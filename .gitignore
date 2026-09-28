@@ -1,0 +1,36 @@
+# Credenciais e configuração local
+.env
+.env.*
+.vercel/
+site-mesacerta/.vercel/
+site-mesacerta/.env.local
+
+# Dados pessoais de terceiros (contatos, leads, financeiro)
+contatos.json
+planilhas getconneted/
+FINANCEIRO/
+*contatos_unificados*.xlsx
+*contatos_unificados*.xltx
+
+# Robô de WhatsApp (repositório próprio)
+sender-whatsapp/
+sender-whatsapp-public/
+
+# Arquivos grandes demais para o GitHub (limite de 100 MB por arquivo)
+*.pptx
+fotos e videos/
+Get Connected Sorocaba 2026/Fotos/
+
+# Temporários
+__pycache__/
+*.pyc
+tmp/
+.codex_tmp_get_connected/
+~$*
+*.tmp
+Thumbs.db
+desktop.ini
+
+# Trabalho temporário de ferramentas e dependências
+.codex-work/
+node_modules/

@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Mesa Certa: planejamento de rodadas de negócio para eventos de networking.">
+<meta name="theme-color" content="#0B3B3A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230e6b66'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-size='24' font-weight='700' fill='white'%3EMC%3C/text%3E%3C/svg%3E">
+<title>Mesa Certa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#EEF2F0; --surface:#FFFFFF; --surface-2:#F6F8F7; --line:#D5DDDA;
+  --ink:#18222B; --ink-2:#4B5A63; --ink-3:#7A8890;
+  --accent:#0E6B66; --accent-soft:#D6ECE9; --accent-ink:#FFFFFF;
+  --new:#0E6B66; --revisit:#C27C12; --revisit-soft:#F6E6C8;
+  --bad:#B23A34; --bad-soft:#F5DAD8; --good:#2D7A4C; --good-soft:#D8EEDF;
+  --heat-0:#FFFFFF;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#10161A; --surface:#182026; --surface-2:#1E282F; --line:#2E3B43;
+    --ink:#E4ECEA; --ink-2:#A9B7BC; --ink-3:#7D8C92;
+    --accent:#4DB6AC; --accent-soft:#1D3A38; --accent-ink:#0B1614;
+    --new:#4DB6AC; --revisit:#E3A544; --revisit-soft:#3B2F1A;
+    --bad:#EE7B73; --bad-soft:#3E2220; --good:#6CC792; --good-soft:#1C3326;
+    --heat-0:#182026;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#10161A; --surface:#182026; --surface-2:#1E282F; --line:#2E3B43;
+  --ink:#E4ECEA; --ink-2:#A9B7BC; --ink-3:#7D8C92;
+  --accent:#4DB6AC; --accent-soft:#1D3A38; --accent-ink:#0B1614;
+  --new:#4DB6AC; --revisit:#E3A544; --revisit-soft:#3B2F1A;
+  --bad:#EE7B73; --bad-soft:#3E2220; --good:#6CC792; --good-soft:#1C3326;
+  --heat-0:#182026;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;padding:20px 16px 48px}
+.wrap{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+header.top{max-width:1320px;margin:0 auto 18px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+h1{font-family:var(--display);font-size:28px;line-height:1.1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--body);font-size:13px;font-weight:500;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.top .meta{color:var(--ink-2);font-size:13px}
+h2{font-family:var(--display);font-size:18px;margin:0 0 10px;text-wrap:balance}
+h3{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+aside.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:900px){aside.panel{position:static}}
+.field{display:grid;grid-template-columns:1fr 92px;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.field:last-of-type{border-bottom:0}
+.field label{font-size:13px;color:var(--ink-2)}
+.field input{width:100%;font:500 15px var(--mono);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;text-align:right}
+.field input.invalid{border-color:var(--bad);color:var(--bad)}
+.field input:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.derived{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:grid;gap:6px;font-size:13px}
+.derived div{display:flex;justify-content:space-between;gap:10px}
+.derived b{font-family:var(--mono);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{font:500 14px var(--body);color:var(--ink-2);background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs .count{font:500 11px var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px}
+.kpi .v{font:600 26px var(--display);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12.5px;color:var(--ink-2)}
+.kpi.ok{border-left:4px solid var(--good)} .kpi.warn{border-left:4px solid var(--revisit)} .kpi.bad{border-left:4px solid var(--bad)}
+.alerts{margin-bottom:14px}
+.alerts details{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.alerts summary{cursor:pointer;padding:10px 14px;font-size:13.5px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:8px;list-style:none}
+.alerts summary::-webkit-details-marker{display:none}
+.alerts summary::after{content:"▾";margin-left:auto;color:var(--ink-3);transition:transform .15s}
+.alerts details[open] summary::after{transform:rotate(180deg)}
+.alerts ul{margin:0;padding:0 14px 12px;list-style:none;display:grid;gap:8px}
+.alert{display:flex;gap:10px;align-items:baseline;font-size:13.5px;color:var(--ink-2)}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--good);transform:translateY(-1px)}
+.dot.warn{background:var(--revisit)} .dot.bad{background:var(--bad)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+.heat td,.heat th{border:1px solid var(--line);text-align:center;padding:0;font-size:12px}
+.heat th{background:var(--surface-2);font-weight:600;color:var(--ink-2);padding:6px 8px;white-space:nowrap}
+.heat th.row{text-align:left;position:sticky;left:0;z-index:1;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.heat td{width:40px;min-width:40px;height:34px;font-family:var(--mono);position:relative;cursor:default}
+.heat td.over{outline:2px solid var(--bad);outline-offset:-2px}
+.heat td .r{position:absolute;right:2px;top:1px;font-size:9px;color:var(--revisit);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2);margin-top:10px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px;border:1px solid var(--line)}
+.rank{width:100%}
+.rank td,.rank th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+.rank th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.rank td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--surface-2);min-width:120px}
+.bar i{display:block;height:100%}
+.bar .a{background:var(--new)} .bar .b{background:var(--revisit)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.list{width:100%}
+.list td,.list th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
+.list td.n{font-family:var(--mono)}
+.list th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.pill{display:inline-block;font:500 11.5px var(--body);padding:1px 8px;border-radius:10px;white-space:nowrap}
+.pill.new{background:var(--accent-soft);color:var(--accent)}
+.pill.rev{background:var(--revisit-soft);color:var(--revisit)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.sp{background:var(--accent);color:var(--accent-ink)}
+.round li.sp{font-weight:600;color:var(--accent);padding-bottom:5px;margin-bottom:3px;border-bottom:1px dashed var(--line)}
+.sizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.size{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:4px;background:var(--surface-2)}
+.size .seats{display:flex;gap:3px;flex-wrap:wrap}
+.size .seats i{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.size .seats i.sp{background:var(--ink-3)}
+.size .v{font:600 30px var(--display);line-height:1.1;font-variant-numeric:tabular-nums}
+.size .v small{font:500 13px var(--body);color:var(--ink-2);margin-left:4px}
+.size .l{font-size:13px;color:var(--ink-2)}
+.size.bad{border-color:var(--bad)} .size.zero{opacity:.45}
+.empty{color:var(--ink-3);font-size:13px;padding:10px 0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+select,input[type="search"]{font:14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 10px;max-width:100%}
+.btn{font:500 13.5px var(--body);color:var(--accent-ink);background:var(--accent);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.round h4 span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.round h4 span:last-child{white-space:nowrap}
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.round{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px}
+.round h4{margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between}
+.round ul{margin:0;padding:0;list-style:none;display:grid;gap:3px}
+.round li{display:flex;justify-content:space-between;gap:6px;font-size:13px}
+.route td,.route th{border:1px solid var(--line);padding:5px 6px;text-align:center;font-size:12.5px;white-space:nowrap}
+.route th{background:var(--surface-2);color:var(--ink-2);font-weight:600}
+.route td.name{text-align:left;position:sticky;left:0;background:var(--surface);font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.route td.rep{background:var(--revisit-soft);color:var(--revisit);font-weight:600}
+.route td.num{font-family:var(--mono)}
+textarea{width:100%;min-height:220px;font:13px var(--mono);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+.hint{font-size:12.5px;color:var(--ink-3);margin:6px 0 0}
+.status{font-size:12.5px;color:var(--ink-3);min-height:18px;margin-top:8px}
+@media (prefers-reduced-motion:no-preference){.tabs button{transition:color .15s,border-color .15s}}
+
+/* Visual system 2026 — clarity first */
+:root{
+  --navy:#102B36; --navy-2:#173E49; --mint:#68D5C5; --mint-soft:#E8F7F4;
+  --gold:#E8B84A; --shadow-sm:0 4px 16px rgba(18,43,54,.07);
+  --shadow-md:0 18px 44px rgba(18,43,54,.12); --radius-sm:10px;
+  --radius-md:16px; --radius-lg:24px;
+}
+:root[data-theme="dark"]{
+  --navy:#0B171D; --navy-2:#12272F; --mint-soft:#173632;
+  --shadow-sm:0 4px 18px rgba(0,0,0,.2); --shadow-md:0 18px 48px rgba(0,0,0,.3);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--navy:#0B171D;--navy-2:#12272F;--mint-soft:#173632;--shadow-sm:0 4px 18px rgba(0,0,0,.2);--shadow-md:0 18px 48px rgba(0,0,0,.3)}
+  :root:not([data-theme="light"]) .guide-intro,:root:not([data-theme="light"]) .guide-step{background:rgba(24,32,38,.82)}
+  :root:not([data-theme="light"]) .tabs{background:rgba(24,32,38,.9)}
+}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;padding:28px 20px 64px;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(104,213,197,.18),transparent 28rem),
+    radial-gradient(circle at 92% 8%,rgba(232,184,74,.12),transparent 25rem),
+    var(--ground);
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(14,107,102,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(14,107,102,.035) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,#000,transparent 58%);z-index:-1}
+header.top{
+  position:relative;overflow:hidden;max-width:1320px;margin:0 auto 22px;padding:26px 28px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;
+  color:#fff;background:linear-gradient(125deg,var(--navy) 0%,#0E5B59 68%,#13766F 100%);
+  border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);
+}
+header.top::after{content:"";position:absolute;width:260px;height:260px;right:-70px;top:-150px;border:48px solid rgba(255,255,255,.07);border-radius:50%}
+.brand{position:relative;z-index:1;display:flex;align-items:center;gap:16px;min-width:0}
+.brand-mark{display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,var(--mint),#35A79D);box-shadow:inset 0 1px rgba(255,255,255,.5),0 8px 22px rgba(0,0,0,.18);font:700 18px var(--display);color:var(--navy)}
+.brand-copy{min-width:0}
+header.top h1{color:#fff;font-size:clamp(24px,3vw,34px)}
+header.top h1 small{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:7px}
+.hero-copy{margin:8px 0 0;color:rgba(255,255,255,.76);font-size:14px;max-width:680px}
+.hero-summary{position:relative;z-index:1;display:grid;justify-items:end;gap:8px;text-align:right}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.top .meta{color:#fff;font:600 14px var(--body);max-width:330px}
+.live-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.1);color:#fff;font-size:12px;font-weight:600;backdrop-filter:blur(6px)}
+.live-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(104,213,197,.16)}
+.wrap{grid-template-columns:320px minmax(0,1fr);gap:24px}
+.panel{border-color:rgba(126,148,153,.22);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}
+aside.panel{top:16px;padding:20px;background:linear-gradient(180deg,var(--surface),var(--surface-2))}
+.aside-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.aside-heading h2{margin:0}
+.step-chip{display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:600}
+.aside-copy{margin:0 0 18px;color:var(--ink-2);font-size:13px}
+.field-group{margin-top:16px}
+.field-group-title{display:flex;align-items:center;gap:8px;margin:0 0 4px;color:var(--ink-3);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.field-group-title::after{content:"";height:1px;flex:1;background:var(--line)}
+.field{grid-template-columns:minmax(0,1fr) 86px;padding:8px 0}
+.field label{color:var(--ink);font-weight:500;line-height:1.3}
+.field input{border-radius:9px;border-color:transparent;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .15s,background .15s}
+.field input:hover{box-shadow:inset 0 0 0 1px var(--accent)}
+.scenario-note{display:flex;gap:9px;margin:14px 0 0;padding:11px 12px;border-radius:12px;background:var(--mint-soft);color:var(--ink-2);font-size:12px;line-height:1.4}
+.scenario-note strong{color:var(--accent)}
+.derived{gap:0;margin-top:16px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.derived div{padding:7px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.derived div:last-child{border-bottom:0}
+.derived span{color:var(--ink-2)}
+.derived b{color:var(--ink)}
+.quick-guide{display:grid;grid-template-columns:1.25fr repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.guide-intro,.guide-step{min-height:88px;border:1px solid rgba(126,148,153,.22);border-radius:var(--radius-md);padding:14px;background:rgba(255,255,255,.72);box-shadow:var(--shadow-sm);backdrop-filter:blur(8px)}
+:root[data-theme="dark"] .guide-intro,:root[data-theme="dark"] .guide-step{background:rgba(24,32,38,.82)}
+.guide-intro{display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,var(--surface),var(--mint-soft))}
+.guide-intro span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.guide-intro strong{font:700 18px/1.15 var(--display);margin-top:4px}
+.guide-step{position:relative;padding-left:48px;display:flex;flex-direction:column;justify-content:center}
+.guide-step b{position:absolute;left:13px;top:14px;display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font:600 12px var(--mono)}
+.guide-step strong{font-size:13px}
+.guide-step span{font-size:12px;color:var(--ink-2);line-height:1.35;margin-top:3px}
+.tabs{position:sticky;top:10px;z-index:5;flex-wrap:nowrap;gap:5px;margin-bottom:20px;padding:6px;overflow-x:auto;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);backdrop-filter:blur(14px)}
+:root[data-theme="dark"] .tabs{background:rgba(24,32,38,.9)}
+.tabs button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-width:max-content;margin:0;padding:9px 12px;border:0;border-radius:9px;color:var(--ink-2);transition:background .15s,color .15s,transform .15s}
+.tabs button:hover{background:var(--surface-2);color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border:0;box-shadow:inset 0 0 0 1px rgba(14,107,102,.12)}
+.tab-icon{font-size:15px;line-height:1}
+.tabs .count{background:var(--revisit-soft);border:0;color:var(--revisit);padding:1px 6px}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:2px 2px 14px}
+.section-heading h2{font-size:22px;margin:2px 0 3px}
+.section-heading p{margin:0;color:var(--ink-2);font-size:13.5px;max-width:720px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.section-status{display:inline-flex;align-items:center;gap:7px;flex:none;border-radius:999px;padding:7px 11px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:600}
+.section-status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.section-status.warn{background:var(--revisit-soft);color:var(--revisit)}
+.section-status.bad{background:var(--bad-soft);color:var(--bad)}
+.kpis{grid-template-columns:repeat(4,minmax(155px,1fr));gap:12px}
+.kpi{position:relative;overflow:hidden;min-height:110px;padding:16px 16px 14px;border:0;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);background:linear-gradient(145deg,var(--surface),var(--surface-2))}
+.kpi::after{content:"";position:absolute;right:-24px;bottom:-38px;width:90px;height:90px;border-radius:50%;background:var(--accent-soft);opacity:.48}
+.kpi .v{position:relative;z-index:1;font-size:30px;color:var(--ink)}
+.kpi .l{position:relative;z-index:1;max-width:230px;line-height:1.35}
+.kpi.ok,.kpi.warn,.kpi.bad{border-left:0}
+.kpi.ok{box-shadow:inset 0 3px var(--good),var(--shadow-sm)}
+.kpi.warn{box-shadow:inset 0 3px var(--revisit),var(--shadow-sm)}
+.kpi.bad{box-shadow:inset 0 3px var(--bad),var(--shadow-sm)}
+.kpi:last-child{grid-column:span 2}
+.alerts details{overflow:hidden;border:0;border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}
+.alerts summary{padding:13px 16px;color:var(--ink);background:var(--surface);font-weight:600}
+.alerts ul{padding:4px 16px 14px;background:var(--surface)}
+.alert{padding:8px 10px;border-radius:9px;background:var(--surface-2)}
+.panel>h2,.panel .toolbar h2{font-size:19px}
+.toolbar{gap:10px}
+select,input[type="search"],textarea{border-radius:10px;transition:border-color .15s,box-shadow .15s}
+select:hover,input[type="search"]:hover,textarea:hover{border-color:var(--accent)}
+input[type="search"]{min-width:260px}
+.btn{border-radius:10px;padding:9px 15px;box-shadow:0 5px 14px rgba(14,107,102,.14);transition:transform .15s,box-shadow .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 18px rgba(14,107,102,.2)}
+.btn.ghost{box-shadow:none}
+.scroll{border-radius:10px}
+.rank thead,.list thead,.route thead{position:sticky;top:0;z-index:2;background:var(--surface)}
+.rank tbody tr:nth-child(even),.list tbody tr:nth-child(even),.route tbody tr:nth-child(even){background:rgba(122,136,144,.045)}
+.rank tbody tr:hover,.list tbody tr:hover,.route tbody tr:hover{background:var(--accent-soft)}
+.rank td,.rank th,.list td,.list th{padding:9px 10px}
+.heat{border-collapse:separate;border-spacing:3px}
+.heat td,.heat th{border:0;border-radius:7px}
+.heat th{padding:7px 9px}
+.heat td{height:38px;font-weight:500}
+.heat td.over{outline-offset:0;border-radius:7px}
+.legend{padding:10px 12px;border-radius:10px;background:var(--surface-2)}
+.size{border:0;border-radius:14px;padding:15px;background:linear-gradient(145deg,var(--surface-2),var(--surface));box-shadow:inset 0 0 0 1px var(--line)}
+.size.bad{box-shadow:inset 0 0 0 2px var(--bad)}
+.round{border:0;border-radius:13px;padding:12px;background:linear-gradient(145deg,var(--surface-2),var(--surface));box-shadow:inset 0 0 0 1px var(--line)}
+.round h4{padding-bottom:7px;border-bottom:1px solid var(--line)}
+.pill{padding:2px 8px}
+.route td,.route th{padding:7px 8px}
+.route td.name{background:var(--surface)}
+textarea{padding:12px;line-height:1.55}
+@media (max-width:1120px){.quick-guide{grid-template-columns:1fr 1fr}.guide-intro{grid-row:span 2}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){body{padding:16px 12px 44px}header.top{grid-template-columns:1fr;padding:22px}.hero-summary{justify-items:start;text-align:left}.wrap{grid-template-columns:minmax(0,1fr)}aside.panel{position:static}.quick-guide{margin-top:0}}
+@media (max-width:620px){header.top{border-radius:18px}.brand{align-items:flex-start}.brand-mark{width:42px;height:42px}.hero-copy{font-size:13px}.quick-guide{grid-template-columns:1fr}.guide-intro{grid-row:auto;min-height:auto}.guide-step{min-height:76px}.tabs{margin-left:-2px;margin-right:-2px}.section-heading{align-items:flex-start;flex-direction:column}.kpis{grid-template-columns:1fr 1fr}.kpi{min-height:100px;padding:14px}.kpi .v{font-size:25px}.grid2{grid-template-columns:1fr}input[type="search"]{min-width:100%}}
+.wrap{grid-template-columns:minmax(0,1fr)}
+.field-group{margin-top:10px}
+@media (max-width:430px){.kpis{grid-template-columns:1fr}.kpi:last-child{grid-column:span 1}.brand-mark{display:none}}
+
+/* Simplificação e representação espacial */
+.kpi:last-child{grid-column:auto}
+.advanced-details{margin-top:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden}
+.advanced-details>summary{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 17px;cursor:pointer;list-style:none;color:var(--ink)}
+.advanced-details>summary::-webkit-details-marker{display:none}
+.advanced-details>summary span:first-child{display:grid;gap:2px}
+.advanced-details>summary small{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.advanced-details>summary strong{font-size:13.5px}
+.summary-action{flex:none;color:var(--accent);font-size:12px;font-weight:600}
+.summary-action::after{content:" ↓"}
+.advanced-details[open] .summary-action{font-size:0}
+.advanced-details[open] .summary-action::after{content:"Fechar ↑";font-size:12px}
+.advanced-content{display:grid;gap:12px;padding:0 12px 12px}
+.advanced-content>.panel{box-shadow:none;border-radius:12px}
+.rule-result{position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;margin-bottom:18px;padding:22px;border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}
+.rule-result.ok{background:linear-gradient(135deg,var(--surface),var(--good-soft));border:1px solid rgba(45,122,76,.18)}
+.rule-result.bad{background:linear-gradient(135deg,var(--surface),var(--bad-soft));border:1px solid rgba(178,58,52,.2)}
+.rule-result::after{content:"";position:absolute;right:-35px;top:-55px;width:150px;height:150px;border-radius:50%;border:24px solid rgba(255,255,255,.22)}
+.rule-art{position:relative;z-index:1;display:grid;place-items:center;flex:none;width:54px;height:54px;border-radius:18px;color:#fff;font:700 25px var(--display)}
+.rule-result.ok .rule-art{background:var(--good);box-shadow:0 10px 24px rgba(45,122,76,.22)}
+.rule-result.bad .rule-art{background:var(--bad);box-shadow:0 10px 24px rgba(178,58,52,.22)}
+.rule-result>div{position:relative;z-index:1;display:grid;gap:3px}
+.rule-result small{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.rule-result strong{font:700 19px/1.2 var(--display)}
+.rule-result p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.conflict-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.conflict-card{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid rgba(178,58,52,.22);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.pair-art{position:relative;flex:none;width:66px;height:46px}
+.pair-art span{position:absolute;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--bad-soft);border:2px solid var(--surface);color:var(--bad);font:600 11px var(--mono)}
+.pair-art span:last-child{left:24px;background:var(--revisit-soft);color:var(--revisit)}
+.conflict-card>div:last-child{display:grid;gap:3px;min-width:0}
+.conflict-card small{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bad)}
+.conflict-card strong{font-size:13px;overflow-wrap:anywhere}
+.conflict-card strong i{font-weight:400;color:var(--ink-3)}
+.conflict-card p{margin:2px 0 0;color:var(--ink-2);font:12px/1.45 var(--mono)}
+.person-art{display:grid;place-items:center;flex:none;width:48px;height:48px;border-radius:16px;background:var(--bad-soft);color:var(--bad);font:700 12px var(--mono);box-shadow:inset 0 0 0 1px rgba(178,58,52,.14)}
+.empty-state{display:grid;justify-items:center;text-align:center;padding:42px 20px;border:1px dashed var(--line);border-radius:var(--radius-md);background:linear-gradient(145deg,var(--surface),var(--surface-2))}
+.empty-state.compact{padding:28px 18px}
+.empty-state strong{font:700 18px var(--display)}
+.empty-state p{max-width:430px;margin:5px 0 0;color:var(--ink-2);font-size:13px}
+.orbit-art{position:relative;width:98px;height:70px;margin-bottom:14px}
+.orbit-art::before{content:"";position:absolute;inset:7px 12px;border:1px dashed var(--good);border-radius:50%;transform:rotate(-10deg)}
+.orbit-art span{position:absolute;top:28px;width:18px;height:18px;border-radius:50%;background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.orbit-art span:first-child{left:4px}.orbit-art span:nth-child(2){right:4px}
+.orbit-art i{position:absolute;left:34px;top:13px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--good);color:#fff;font-style:normal;font-weight:700;box-shadow:0 8px 20px rgba(45,122,76,.22)}
+.tables{grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+.table-card{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,var(--surface),var(--surface-2));box-shadow:var(--shadow-sm)}
+.table-card::before{content:"";position:absolute;inset:50px 0 auto;height:230px;opacity:.32;background-image:radial-gradient(circle,var(--line) 1px,transparent 1px);background-size:16px 16px;mask-image:radial-gradient(circle,#000,transparent 72%)}
+.table-card.over{border-color:var(--bad);box-shadow:inset 0 3px var(--bad),var(--shadow-sm)}
+.table-card>header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:14px 15px 0}
+.table-card>header>div{display:grid}
+.table-number{font:700 16px var(--display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.table-card>header>div{min-width:0}
+.table-core .core-name{font:700 11px/1.2 var(--display);max-width:92px;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.table-card>header small{color:var(--ink-3);font-size:11px}
+.capacity-dot{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 0 5px var(--good-soft)}
+.table-card.over .capacity-dot{background:var(--bad);box-shadow:0 0 0 5px var(--bad-soft)}
+.table-stage{position:relative;display:grid;place-items:center;min-height:250px;padding:9px}
+.table-scene{position:relative;width:220px;height:220px}
+.table-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;align-content:center;width:112px;height:112px;padding:13px;border-radius:50%;text-align:center;color:#fff;background:radial-gradient(circle at 36% 28%,#22827A,var(--accent) 62%,#095451);border:5px solid var(--surface);box-shadow:0 14px 30px rgba(14,107,102,.22),inset 0 1px rgba(255,255,255,.28)}
+.table-core::after{content:"";position:absolute;inset:5px;border:1px solid rgba(255,255,255,.22);border-radius:50%}
+.table-core small{position:relative;z-index:1;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.68)}
+.table-core strong{position:relative;z-index:1;font:700 20px var(--display)}
+.table-core span{position:relative;z-index:1;width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:rgba(255,255,255,.82)}
+.seat{--angle:0deg;--counter:0deg;position:absolute;left:50%;top:50%;z-index:2;display:grid;place-items:center;width:42px;height:30px;border-radius:12px;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(-94px) rotate(var(--counter));background:var(--surface);border:1px solid var(--line);box-shadow:0 5px 12px rgba(18,43,54,.12);color:var(--ink);font:600 10px var(--mono)}
+.seat.more{background:var(--navy);border-color:var(--navy);color:#fff}
+#printArea{display:none}
+@media print{
+  html,body{height:auto!important;min-height:0!important;overflow:visible!important}
+  body>*:not(#printArea){display:none!important}
+  body{background:#fff!important;padding:0!important;margin:0!important}
+  #printArea{display:block!important;position:static!important;width:auto!important;height:auto!important;overflow:visible!important;color:#000}
+  .rot-col{display:block}
+  .rot-bloco{display:block;width:100%;margin:0 0 5mm;font-size:10pt;break-inside:auto;page-break-inside:auto}
+  .rot-nome{font-size:12pt;font-weight:700;margin:0 0 1.5mm;color:#000;break-after:avoid;page-break-after:avoid}
+  .rot-lista{border:1px solid #000;border-bottom:0}
+  .rot-item{border-bottom:1px solid #000;padding:1.4mm 2mm;font-size:9.5pt;line-height:1.2;color:#000;break-inside:avoid;page-break-inside:avoid}
+  @page{size:A4 portrait;margin:10mm}
+}
+.nome-clic{cursor:pointer;border-bottom:1px dotted var(--ink-3)}
+.nome-clic:hover{color:var(--accent);border-bottom-color:var(--accent)}
+#menuPessoa{position:fixed;z-index:50;min-width:210px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-md);padding:6px;display:none}
+#menuPessoa.on{display:block}
+#menuPessoa .cab{padding:6px 9px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+#menuPessoa .cab b{display:block;font-size:13.5px}
+#menuPessoa .cab small{color:var(--ink-3);font-size:11.5px}
+#menuPessoa button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:8px 9px;font:13px var(--body);color:var(--ink);cursor:pointer}
+#menuPessoa button:hover{background:var(--accent-soft);color:var(--accent)}
+#menuPessoa button[disabled]{color:var(--ink-3);cursor:default}
+#menuPessoa button[disabled]:hover{background:none;color:var(--ink-3)}
+#menuPessoa .editar-nome{display:grid;gap:8px;padding:8px 9px 9px}
+#menuPessoa .editar-nome label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+#menuPessoa .editar-nome input{width:100%;min-width:250px;padding:8px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--ink);font:13px var(--body)}
+#menuPessoa .editar-nome input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+#menuPessoa .menu-acoes{display:flex;gap:6px}
+#menuPessoa .menu-acoes button{flex:1;text-align:center;border:1px solid var(--line)}
+#menuPessoa .menu-acoes .salvar{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+#menuPessoa .menu-acoes .salvar:hover{background:var(--accent);color:var(--accent-ink)}
+#menuPessoa .menu-erro{min-height:16px;margin:0;color:var(--bad);font-size:11.5px;line-height:1.35}
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.mesa-card{border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden}
+.mesa-card>header{display:flex;align-items:center;gap:8px;padding:11px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.mesa-card>header input{flex:1;min-width:0;font:600 14px var(--body);color:var(--ink);background:transparent;border:1px solid transparent;border-radius:7px;padding:4px 6px}
+.mesa-card>header input:hover,.mesa-card>header input:focus{border-color:var(--line);background:var(--surface)}
+.mesa-card>header small{color:var(--ink-3);font-size:11px;white-space:nowrap}
+.mesa-card>header button{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:16px;padding:0 2px}
+.anf-linha{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:13px;border-bottom:1px dashed var(--line)}
+.anf-linha span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anf-linha select{padding:3px 6px;font-size:12px}
+.anf-linha button{background:none;border:0;color:var(--ink-3);cursor:pointer;padding:0 2px}
+.anf-add{display:flex;gap:6px;padding:10px 12px}
+.anf-add input{flex:1;min-width:0;font:13px var(--body);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+.mesa-card .vazio{color:var(--ink-3);font-size:12.5px;padding:10px 12px}
+.mesa-item{border:1px solid var(--line);border-radius:10px;background:var(--surface-2);overflow:hidden}
+.mesa-item>summary{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;list-style:none;font-size:13.5px}
+.mesa-item>summary::-webkit-details-marker{display:none}
+.mesa-item>summary b{font-weight:600}
+.mesa-item>summary .qtd{margin-left:auto;font:500 11.5px var(--body);color:var(--accent);background:var(--accent-soft);border-radius:10px;padding:1px 8px;white-space:nowrap}
+.mesa-item>summary .rm{color:var(--ink-3);border:0;background:none;cursor:pointer;font-size:15px;padding:0 2px}
+.anf-lista{display:grid;gap:2px;padding:4px 12px 12px;max-height:230px;overflow:auto}
+.anf-lista label{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:7px;font-size:13px;cursor:pointer}
+.anf-lista label:hover{background:var(--surface)}
+.anf-lista small{margin-left:auto;color:var(--ink-3);font-size:11.5px}
+.anf-vazio{color:var(--ink-3);font-size:12.5px;padding:2px 7px 10px}
+.seat.casa{border-color:var(--gold);border-style:dashed}
+.seat.host{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.seat.returning{border-color:var(--revisit);color:var(--revisit)}
+.guest-chips>span.fixo{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seat{max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.table-guests{position:relative;z-index:2;border-top:1px solid var(--line);background:var(--surface)}
+.table-guests summary{display:flex;justify-content:center;align-items:center;gap:7px;padding:11px;cursor:pointer;list-style:none;color:var(--accent);font-size:12px;font-weight:600}
+.table-guests summary::-webkit-details-marker{display:none}
+.table-guests summary::after{content:"⌄";font-size:14px}.table-guests[open] summary::after{transform:rotate(180deg)}
+.table-guests summary b{display:grid;place-items:center;min-width:21px;height:21px;border-radius:999px;background:var(--accent-soft);font:600 10px var(--mono)}
+.guest-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 13px}
+.guest-chips>span{padding:5px 8px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:11px;color:var(--ink-2)}
+.guest-chips small{color:var(--revisit);font-weight:600}
+.route-list{display:grid;gap:12px}
+.route-card{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);box-shadow:var(--shadow-sm)}
+.route-card>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line)}
+.route-card>header>div{display:grid;gap:2px;min-width:0}
+.route-card>header small{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.route-card>header strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.route-total{flex:none;color:var(--accent);font-size:12px;font-weight:600}
+.journey{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;margin:0;padding:14px;overflow:visible;list-style:none}
+.journey li{position:relative;min-width:0;display:grid;gap:2px;padding:10px 10px 10px 34px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.journey li::before{content:"";position:absolute;left:12px;top:50%;width:9px;height:9px;border-radius:50%;transform:translateY(-50%);background:var(--surface);border:3px solid var(--accent)}
+.journey li::after{display:none}
+.journey li span{font:600 10px var(--mono);color:var(--accent)}
+.journey li strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.journey li small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-3);font-size:10px}
+.route-art{display:flex;align-items:center;margin-bottom:16px}
+.route-art span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:600 11px var(--mono);box-shadow:0 7px 16px rgba(14,107,102,.18)}
+.route-art i{width:28px;height:2px;background:var(--accent-soft)}
+.result-note{margin:0;padding:9px 12px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);font-size:12px;text-align:center}
+@media (max-width:620px){.rule-result{align-items:flex-start;padding:17px}.rule-art{width:44px;height:44px;border-radius:14px}.rule-result strong{font-size:16px}.tables{grid-template-columns:1fr}.table-scene{transform:scale(.94)}.journey{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px}.advanced-details>summary{align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">MC</div>
+    <div class="brand-copy">
+      <h1><small>Mesa Certa · Rodadas de negócio</small>Get Connected Sorocaba 2026</h1>
+      <p class="hero-copy">Planeje os encontros, confira a lotação e entregue um roteiro claro para cada convidado.</p>
+    </div>
+  </div>
+  <div class="hero-summary">
+    <span class="live-pill">Simulação atualizada</span>
+    <span class="hero-label">Resumo do cenário</span>
+    <div class="meta" id="headMeta"></div>
+  </div>
+</header>
+
+<div id="menuPessoa" role="menu"></div>
+<div id="printArea" aria-hidden="true"></div>
+<div class="wrap">
+
+  <main>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-geral" aria-controls="panel-geral" aria-selected="true" data-tab="geral"><span class="tab-icon" aria-hidden="true">⌂</span>Resumo</button>
+      <button role="tab" id="tab-rep" aria-controls="panel-rep" aria-selected="false" tabindex="-1" data-tab="rep"><span class="tab-icon" aria-hidden="true">↻</span>Encontros <span class="count" id="repCount">0</span></button>
+      <button role="tab" id="tab-mesas" aria-controls="panel-mesas" aria-selected="false" tabindex="-1" data-tab="mesas"><span class="tab-icon" aria-hidden="true">▦</span>Mesas por rodada</button>
+      <button role="tab" id="tab-part" aria-controls="panel-part" aria-selected="false" tabindex="-1" data-tab="part"><span class="tab-icon" aria-hidden="true">⇢</span>Rota dos convidados</button>
+      <button role="tab" id="tab-patro" aria-controls="panel-patro" aria-selected="false" tabindex="-1" data-tab="patro"><span class="tab-icon" aria-hidden="true">★</span>Patrocinadores <span class="count" id="patroCount">0</span></button>
+      <button role="tab" id="tab-pessoas" aria-controls="panel-pessoas" aria-selected="false" tabindex="-1" data-tab="pessoas"><span class="tab-icon" aria-hidden="true">⚙</span>Configuração de cenário <span class="count" id="pplCount">0</span></button>
+      <button role="tab" id="tab-nomes" aria-controls="panel-nomes" aria-selected="false" tabindex="-1" data-tab="nomes"><span class="tab-icon" aria-hidden="true">↓</span>Exportar</button>
+    </nav>
+
+    <section id="panel-geral" role="tabpanel" aria-labelledby="tab-geral" data-view="geral">
+      <div class="section-heading">
+        <div><span class="eyebrow">Visão geral</span><h2>Seu evento em um olhar</h2><p>Comece pelos números principais. Depois, abra os avisos para entender se algum ajuste é necessário.</p></div>
+        <span class="section-status" id="summaryStatus">Calculando cenário…</span>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="alerts" id="alerts"></div>
+      <details class="advanced-details">
+        <summary><span><small>Opcional</small><strong>Ver análise detalhada da distribuição</strong></span><span class="summary-action">Abrir</span></summary>
+        <div class="advanced-content">
+          <div class="panel">
+            <div class="toolbar" style="justify-content:space-between">
+              <h2 style="margin:0">Pessoas por mesa</h2>
+              <select id="selSize" aria-label="Rodada"></select>
+            </div>
+            <div class="sizes" id="sizes"></div>
+          </div>
+          <div class="panel">
+            <h2>Mesa × rodada</h2>
+            <p class="hint" style="margin:0 0 10px">Cada célula traz o total de pessoas na mesa, somando anfitriões fixos e convidados. A cor mostra se há gente voltando à mesa e o contorno vermelho, lotação acima do ideal.</p>
+            <div class="scroll"><table class="heat" id="heat"></table></div>
+            <div class="legend">
+              <span><span class="sw" style="background:var(--accent-soft)"></span>Primeira visita</span>
+              <span><span class="sw" style="background:var(--revisit-soft)"></span>Retorno à mesa</span>
+              <span><span class="sw" style="background:var(--heat-0);outline:2px solid var(--bad);outline-offset:-2px"></span>Acima da capacidade</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Alcance dos patrocinadores</h2>
+            <p class="hint" style="margin:0 0 10px">Quantos convidados diferentes cada patrocinador encontra.</p>
+            <div class="scroll"><table class="rank" id="rank"></table></div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="panel-rep" role="tabpanel" aria-labelledby="tab-rep" data-view="rep" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Visão individual</span><h2>Encontros dos convidados</h2><p>Quem divide mesa com quem mais de uma vez, em qual rodada e com qual patrocinador.</p></div></div>
+      <div class="alerts" id="repAlerts"></div>
+      <div class="toolbar" id="repSearchBar">
+        <input type="search" id="searchRep" placeholder="Buscar convidado (nome ou C01)" aria-label="Buscar convidado">
+      </div>
+      <div class="conflict-list" id="repTables"></div>
+    </section>
+
+    <section id="panel-mesas" role="tabpanel" aria-labelledby="tab-mesas" data-view="mesas" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Operação</span><h2>Quem senta em cada mesa</h2><p>Selecione uma rodada para orientar a equipe e conferir a composição de todas as mesas.</p></div></div>
+      <div class="toolbar">
+        <button class="btn ghost" id="prevRound" aria-label="Rodada anterior">‹</button>
+        <label for="selMesa" class="hint" style="margin:0">Rodada</label>
+        <select id="selMesa"></select>
+        <button class="btn ghost" id="nextRound" aria-label="Próxima rodada">›</button>
+        <span class="hint" style="margin:0" id="mesaInfo"></span>
+      </div>
+      <div class="tables" id="mesaRounds"></div>
+    </section>
+
+    <section id="panel-part" role="tabpanel" aria-labelledby="tab-part" data-view="part" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Roteiro individual</span><h2>Caminho de cada convidado</h2><p>Busque uma pessoa para ver o roteiro dela, rodada por rodada.</p></div></div>
+      <div class="toolbar">
+        <input type="search" id="searchPart" placeholder="Buscar convidado (C01 ou nome)" aria-label="Buscar convidado">
+        <label class="hint" style="margin:0"><input type="checkbox" id="onlyRep"> Somente com conflito</label>
+      </div>
+      <div class="route-list" id="route"></div>
+    </section>
+
+    <section id="panel-patro" role="tabpanel" aria-labelledby="tab-patro" data-view="patro" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Mesas</span><h2>Patrocinadores e seus anfitriões</h2><p>Cada cartão é uma mesa. Digite ali quem é anfitrião daquela empresa e diga se a pessoa fica fixa ou roda.</p></div><span class="section-status" id="patroStatus"></span></div>
+      <datalist id="listaAnf"></datalist>
+      <div class="mesas-grid" id="mesasCards"></div>
+      <div class="grid2" style="margin-top:16px">
+        <div class="panel">
+          <h2>Patrocinadores (mesas)</h2>
+          <textarea id="inPatr" style="min-height:130px" aria-label="Patrocinadores" placeholder="Uma empresa por linha, na ordem das mesas:&#10;INTERFOCUS&#10;NETTOP&#10;ASSESSOR ARQ"></textarea>
+          <div class="toolbar" style="margin:10px 0 0"><button class="btn" data-add="patr">Adicionar mesas</button><span class="hint" style="margin:0">Cada linha vira uma mesa, na ordem.</span></div>
+          <div id="mesasLista" style="margin-top:12px;display:grid;gap:6px"></div>
+        </div>
+        <div class="panel">
+          <h2>Anfitriões</h2>
+          <textarea id="inAnf" style="min-height:130px" aria-label="Anfitriões" placeholder="Nome; EMPRESA; fixo (ou roda)&#10;Eliseu Bianconi; ADEMICON; fixo&#10;João Gabriel; ADEMICON; roda"></textarea>
+          <div class="toolbar" style="margin:10px 0 0"><button class="btn" data-add="anf">Adicionar anfitriões</button><span class="hint" style="margin:0">Entram como <b>fixos</b>. Ligue cada um à sua empresa nos cartões abaixo. Para quem roda, termine a linha com “roda”.</span></div>
+          <div id="anfLista" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-pessoas" role="tabpanel" aria-labelledby="tab-pessoas" data-view="pessoas" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Configuração</span><h2>Cenário e pessoas</h2><p>Ajuste os números do evento e cadastre quem vem. Cole as listas, um nome por linha, e defina quem fica fixo, quem roda e quem fica fora.</p></div><span class="section-status" id="pplStatus"></span></div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="panel">
+          <h2>Números do evento</h2>
+    <div class="field-group">
+      <div class="field"><label for="inP">Quantidade de convidados</label><input id="inP" type="number" min="2" max="400" value="76" title="Convidados mais os anfitriões que rodam"></div>
+      <div class="field"><label for="outAnf">Donos de mesa (anfitriões fixos)</label><input id="outAnf" type="text" readonly tabindex="-1" title="Anfitriões que ficam fixos na mesa. Quem roda entra na quantidade de convidados."></div>
+      <div class="field"><label for="outPatr">Quantidade de patrocinadores</label><input id="outPatr" type="text" readonly tabindex="-1"></div>
+      <div class="field"><label for="inT">Número de mesas</label><input id="inT" type="number" min="2" max="40" value="14"></div>
+      <div class="field"><label for="inR">Número de rodadas</label><input id="inR" type="number" min="1" max="60" value="14"></div>
+      <div class="field"><label for="inCap">Pessoas por mesa, incluindo anfitrião</label><input id="inCap" type="number" min="2" max="30" value="7"></div>
+    </div>
+    <input type="hidden" id="inSp" value="2"><input type="hidden" id="inSw" value="1">
+    <p class="hint" id="fieldErr" style="color:var(--bad)" hidden></p>
+        </div>
+        <div class="panel">
+          <h2>Convidados</h2>
+          <textarea id="inConv" style="min-height:130px" aria-label="Convidados" placeholder="Um nome por linha:&#10;Renato Moraes&#10;Camila Rodrigues"></textarea>
+          <div class="toolbar" style="margin:10px 0 0"><button class="btn" data-add="conv">Adicionar convidados</button><span class="hint" style="margin:0">Entram como <b>convidados que rodam</b>. Só o nome basta.</span></div>
+        </div>
+              </div>
+
+      <div class="panel" style="margin-top:14px">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 style="margin:0">Lista de pessoas</h2>
+          <div class="toolbar" style="margin:0">
+            <input type="search" id="pplSearch" placeholder="Buscar nome ou empresa" aria-label="Buscar pessoa">
+            <select id="pplFiltro" aria-label="Filtrar situação">
+              <option value="">Todas as situações</option>
+              <option value="roda">Só quem roda</option>
+              <option value="fixo">Só fixos</option>
+              <option value="fora">Só fora das rodadas</option>
+            </select>
+            <button class="btn ghost" id="pplLimpar">Limpar tudo</button>
+          </div>
+        </div>
+        <ul id="pplAvisos" style="list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px"></ul>
+        <div class="scroll"><table class="list" id="pplTabela"></table></div>
+      </div>
+    </section>
+
+    <section id="panel-nomes" role="tabpanel" aria-labelledby="tab-nomes" data-view="nomes" hidden>
+      <div class="section-heading"><div><span class="eyebrow">Preparação final</span><h2>Exportar a grade</h2><p>Leve os roteiros para o Excel ou copie o texto pronto para enviar a cada convidado.</p></div></div>
+      <div class="panel">
+        <div class="toolbar">
+          <select id="expType" aria-label="O que exportar">
+            <option value="lista">Roteiro em texto</option>
+            <option value="mesa">Convidados por mesa e rodada</option>
+          </select>
+          <button class="btn ghost" id="expSelect">Selecionar tudo</button>
+          <button class="btn" id="expPdf">Gerar PDF dos roteiros</button>
+          <span class="hint" id="pdfStatus" role="status" aria-live="polite" style="margin:0">O arquivo será baixado pronto, com todas as pessoas e rodadas.</span>
+        </div>
+        <p class="alert" id="expWarn" hidden style="margin:0 0 10px;color:var(--bad)"><span class="dot bad"></span><span>Confira os avisos em vermelho antes de usar esta lista no evento.</span></p>
+        <textarea id="expText" readonly aria-label="Texto para copiar"></textarea>
+        <p class="hint">Clique em “Selecionar tudo”, copie com Ctrl+C e cole onde precisar. No Excel, cole na célula A1.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return localStorage.getItem(k)===v}catch(e){return false}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// base de pessoas: mesas (patrocinadores) + pessoas com papel e situa\u00e7\u00e3o
+const SPONSORS=["INTERFOCUS","NETTOP","ASSESSOR ARQ","ENTRE SONHOS E N\u00daMEROS","SUMITANI","PORT CONSULTING","SB INVESTIMENTOS & CONS\u00d3RCIO","DESTRAVAHUB","PAULO VALLE","DML CORRETORA","ADEMICON","CLIMBZ","JAWUL","CONVEXXA"];
+let DB={mesas:[...SPONSORS],pessoas:[]};
+try{const d=JSON.parse(store.get("mesacerta-db")||"null");if(d&&Array.isArray(d.mesas)&&Array.isArray(d.pessoas))DB=d}catch(e){}
+const salvarDB=()=>store.set("mesacerta-db",JSON.stringify(DB));
+const norm=s=>String(s||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const acheMesa=nome=>{const n=norm(nome);if(!n)return null;const i=DB.mesas.findIndex(m=>norm(m)===n);if(i>=0)return i;const j=DB.mesas.findIndex(m=>norm(m).includes(n)||n.includes(norm(m)));return j>=0?j:null};
+
+const pad=n=>String(n).padStart(2,"0");
+const cCode=i=>"C"+pad(i+1), pCode=t=>"P"+pad(t+1);
+const firstName=s=>String(s).trim().split(/\s+/)[0]||"";
+// quem roda, na ordem do cadastro
+let ROT=[];
+const recalcRot=()=>{ROT=DB.pessoas.filter(x=>x.situacao==="roda")};
+recalcRot();
+const spName=t=>DB.mesas[t]||pCode(t);
+const tName=t=>spName(t);
+const fixedAt=t=>DB.pessoas.filter(x=>x.situacao==="fixo"&&x.mesa===t).map(x=>x.nome);
+const pName=i=>{const r=ROT[i];return r?cCode(i)+" \u00b7 "+r.nome:cCode(i)};
+const gShort=i=>{const r=ROT[i];return r?firstName(r.nome):cCode(i)};
+const rotMesa=i=>{const r=ROT[i];return r&&typeof r.mesa==="number"?r.mesa:null}; // anfitri\u00e3o que roda: mesa da pr\u00f3pria empresa
+
+function rng(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const LIMITS={inP:[76,2,400,"Convidados"],inT:[14,2,40,"Mesas"],inR:[14,1,60,"Rodadas"],inCap:[7,2,30,"Pessoas por mesa"],inSp:[2,0,30,"Minutos do patrocinador"],inSw:[1,0,15,"Minutos de troca"]};
+let fieldErrors=[];
+// lê o campo; se estiver vazio ou fora do limite, marca em vermelho e avisa qual valor está sendo usado
+function readInt(id){const [def,lo,hi,label]=LIMITS[id];const raw=$(id).value.trim();const v=parseInt(raw,10);
+  let used=isNaN(v)?def:clamp(v,lo,hi);const bad=raw===""||isNaN(v)||v!==used||String(v)!==raw;
+  $(id).classList.toggle("invalid",bad);
+  if(bad)fieldErrors.push(`${label}: ${raw===""?"campo vazio":"“"+raw+"” fora do limite ("+lo+" a "+hi+")"} — usando ${used}.`);
+  return used}
+
+/* Monta a grade.
+   Participantes são divididos em "turmas" de até T pessoas. Em cada rodada, a turma k
+   ocupa as mesas deslocando-se por uma permutação F[ciclo][k]: cada participante passa
+   por todas as mesas uma vez por ciclo de T rodadas, e cada mesa recebe no máximo uma
+   pessoa por turma — então a lotação fica sempre em ⌈P/T⌉ ou ⌊P/T⌋.
+   As permutações são otimizadas para espalhar os encontros entre participantes e
+   evitar que a mesma dupla volte a se encontrar na mesma mesa. */
+function build(P,T,R,seed){
+  const rand=rng(seed*7919+P*131+T*17+R);
+  const m=Math.ceil(P/T), C=Math.ceil(R/T), lastLen=R-(C-1)*T;
+  const F=[];
+  for(let c=0;c<C;c++){F.push([]);for(let k=0;k<m;k++){const p=[...Array(T).keys()];for(let i=T-1;i>0;i--){const j=Math.floor(rand()*(i+1));[p[i],p[j]]=[p[j],p[i]]}F[c].push(p)}}
+  const W=40, cnt=new Int32Array(T), tk=new Int32Array(T*T), touched=new Int32Array(R);
+  function pairCost(k,k2){
+    let cost=0;
+    for(let r=0;r<R;r++){const c=(r/T)|0,rr=r%T,a=F[c][k][rr],b=F[c][k2][rr];const d=(a-b+T)%T;cost+=2*cnt[d]+1;cnt[d]++;const key=d*T+a;if(tk[key]>0)cost+=W;tk[key]++;touched[r]=key}
+    for(let r=0;r<R;r++){tk[touched[r]]=0;const c=(r/T)|0,rr=r%T;cnt[(F[c][k][rr]-F[c][k2][rr]+T)%T]=0}
+    return cost;
+  }
+  if(m>1){
+    const pc=[];for(let k=0;k<m;k++){pc.push(new Float64Array(m));for(let k2=0;k2<m;k2++)if(k2!==k)pc[k][k2]=pairCost(k,k2)}
+    const iters=clamp(Math.floor(5e6/((m-1)*R+1)),3000,250000);
+    const nv=new Float64Array(m);
+    for(let it=0;it<iters;it++){
+      const temp=Math.max(.05,3*(1-it/iters));
+      const c=Math.floor(rand()*C),k=Math.floor(rand()*m);
+      const len=c===C-1?lastLen:T;
+      const i=Math.floor(rand()*len);let j=Math.floor(rand()*T);if(j===i)continue;
+      const f=F[c][k];[f[i],f[j]]=[f[j],f[i]];
+      let delta=0;for(let k2=0;k2<m;k2++){if(k2===k)continue;nv[k2]=pairCost(k,k2);delta+=nv[k2]-pc[k][k2]}
+      if(delta<=0||rand()<Math.exp(-delta/temp)){for(let k2=0;k2<m;k2++){if(k2===k)continue;pc[k][k2]=nv[k2];pc[k2][k]=nv[k2]}}
+      else{[f[i],f[j]]=[f[j],f[i]]}
+    }
+  }
+  const tab=[];
+  for(let i=0;i<P;i++){const k=(i/T)|0,g=i%T,row=new Array(R);for(let r=0;r<R;r++){const c=(r/T)|0;row[r]=(g+F[c][k][r%T])%T}tab.push(row)}
+  return tab;
+}
+
+// reequilibra as rodadas: mesa com anfitri\u00f5es fixos recebe menos convidados
+function balancear(tab,P,T,R,fx,cap){
+  const at=[];for(let r=0;r<R;r++)at.push(Array.from({length:T},()=>[]));
+  for(let i=0;i<P;i++)for(let r=0;r<R;r++)at[r][tab[i][r]].push(i);
+  for(let r=0;r<R;r++){
+    for(let passo=0;passo<T*4;passo++){
+      let cheia=-1,vazia=-1,nc=-1,nv=1e9;
+      for(let t=0;t<T;t++){
+        const n=at[r][t].length+fx[t];
+        if(n>cap&&at[r][t].length&&n>nc){cheia=t;nc=n}
+        if(n<cap&&n<nv){vazia=t;nv=n}
+      }
+      if(cheia<0||vazia<0)break;
+      let quem=at[r][cheia].find(i=>!tab[i].includes(vazia));
+      if(quem===undefined)quem=at[r][cheia][0];
+      tab[quem][r]=vazia;
+      at[r][cheia]=at[r][cheia].filter(x=>x!==quem);
+      at[r][vazia].push(quem);
+    }
+  }
+  return tab;
+}
+
+// tira o anfitri\u00e3o que roda da mesa da pr\u00f3pria empresa, trocando de lugar com outra pessoa.
+// s\u00f3 \u00e9 poss\u00edvel quando h\u00e1 menos rodadas que mesas; com rodadas >= mesas, todo mundo passa por todas.
+function evitarCasa(tab,P,T,R,casa){
+  if(R>=T)return tab;
+  const at=[];for(let r=0;r<R;r++)at.push(Array.from({length:T},()=>[]));
+  for(let i=0;i<P;i++)for(let r=0;r<R;r++)at[r][tab[i][r]].push(i);
+  for(let i=0;i<P;i++){
+    const h=casa[i];if(h===null||h===undefined)continue;
+    for(let r=0;r<R;r++){
+      if(tab[i][r]!==h)continue;
+      for(let k=0;k<T;k++){
+        const t2=(h+1+k)%T;
+        if(t2===h||tab[i].includes(t2))continue;               // n\u00e3o pode repetir mesa
+        const j=at[r][t2].find(j=>casa[j]!==h&&!tab[j].includes(h));
+        if(j===undefined)continue;
+        tab[i][r]=t2;tab[j][r]=h;                               // troca de lugar na mesma rodada
+        at[r][h]=at[r][h].filter(x=>x!==i);at[r][h].push(j);
+        at[r][t2]=at[r][t2].filter(x=>x!==j);at[r][t2].push(i);
+        break;
+      }
+    }
+  }
+  return tab;
+}
+
+function analyze(tab,P,T,R){
+  const at=[];for(let r=0;r<R;r++){at.push([]);for(let t=0;t<T;t++)at[r].push([])}
+  for(let i=0;i<P;i++)for(let r=0;r<R;r++)at[r][tab[i][r]].push(i);
+  const visitNo=tab.map(()=>new Array(R));
+  const repByPart=[];
+  for(let i=0;i<P;i++){const seen=new Array(T).fill(0),rounds={};for(let r=0;r<R;r++){const t=tab[i][r];seen[t]++;visitNo[i][r]=seen[t];(rounds[t]=rounds[t]||[]).push(r)}
+    const reps=[];for(let t=0;t<T;t++)if(seen[t]>1)reps.push({t,rounds:rounds[t]});
+    repByPart.push({reps,distinct:seen.filter(x=>x>0).length})}
+  const meet=new Uint8Array(P*P), log=new Map();
+  for(let r=0;r<R;r++)for(let t=0;t<T;t++){const g=at[r][t];for(let x=0;x<g.length;x++)for(let y=x+1;y<g.length;y++){const a=Math.min(g[x],g[y]),b=Math.max(g[x],g[y]),id=a*P+b;meet[id]++;const e=log.get(id);if(e)e.push([r,t]);else log.set(id,[[r,t]])}}
+  const pairs=[];let pairsOnce=0,maxMeet=0,sameTable=0;
+  for(const [id,ev] of log){if(ev.length>maxMeet)maxMeet=ev.length;if(ev.length===1){pairsOnce++;continue}
+    const tbls=ev.map(e=>e[1]);const same=new Set(tbls).size<tbls.length;if(same)sameTable++;
+    pairs.push({a:Math.floor(id/P),b:id%P,ev,same})}
+  pairs.sort((x,y)=>(y.same-x.same)||(y.ev.length-x.ev.length)||(x.a-y.a));
+  // visão individual: quantos convidados cada um conhece e com quem senta de novo
+  const person=[];for(let i=0;i<P;i++)person.push({known:0,again:[],sameTable:false});
+  for(const [id,ev] of log){const a=Math.floor(id/P),b=id%P;person[a].known++;person[b].known++;
+    if(ev.length>1){const same=new Set(ev.map(e=>e[1])).size<ev.length;person[a].again.push(b);person[b].again.push(a);if(same){person[a].sameTable=true;person[b].sameTable=true}}}
+  const perTable=[];for(let t=0;t<T;t++){let visits=0,uniq=0,rev=0;for(let r=0;r<R;r++)for(const i of at[r][t]){visits++;if(visitNo[i][r]===1)uniq++;else rev++}perTable.push({t,visits,uniq,rev})}
+  let minL=Infinity,maxL=0;for(let r=0;r<R;r++)for(let t=0;t<T;t++){const n=at[r][t].length;if(n<minL)minL=n;if(n>maxL)maxL=n}
+  return {at,visitNo,repByPart,pairs,pairsOnce,maxMeet,sameTable,perTable,minL,maxL,person};
+}
+
+let S=null;
+// avisos ficam recolhidos; abrem sozinhos só quando há problema
+const openBoxes={};
+function alertBox(list,key){
+  const bad=list.some(a=>a[0]==="bad"),warn=list.some(a=>a[0]==="warn");
+  const open=openBoxes[key]!==undefined?openBoxes[key]:bad;
+  return `<details data-key="${key}"${open||bad?" open":""}><summary><span class="dot ${bad?"bad":warn?"warn":""}"></span>Avisos (${list.length})</summary><ul>`+
+    list.map(a=>`<li class="alert"><span class="dot ${a[0]}"></span><span>${esc(a[1])}</span></li>`).join("")+"</ul></details>";
+}
+document.addEventListener("toggle",e=>{const d=e.target;if(d.matches&&d.matches("details[data-key]"))openBoxes[d.dataset.key]=d.open},true);
+const GUEST_MIN=1; // tempo fixo de fala de cada convidado
+function fmtDur(min){const h=Math.floor(min/60),m=min%60;return h?(h+"h"+(m?pad(m):"")):(m+" min")}
+
+let seedBase=1;
+function run(){
+  fieldErrors=[];
+  recalcRot();
+  const temCadastro=DB.mesas.length>=2&&ROT.length>=2;
+  if(temCadastro){$("inP").value=ROT.length;$("inT").value=DB.mesas.length}
+  $("inP").readOnly=$("inT").readOnly=temCadastro;
+  $("inP").title=$("inT").title=temCadastro?"Vem da aba Pessoas":"";
+  const P=readInt("inP"),T=readInt("inT"),R=readInt("inR"),cap=readInt("inCap"),sp=readInt("inSp"),sw=readInt("inSw");
+  $("fieldErr").textContent=fieldErrors.join(" ");$("fieldErr").hidden=!fieldErrors.length;
+  setTimeout(()=>{
+    // 1) quando há mais rodadas que mesas, tenta outras grades até ninguém rever a mesma pessoa na mesma mesa
+    const fxRun=[];for(let t=0;t<T;t++)fxRun.push(fixedAt(t).length);
+    const casaRun=ROT.map(x=>typeof x.mesa==="number"?x.mesa:null); // mesa da pr\u00f3pria empresa
+    const montar=sd=>evitarCasa(balancear(build(P,T,R,sd),P,T,R,fxRun,cap),P,T,R,casaRun);
+    // testa algumas combinações e fica com a que menos repete encontros
+    const nota=a=>a.sameTable*1e6+a.maxMeet*1e3+a.pairs.length;
+    let seed=seedBase,tab=montar(seed),A=analyze(tab,P,T,R);
+    const tentativas=A.sameTable>0?15:4;
+    for(let k=1;k<=tentativas;k++){
+      const sd=seedBase+k,t2=montar(sd),a2=analyze(t2,P,T,R);
+      if(nota(a2)<nota(A)){tab=t2;A=a2;seed=sd}
+      if(A.sameTable===0&&A.maxMeet<=2)break;
+    }
+    S={P,T,R,cap,gcap:cap-1,sp,sw,seed,tab,A};
+    renderAll();
+  },10);
+}
+
+function renderAll(){
+  const {P,T,R,cap,gcap,sp,sw,A}=S;
+  // cada convidado fala 1 min; a rodada dura o tempo da mesa mais cheia + o patrocinador
+  const mn=A.maxL*GUEST_MIN+sp;
+  const dur=R*mn+Math.max(0,R-1)*sw;
+  // acompanhantes fixos por mesa (lidos dos nomes, podem mudar sem refazer a grade)
+  const fx=[];for(let t=0;t<T;t++)fx.push(fixedAt(t).length);
+  S.fx=fx;S.totalAt=(r,t)=>fx[t]+A.at[r][t].length;
+  const fixTotal=fx.reduce((a,b)=>a+b,0);
+  const seatsFree=fx.reduce((a,n)=>a+Math.max(0,cap-n),0); // vagas para quem gira
+  const needT=Math.ceil((P+fixTotal)/cap);
+  let maxTotal=0,minTotal=1e9,overTables=[];
+  for(let t=0;t<T;t++){let mt=0;for(let r=0;r<R;r++){const n=S.totalAt(r,t);if(n>mt)mt=n;if(n<minTotal)minTotal=n}
+    if(mt>maxTotal)maxTotal=mt;if(mt>cap)overTables.push(spName(t)+" ("+mt+")")}
+  $("headMeta").textContent=P+" convidados + "+fixTotal+" fixos = "+(P+fixTotal)+" pessoas · "+T+" mesas · "+R+" rodadas · "+fmtDur(dur);
+  $("outAnf").value=DB.pessoas.filter(x=>x.situacao==="fixo").length;   // donos de mesa; quem roda já está nos convidados
+  $("outPatr").value=DB.mesas.length;
+
+  const kn=A.person.map(x=>x.known), minK=Math.min(...kn), maxK=Math.max(...kn);
+  const ag=A.person.map(x=>x.again.length), minAg=Math.min(...ag),maxAg=Math.max(...ag);
+  const spMet=Math.min(R,T), sameP=A.person.filter(x=>x.sameTable).length;
+  const range=(a,b)=>a===b?String(a):a+" a "+b;
+  const status=$("summaryStatus"),hasCapacityIssue=maxTotal>cap||P>seatsFree,hasRuleIssue=A.sameTable>0;
+  status.textContent=hasCapacityIssue||hasRuleIssue?"Ajuste necessário":"Cenário aprovado";
+  status.className="section-status "+(hasCapacityIssue||hasRuleIssue?"bad":"");
+  const kp=[
+    {v:minTotal===maxTotal?maxTotal:minTotal+"–"+maxTotal,l:"pessoas por mesa, com os fixos",c:maxTotal>cap?"bad":"ok"},
+    {v:spMet,l:"patrocinadores por convidado",c:"ok"},
+    {v:minK===maxK?minK:minK+"–"+maxK,l:"conexões diferentes por convidado",c:"ok"},
+    {v:sameP,l:"convidados que precisam de ajuste",c:sameP?"bad":"ok"}
+  ];
+  $("kpis").innerHTML=kp.map(k=>`<div class="kpi ${k.c}"><span class="v">${esc(k.v)}</span><span class="l">${esc(k.l)}</span></div>`).join("");
+
+  const al=[];
+  if(P>seatsFree)al.push(["bad",`Faltam lugares: ${P} convidados girando para ${seatsFree} vagas. Com ${T} mesas, ${cap} pessoas por mesa e ${fixTotal} anfitrião(ões) fixo(s), o máximo é ${seatsFree}. Use ${needT} mesas, aceite ${Math.ceil((P+fixTotal)/T)} por mesa, ou deixe algum fixo girando.`]);
+  else if(maxTotal>cap)al.push(["bad",`Mesas acima das ${cap} pessoas: ${overTables.join(", ")}. Aumente o ideal por mesa ou o número de mesas.`]);
+  else al.push(["ok",`Lotação dentro do ideal: no máximo ${maxTotal} pessoas por mesa, contando os anfitriões fixos. Sobram ${seatsFree-P} lugares.`]);
+  let casa=0;for(let r=0;r<R;r++)for(let t=0;t<T;t++)casa+=A.at[r][t].filter(i=>rotMesa(i)===t).length;
+  if(casa)al.push([R>=T?"warn":"bad",`${casa} vez${casa>1?"es":""} um anfitri\u00e3o que roda cai na mesa da pr\u00f3pria empresa (bolinha com borda tracejada em Mesas por rodada).`+(R>=T?` Com ${R} rodadas para ${T} mesas, todo mundo passa por todas as mesas, ent\u00e3o n\u00e3o d\u00e1 para evitar. Use no m\u00e1ximo ${T-1} rodadas para tirar essas pessoas da mesa da pr\u00f3pria empresa.`:" Tente Gerar outra combina\u00e7\u00e3o na aba Encontros.")]);
+  else if(ROT.some(x=>typeof x.mesa==="number")&&R<T)al.push(["ok","Nenhum anfitri\u00e3o que roda senta na mesa da pr\u00f3pria empresa."]);
+  if(sameP)al.push(["bad",`${sameP} convidado${sameP>1?"s":""} precisa${sameP>1?"m":""} de ajuste porque reencontra${sameP>1?"m":""} alguém na mesma mesa.`]);
+  else al.push(["ok","Todos os convidados estão organizados sem reencontros na mesma mesa."]);
+  $("alerts").innerHTML=alertBox(al,"alerts");
+
+  // convidados por mesa: todas as rodadas ou uma rodada
+  const ss=$("selSize"),prev=ss.value;
+  ss.innerHTML=`<option value="all">Todas as rodadas</option>`+[...Array(R).keys()].map(r=>`<option value="${r}">Rodada ${r+1}</option>`).join("");
+  ss.value=(prev==="all"||+prev<R)&&prev!==""?prev:"all";
+  renderSizes();
+
+  // heatmap
+  let h="<thead><tr><th class='row'>Mesa · patrocinador</th>";for(let r=0;r<R;r++)h+=`<th>R${r+1}</th>`;h+="</tr></thead><tbody>";
+  for(let t=0;t<T;t++){h+=`<tr><th class="row" title="${esc(tName(t))}">${esc(tName(t))}</th>`;
+    for(let r=0;r<R;r++){const g=A.at[r][t];const rev=g.filter(i=>A.visitNo[i][r]>1).length;const n=g.length;
+      const bg=n===0?"var(--heat-0)":rev===0?"var(--accent-soft)":"var(--revisit-soft)";
+      const tip=`${tName(t)} · Rodada ${r+1}: ${n+S.fx[t]} pessoas (${S.fx[t]} fixo(s))${rev?`, ${rev} voltando`:""}\n`+g.map(i=>pName(i)+(A.visitNo[i][r]>1?" ("+A.visitNo[i][r]+"ª vez)":"")).join("\n");
+      h+=`<td class="${n+S.fx[t]>cap?"over":""}" style="background:${bg}" title="${esc(tip)}">${n+S.fx[t]}${rev?`<span class="r">${rev}</span>`:""}</td>`}
+    h+="</tr>"}
+  $("heat").innerHTML=h+"</tbody>";
+
+  // ranking
+  const rk=[...A.perTable].sort((a,b)=>b.uniq-a.uniq||a.rev-b.rev||a.t-b.t);const mx=Math.max(...rk.map(x=>x.visits),1);
+  $("rank").innerHTML="<thead><tr><th>Mesa</th><th class='n'>Novos</th><th class='n'>Voltando</th><th class='n'>Total</th><th>Distribuição</th></tr></thead><tbody>"+
+    rk.map(x=>`<tr><td>${esc(tName(x.t))}</td><td class="n">${x.uniq}</td><td class="n">${x.rev}</td><td class="n">${x.visits}</td><td><div class="bar" title="${x.uniq} novos, ${x.rev} voltando"><i class="a" style="width:${x.uniq/mx*100}%"></i><i class="b" style="width:${x.rev/mx*100}%"></i></div></td></tr>`).join("")+"</tbody>";
+
+  // repetições (visão individual)
+  $("repCount").textContent=sameP;$("repCount").hidden=!sameP;
+  const comRe=A.person.filter(x=>x.again.length).length;   // convidados que reencontram algu\u00e9m
+  const vezes=Math.max(0,(A.maxMeet||1)-1);                 // quantos reencontros no pior caso
+  const linhaRe=comRe
+    ? `${comRe} de ${P} convidados v\u00e3o se sentar de novo com algu\u00e9m que j\u00e1 conheceram${vezes>1?`, at\u00e9 ${vezes} vezes com a mesma pessoa`:", uma vez s\u00f3 com cada pessoa"}${sameP?".":", sempre em outra mesa."}`
+    : "Nenhum convidado repete a companhia de mesa.";
+  $("repAlerts").innerHTML=(sameP||vezes>1)?
+    `<div class="rule-result bad"><span class="rule-art" aria-hidden="true">!</span><div><small>${sameP?"Precisa de ajuste":"Vale revisar"}</small><strong>${sameP?sameP+" convidado"+(sameP>1?"s":"")+" reencontra"+(sameP>1?"m":"")+" algu\u00e9m na mesma mesa":"Os convidados podem se encontrar at\u00e9 "+vezes+" vezes de novo"}</strong><p>Cada convidado conhece ${range(minK,maxK)} pessoas diferentes. ${linhaRe}</p></div></div>`:
+    `<div class="rule-result ok"><span class="rule-art" aria-hidden="true">\u2713</span><div><small>Organiza\u00e7\u00e3o aprovada</small><strong>Cada convidado conhecer\u00e1 ${range(minK,maxK)} pessoas diferentes</strong><p>${linhaRe}</p></div></div>`;
+  renderRep();
+  // por rodada
+  const sel=$("selMesa");const cur=Math.min(parseInt(sel.value||"0",10)||0,R-1);
+  sel.innerHTML=[...Array(R).keys()].map(r=>`<option value="${r}">Rodada ${r+1} de ${R}</option>`).join("");sel.value=String(cur);
+  renderPessoas();renderMesa();renderRoute();renderExport();
+}
+
+function renderMesa(){
+  const {P,R,T,gcap,A}=S;const r=parseInt($("selMesa").value,10)||0;
+  let rev=0;for(let t=0;t<T;t++)rev+=A.at[r][t].filter(i=>A.visitNo[i][r]>1).length;
+  $("mesaInfo").textContent=`${P} convidados girando entre ${T} mesas · bolinha verde escura = quem fica fixo`;
+  $("prevRound").disabled=r<=0;$("nextRound").disabled=r>=R-1;
+  let h="";for(let t=0;t<T;t++){const g=A.at[r][t];
+    const fixos=fixedAt(t);
+    const visible=g.slice(0,12),extra=g.length-visible.length;
+    const assentos=fixos.map(f=>({txt:firstName(f),tip:f+" · fixo na mesa",cls:" host"}))
+      .concat(visible.map(i=>({txt:gShort(i),tip:pName(i)+(A.visitNo[i][r]>1?" · retorno à mesa":"")+(rotMesa(i)===t?" · mesa da própria empresa":""),cls:(rotMesa(i)===t?" casa":"")+(A.visitNo[i][r]>1?" returning":"")})));
+    if(extra)assentos.push({txt:"+"+extra,tip:"Mais "+extra+" convidados",cls:" more"});
+    const seatCount=assentos.length;
+    let seats=assentos.map((a,pos)=>{const angle=seatCount?pos*360/seatCount:0;
+      return `<span class="seat${a.cls}" style="--angle:${angle}deg;--counter:${-angle}deg" title="${esc(a.tip)}">${esc(a.txt)}</span>`}).join("");
+    const sponsor=spName(t);
+    const total=fixos.length+g.length;
+    h+=`<article class="table-card${total>S.cap?" over":""}">
+      <header><div><span class="table-number" title="${esc(spName(t))}">${esc(spName(t))}</span><small>Mesa ${t+1} · ${total} pessoas${fixos.length?" · "+fixos.length+" fixo"+(fixos.length>1?"s":""):""}</small></div><span class="capacity-dot" title="${total>S.cap?"Acima da capacidade":"Dentro da capacidade"}"></span></header>
+      <div class="table-stage"><div class="table-scene">${seats}<div class="table-core"><small>Patrocinador</small><strong class="core-name">${esc(sponsor||pCode(t))}</strong><span>Mesa ${t+1}</span></div></div></div>
+      <details class="table-guests"><summary>Ver convidados <b>${g.length}</b></summary><div class="guest-chips">${fixos.map(f=>`<span class="fixo">${esc(f)} <small>fixo</small></span>`).join("")}${g.map(i=>`<span>${esc(pName(i))}${A.visitNo[i][r]>1?` <small>${A.visitNo[i][r]}ª visita</small>`:""}</span>`).join("")}</div></details>
+    </article>`}
+  $("mesaRounds").innerHTML=h;
+}
+
+function renderSizes(){
+  const {R,T,cap,fx,A}=S;const v=$("selSize").value,all=v==="all";
+  const tot=(r,t)=>A.at[r][t].length+fx[t];
+  let lo0=1e9,hi0=0;for(let r=0;r<R;r++)for(let t=0;t<T;t++){const n=tot(r,t);if(n<lo0)lo0=n;if(n>hi0)hi0=n}
+  const sizes=[];for(let n=lo0;n<=hi0;n++)sizes.push(n);
+  // todas as rodadas: quantas vezes UMA mesa fica com n convidados (conta por mesa)
+  // uma rodada: quantas mesas ficam com n convidados naquela rodada
+  const val={};
+  sizes.forEach(n=>{
+    if(all){const per=[];for(let t=0;t<T;t++){let k=0;for(let r=0;r<R;r++)if(tot(r,t)===n)k++;per.push(k)}
+      const lo=Math.min(...per),hi=Math.max(...per);val[n]={txt:lo===hi?String(lo):lo+"–"+hi,num:hi}}
+    else{let k=0;for(let t=0;t<T;t++)if(tot(+v,t)===n)k++;val[n]={txt:String(k),num:k}}
+  });
+  $("sizes").innerHTML=sizes.map(n=>`<div class="size${n>cap?" bad":""}${val[n].num?"":" zero"}">
+    <span class="seats" aria-hidden="true">${"<i></i>".repeat(n)}<i class="sp"></i></span>
+    <span class="v">${val[n].txt}<small>${all?(val[n].num===1?"vez":"vezes"):(val[n].num===1?"mesa":"mesas")}</small></span>
+    <span class="l">${all?"cada mesa fica com":"com"} <b>${n} pessoas</b></span></div>`).join("");
+}
+
+function renderRep(){
+  const {P,T,R,A}=S,q=$("searchRep").value.trim().toLowerCase();
+  const nome=i=>{const r=ROT[i];return r?r.nome+" ("+cCode(i)+")":cCode(i)};
+  const lista=A.pairs.filter(x=>!q||nome(x.a).toLowerCase().includes(q)||nome(x.b).toLowerCase().includes(q));
+  $("repSearchBar").hidden=!A.pairs.length;
+  const pior=A.maxMeet||0;
+  let dica="";
+  if(pior>2){
+    const ideias=[];
+    ideias.push(`clique em <b>Gerar outra combina\u00e7\u00e3o</b> aqui embaixo: a grade \u00e9 refeita e quase sempre cai para 2 encontros`);
+    if(R>T)ideias.push(`reduza as rodadas de ${R} para ${T}: com mais rodadas que mesas, as pessoas se cruzam mais`);
+    ideias.push(`aumente as mesas de ${T} para ${T+2}: mais mesas espalham melhor os convidados`);
+    ideias.push(`reduza os convidados por mesa, hoje at\u00e9 ${S.cap}: mesas menores geram menos repeti\u00e7\u00e3o`);
+    dica=`<div class="rule-result bad" style="margin-bottom:14px"><span class="rule-art" aria-hidden="true">!</span><div><small>Como reduzir</small><strong>Tem gente se reencontrando ${pior} vezes</strong><p>Tente, nesta ordem:</p><ul style="margin:6px 0 0;padding-left:18px;color:var(--ink-2);font-size:13px">${ideias.map(x=>"<li>"+x+"</li>").join("")}</ul><p style="margin-top:10px"><button class="btn" id="reshuffle">Gerar outra combina\u00e7\u00e3o</button></p></div></div>`;
+  }
+  if(!A.pairs.length){
+    $("repTables").innerHTML=dica+`<div class="empty-state"><div class="orbit-art" aria-hidden="true"><span></span><span></span><i>\u2713</i></div><strong>Ningu\u00e9m repete companhia</strong><p>Cada convidado divide mesa com cada pessoa no m\u00e1ximo uma vez.</p></div>`;
+    ligarReshuffle();return;
+  }
+  const cards=lista.slice(0,150).map(x=>{
+    const n=x.ev.length;
+    const onde=x.ev.map(e=>`Rodada ${e[0]+1} \u00b7 ${spName(e[1])}`).join("<br>");
+    const frase=n===2?"Os convidados se reencontraram ao menos uma vez":`Os convidados se reencontraram ${n-1} vezes`;
+    return `<article class="conflict-card"${n>2||x.same?"":' style="border-color:var(--line)"'}><div class="pair-art" aria-hidden="true"><span>${cCode(x.a)}</span><span>${cCode(x.b)}</span></div><div><small>${x.same?"mesma mesa":n>2?"revisar":"reencontro"}</small><strong>${esc(nome(x.a))} <i>e</i> ${esc(nome(x.b))}</strong><p>${frase}<br>${onde}</p></div></article>`;
+  }).join("");
+  $("repTables").innerHTML=dica+(cards||`<div class="empty-state compact"><strong>Nenhum convidado encontrado</strong><p>Tente outro nome ou c\u00f3digo.</p></div>`)+
+    (lista.length>150?`<p class="result-note">Mostrando 150 de ${lista.length}. Use a busca para achar uma pessoa.</p>`:"");
+  ligarReshuffle();
+}
+function ligarReshuffle(){const b=$("reshuffle");if(b)b.addEventListener("click",()=>{seedBase++;run()})}
+
+function renderRoute(){
+  const {P,R,tab,A}=S;const q=$("searchPart").value.trim().toLowerCase();const only=$("onlyRep").checked;
+  if(!only&&q.length<2){$("route").innerHTML=`<div class="empty-state"><div class="route-art" aria-hidden="true"><span>1</span><i></i><span>2</span><i></i><span>3</span></div><strong>${q?"Digite mais um caractere":"Encontre um convidado"}</strong><p>${q?"Use pelo menos dois caracteres para evitar uma lista grande.":"Digite o nome ou código acima para visualizar somente o roteiro dessa pessoa."}</p></div>`;return}
+  const matches=[];
+  for(let i=0;i<P;i++){const nm=pName(i);if(q&&!nm.toLowerCase().includes(q)&&!("c"+pad(i+1)).includes(q))continue;if(only&&!A.person[i].sameTable)continue;matches.push(i)}
+  if(!matches.length){$("route").innerHTML=`<div class="empty-state compact"><strong>Nenhum convidado encontrado</strong><p>Confira o nome ou desative o filtro.</p></div>`;return}
+  const visible=matches.slice(0,12);
+  $("route").innerHTML=visible.map(i=>{
+    const nm=pName(i),hasConflict=A.person[i].sameTable;
+    const steps=tab[i].map((t,r)=>`<li><span>R${r+1}</span><strong title="${esc(spName(t))}">${esc(spName(t))}</strong><small>Mesa ${t+1}</small></li>`).join("");
+    return `<article class="route-card"><header><div><small>Roteiro de</small><strong>${esc(nm)}</strong></div>${hasConflict?'<span class="pill bad">tem conflito</span>':`<span class="route-total">${A.repByPart[i].distinct} mesas</span>`}</header><ol class="journey">${steps}</ol></article>`;
+  }).join("")+(matches.length>visible.length?`<p class="result-note">Mostrando 12 de ${matches.length} resultados. Digite mais letras para refinar.</p>`:"");
+}
+
+// célula segura: sem tab/quebra de linha e sem virar fórmula no Excel
+const cell=v=>{v=String(v).replace(/[\t\r\n]+/g," ").trim();return /^[=+\-@]/.test(v)?"'"+v:v};
+function renderExport(){
+  const {P,T,R,tab,A}=S;const type=$("expType").value;let lines=[];
+  const sameP=A.person.filter(x=>x.sameTable).length;
+  // versão de impressão: usa o cenário calculado, inclusive quando ainda não há nomes cadastrados
+  $("printArea").innerHTML='<div class="rot-col">'+[...Array(P).keys()].map(i=>
+    `<div class="rot-bloco"><p class="rot-nome">${esc((ROT[i]&&ROT[i].nome)||cCode(i))}</p><div class="rot-lista">`+
+    tab[i].map((k2,k)=>`<div class="rot-item">Rodada ${k+1} - ${esc(spName(k2))}</div>`).join("")+
+    `</div></div>`).join("")+'</div>';
+
+  $("expWarn").hidden=!(sameP||fieldErrors.length||avisosPessoas.some(x=>x[0]==="bad"));
+  if(type==="lista"){
+    // roteiro em texto, pronto para mandar por WhatsApp ou imprimir
+    const blocos=[];
+    for(let i=0;i<P;i++)blocos.push(pName(i)+"\n"+tab[i].map((t,r)=>`Rodada ${r+1} - ${spName(t)}`).join("\n"));
+    $("expText").value=blocos.join("\n\n");return;
+  }
+  if(type==="part"){lines.push(["Código","Convidado"].concat([...Array(R).keys()].map(r=>"Rodada "+(r+1))));
+    for(let i=0;i<P;i++)lines.push([cCode(i),(ROT[i]&&ROT[i].nome)||""].concat(tab[i].map(t=>spName(t)+" (Mesa "+(t+1)+")")))}
+  else{lines.push(["Mesa","Código patrocinador","Patrocinador","Rodada","Convidados"]);
+    for(let t=0;t<T;t++)for(let r=0;r<R;r++)lines.push(["Mesa "+(t+1),pCode(t),spName(t),"Rodada "+(r+1),[...fixedAt(t).map(f=>f+" (fixo)"),...A.at[r][t].map(pName)].join(", ")])}
+  $("expText").value=lines.map(l=>l.map(cell).join("\t")).join("\n");
+}
+
+const tabButtons=[...document.querySelectorAll(".tabs button")];
+tabButtons.forEach(b=>{
+  b.addEventListener("click",()=>{
+    tabButtons.forEach(x=>{x.setAttribute("aria-selected",x===b?"true":"false");x.tabIndex=x===b?0:-1});
+    document.querySelectorAll("main section[data-view]").forEach(s=>s.hidden=s.dataset.view!==b.dataset.tab);
+    store.set("rodadas-aba",b.dataset.tab);
+  });
+  b.addEventListener("keydown",e=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;
+    e.preventDefault();const at=tabButtons.indexOf(b);
+    const next=e.key==="Home"?0:e.key==="End"?tabButtons.length-1:(at+(e.key==="ArrowRight"?1:-1)+tabButtons.length)%tabButtons.length;
+    tabButtons[next].focus();tabButtons[next].click();
+  });
+});
+const savedTab=store.get("rodadas-aba");if(savedTab){const b=document.querySelector(`.tabs button[data-tab="${savedTab}"]`);if(b)b.click()}
+
+let deb;["inP","inT","inR","inCap","inSp","inSw"].forEach(id=>{
+  try{const v=store.get("rodadas2-"+id);if(v!==null&&v!=="")$(id).value=v}catch(e){}
+  $(id).addEventListener("input",()=>{store.set("rodadas2-"+id,$(id).value);clearTimeout(deb);deb=setTimeout(run,350)});
+  // ao sair do campo, mostra o valor que de fato está sendo usado
+  $(id).addEventListener("change",()=>{const [def,lo,hi]=LIMITS[id];const v=parseInt($(id).value,10);$(id).value=isNaN(v)?def:clamp(v,lo,hi);store.set("rodadas2-"+id,$(id).value);run()})});
+$("selMesa").addEventListener("change",renderMesa);
+const stepRound=d=>{const s=$("selMesa"),r=clamp((parseInt(s.value,10)||0)+d,0,S.R-1);s.value=String(r);renderMesa()};
+$("prevRound").addEventListener("click",()=>stepRound(-1));
+$("nextRound").addEventListener("click",()=>stepRound(1));
+$("searchPart").addEventListener("input",renderRoute);
+$("searchRep").addEventListener("input",renderRep);
+$("selSize").addEventListener("change",renderSizes);
+$("onlyRep").addEventListener("change",renderRoute);
+$("expType").addEventListener("change",renderExport);
+$("expSelect").addEventListener("click",()=>{const e=$("expText");e.focus();e.select()});
+function gerarPdfRoteiros(){
+  if(!S||!S.tab||!S.P)throw new Error("A grade ainda não foi calculada.");
+  const Pdf=window.jspdf&&window.jspdf.jsPDF;
+  if(!Pdf)throw new Error("O gerador de PDF não carregou. Verifique a internet e tente novamente.");
+
+  const doc=new Pdf({orientation:"portrait",unit:"mm",format:"a4",compress:true,putOnlyUsedFonts:true});
+  const pageW=doc.internal.pageSize.getWidth(),pageH=doc.internal.pageSize.getHeight();
+  const margin=11,gap=6,colW=(pageW-margin*2-gap)/2,top=24,bottom=pageH-14;
+  const lineH=3.65,rowPad=1.25,nameLineH=4.2;
+  let col=0,y=top;
+  const x=()=>margin+col*(colW+gap);
+  const nomePessoa=i=>(ROT[i]&&ROT[i].nome)||cCode(i);
+  const dataGeracao=new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date());
+
+  doc.setProperties({title:"Roteiros - Mesa Certa",subject:"Roteiros individuais das rodadas de negócio",creator:"Mesa Certa"});
+  function cabecalho(){
+    doc.setFillColor(14,107,102);doc.rect(0,0,pageW,17,"F");
+    doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("Mesa Certa",margin,7.3);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+    doc.text("Roteiros individuais das rodadas de negócio",margin,12.1);
+    doc.text(`${S.P} pessoas · ${S.R} rodada${S.R===1?"":"s"}`,pageW-margin,10,{align:"right"});
+    doc.setTextColor(24,34,43);col=0;y=top;
+  }
+  function proximaColuna(){
+    if(col===0){col=1;y=top}
+    else{doc.addPage();cabecalho()}
+  }
+  function alturaNome(nome,continuacao){
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    const linhas=doc.splitTextToSize(nome+(continuacao?" (continuação)":""),colW);
+    return {linhas,h:linhas.length*nameLineH+1.2};
+  }
+  function linhaRodada(r,t){
+    doc.setFont("helvetica","normal");doc.setFontSize(8.3);
+    const linhas=doc.splitTextToSize(`Rodada ${r+1} - ${spName(t)}`,colW-4);
+    return {linhas,h:Math.max(5.2,linhas.length*lineH+rowPad*2)};
+  }
+  function desenharTrecho(i,inicio,fim,continuacao){
+    const nome=alturaNome(nomePessoa(i),continuacao),xx=x();
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);doc.setTextColor(24,34,43);
+    doc.text(nome.linhas,xx,y+3.5);y+=nome.h;
+    for(let r=inicio;r<fim;r++){
+      const item=linhaRodada(r,S.tab[i][r]);
+      doc.setDrawColor(92,108,116);doc.setLineWidth(.2);doc.rect(xx,y,colW,item.h);
+      doc.setFont("helvetica","normal");doc.setFontSize(8.3);doc.setTextColor(24,34,43);
+      doc.text(item.linhas,xx+2,y+rowPad+2.8);y+=item.h;
+    }
+    y+=4;
+  }
+  cabecalho();
+  for(let i=0;i<S.P;i++){
+    let r=0,continuacao=false;
+    while(r<S.R){
+      let nome=alturaNome(nomePessoa(i),continuacao);
+      const itens=[];let total=nome.h+4;
+      for(let k=r;k<S.R;k++){const item=linhaRodada(k,S.tab[i][k]);itens.push(item);total+=item.h}
+      if(total<=bottom-top&&total>bottom-y){proximaColuna();nome=alturaNome(nomePessoa(i),continuacao)}
+      if(bottom-y<nome.h+5.2+4){proximaColuna();nome=alturaNome(nomePessoa(i),continuacao)}
+      let fim=r,usado=nome.h+4;
+      while(fim<S.R){const h=itens[fim-r].h;if(y+usado+h>bottom)break;usado+=h;fim++}
+      if(fim===r){
+        if(y>top){proximaColuna();continue}
+        // Proteção para um nome de patrocinador excepcionalmente longo: nunca entra em laço infinito.
+        fim=r+1;
+      }
+      desenharTrecho(i,r,fim,continuacao);
+      r=fim;continuacao=true;
+      if(r<S.R)proximaColuna();
+    }
+  }
+  const paginas=doc.getNumberOfPages();
+  for(let p=1;p<=paginas;p++){
+    doc.setPage(p);doc.setDrawColor(205,215,212);doc.setLineWidth(.2);doc.line(margin,pageH-10,pageW-margin,pageH-10);
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(90,104,111);
+    doc.text(`Gerado em ${dataGeracao}`,margin,pageH-6.2);
+    doc.text(`Página ${p} de ${paginas}`,pageW-margin,pageH-6.2,{align:"right"});
+  }
+  doc.save(`mesa-certa-roteiros-${new Date().toISOString().slice(0,10)}.pdf`);
+  return paginas;
+}
+$("expPdf").addEventListener("click",()=>{
+  const b=$("expPdf"),status=$("pdfStatus"),rotulo=b.textContent;
+  b.disabled=true;b.textContent="Gerando PDF…";status.style.color="";
+  try{
+    const paginas=gerarPdfRoteiros();
+    status.textContent=`PDF gerado com ${S.P} pessoas, ${S.R} rodada${S.R===1?"":"s"} e ${paginas} página${paginas===1?"":"s"}. Se o download não aparecer, use Ctrl+P e escolha Salvar como PDF.`;
+  }catch(e){
+    status.textContent=e.message+" Como alternativa, use Ctrl+P; a impressão também foi corrigida para várias páginas.";
+    status.style.color="var(--bad)";
+  }finally{b.disabled=false;b.textContent=rotulo}
+});
+// ---------- aba Pessoas ----------
+let avisosPessoas=[];
+const novoId=()=>"p"+Math.random().toString(36).slice(2,9);
+function addPessoa(nome,papel,mesaNome,situacao){
+  nome=String(nome||"").trim();if(!nome)return false;
+  let mesa=mesaNome?acheMesa(mesaNome):null;
+  let sit=norm(situacao);
+  sit=sit.startsWith("fix")?"fixo":sit.startsWith("fora")||sit.startsWith("stand")?"fora":sit.startsWith("rod")?"roda":"";
+  if(!sit)sit=papel==="anfitriao"?"fixo":"roda";      // convidado roda, anfitri\u00e3o fica fixo
+  DB.pessoas.push({id:novoId(),nome,papel:papel||"convidado",mesa,situacao:sit});
+  return true;
+}
+function importar(tipo){
+  const campo={patr:"inPatr",anf:"inAnf",conv:"inConv",tsv:"inTsv"}[tipo];
+  const linhas=$(campo).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  let n=0;
+  linhas.forEach(l=>{
+    if(tipo==="patr"){if(!DB.mesas.some(m=>norm(m)===norm(l))){DB.mesas.push(l);n++}return}
+    const partes=l.split(/\t|;/).map(x=>x.trim());
+    if(tipo==="conv"){if(addPessoa(partes[0],"convidado","",partes[1]||"roda"))n++;return}
+    if(tipo==="anf"){if(addPessoa(partes[0],"anfitriao",partes[1]||"",partes[2]||"fixo"))n++;return}
+    // planilha: Nome | Papel | Empresa | Segmento | Situa\u00e7\u00e3o
+    const nome=partes[0];
+    const papelTxt=norm(partes[1]||"");
+    const papel=papelTxt.includes("convidad")?"convidado":"anfitriao";
+    const empresa=partes[2]||"";
+    const sit=partes.slice(3).find(x=>/fix|rod|fora|stand/i.test(x))||"";
+    if(papel==="anfitriao"&&empresa&&acheMesa(empresa)===null&&!/stand/i.test(papelTxt+sit)){DB.mesas.push(empresa)}
+    if(addPessoa(nome,papel,empresa,sit))n++;
+  });
+  $(campo).value="";salvarDB();run();
+  const comoEntrou={patr:" mesa(s) adicionada(s)",conv:" convidado(s) adicionado(s), todos rodando",anf:" anfitri\u00e3o(\u00f5es) adicionado(s), todos fixos",tsv:" pessoa(s) importada(s)"}[tipo];
+  $("pplStatus").textContent=n?n+comoEntrou:"Nada novo para adicionar";
+}
+function renderPessoas(){
+  const q=norm($("pplSearch").value),filtro=$("pplFiltro").value;
+  const conta={roda:0,fixo:0,fora:0};
+  DB.pessoas.forEach(x=>conta[x.situacao]!==undefined&&conta[x.situacao]++);
+  $("pplCount").textContent=DB.pessoas.length;$("pplCount").hidden=!DB.pessoas.length;
+  // avisos do cadastro
+  avisosPessoas=[];
+  const semFixo=DB.mesas.map((m,t)=>fixedAt(t).length?null:m).filter(Boolean);
+  if(!DB.mesas.length)avisosPessoas.push(["bad","Nenhuma mesa cadastrada. Comece pelos patrocinadores."]);
+  if(semFixo.length)avisosPessoas.push(["warn","Mesas sem ningu\u00e9m fixo: "+semFixo.join(", ")+". S\u00f3 o nome da empresa aparece na mesa."]);
+  const semMesa=DB.pessoas.filter(x=>x.situacao==="fixo"&&x.mesa===null);
+  if(semMesa.length)avisosPessoas.push(["bad",semMesa.length+" fixo(s) sem mesa escolhida: "+semMesa.slice(0,5).map(x=>x.nome).join(", ")+(semMesa.length>5?"\u2026":"")+". Adicione de novo na caixa Anfitri\u00f5es no formato Nome; EMPRESA para eles entrarem na mesa certa."]);
+  const vistos={},dup=[];DB.pessoas.forEach(x=>{const k=norm(x.nome);if(vistos[k])dup.push(x.nome);vistos[k]=1});
+  if(dup.length)avisosPessoas.push(["bad","Nome repetido: "+[...new Set(dup)].slice(0,5).join(", ")]);
+  if(conta.roda&&conta.roda<2)avisosPessoas.push(["bad","Pelo menos 2 pessoas precisam rodar."]);
+  if(!avisosPessoas.length&&DB.pessoas.length)avisosPessoas.push(["ok",conta.roda+" rodam \u00b7 "+conta.fixo+" fixos \u00b7 "+conta.fora+" fora \u00b7 "+DB.mesas.length+" mesas"]);
+  $("pplAvisos").innerHTML=avisosPessoas.map(a=>`<li class="alert"><span class="dot ${a[0]}"></span><span>${esc(a[1])}</span></li>`).join("");
+  $("pplStatus").className="section-status "+(avisosPessoas.some(a=>a[0]==="bad")?"bad":avisosPessoas.some(a=>a[0]==="warn")?"warn":"");
+  if(!$("pplStatus").textContent)$("pplStatus").textContent=conta.roda+" rodando \u00b7 "+conta.fixo+" fixos";
+  // tabela
+  const idxRot={};ROT.forEach((r,i)=>idxRot[r.id]=i);
+  const mesaTxt=x=>{
+    if(x.situacao==="fora")return '<span class="hint" style="margin:0">\u2014</span>';
+    if(x.situacao==="fixo")return x.mesa===null?'<span style="color:var(--bad)">sem empresa</span>':esc(DB.mesas[x.mesa]);
+    if(typeof x.mesa==="number")return esc(DB.mesas[x.mesa])+' <span class="hint" style="margin:0">empresa \u00b7 roda entre as mesas</span>';
+    const i=idxRot[x.id];                        // convidado que roda: mostra a mesa de cada rodada
+    if(!S||i===undefined||!S.tab||!S.tab[i])return '<span class="hint" style="margin:0">\u2014</span>';
+    const rota=S.tab[i].map((t,r)=>"Rodada "+(r+1)+": "+spName(t)).join("\n");
+    return `<span title="${esc(rota)}">${esc(spName(S.tab[i][0]))} <span class="hint" style="margin:0">na rodada 1 \u00b7 veja todas no roteiro</span></span>`;
+  };
+  const linhas=DB.pessoas.filter(x=>(!q||norm(x.nome).includes(q)||norm(DB.mesas[x.mesa]||"").includes(q))&&(!filtro||x.situacao===filtro));
+  renderMesasLista();renderMesasCards();renderAnfLista();
+  $("pplTabela").innerHTML=DB.pessoas.length?
+    "<thead><tr><th>Nome</th><th>Papel</th><th>Mesa</th><th>Situa\u00e7\u00e3o</th><th></th></tr></thead><tbody>"+
+    linhas.map(x=>`<tr data-id="${x.id}">
+      <td><span class="nome-clic" data-pid="${x.id}" title="Clique para ver as opções">${esc(x.nome)}</span></td>
+      <td><select data-campo="papel"><option value="convidado"${x.papel==="convidado"?" selected":""}>Convidado</option><option value="anfitriao"${x.papel!=="convidado"?" selected":""}>Anfitri\u00e3o</option></select></td>
+      <td>${mesaTxt(x)}</td>
+      <td><select data-campo="situacao"><option value="roda"${x.situacao==="roda"?" selected":""}>Roda</option><option value="fixo"${x.situacao==="fixo"?" selected":""}>Fixo na mesa</option><option value="fora"${x.situacao==="fora"?" selected":""}>Fora das rodadas</option></select></td>
+      <td><button class="btn ghost" data-rm="${x.id}" title="Remover" style="padding:4px 9px">\u00d7</button></td></tr>`).join("")+"</tbody>":
+    "<tbody><tr><td class='empty'>Nenhuma pessoa cadastrada ainda. Cole as listas acima.</td></tr></tbody>";
+}
+const mesasAbertas=new Set();
+function renderMesasCards(){
+  const anf=DB.pessoas.filter(x=>x.papel!=="convidado");
+  $("patroCount").textContent=DB.mesas.length;$("patroCount").hidden=!DB.mesas.length;
+  const fixos=anf.filter(x=>x.situacao==="fixo").length,rodam=anf.filter(x=>x.situacao==="roda").length;
+  $("patroStatus").textContent=DB.mesas.length?`${DB.mesas.length} mesas \u00b7 ${fixos} fixos \u00b7 ${rodam} rodando`:"Nenhuma mesa ainda";
+  $("mesasCards").innerHTML=DB.mesas.map((m,t)=>{
+    const meus=anf.filter(x=>x.mesa===t);
+    const linhas=meus.map(x=>`<div class="anf-linha"><span class="nome-clic" data-pid="${x.id}" title="Clique para ver as opções">${esc(x.nome)}</span>
+      <select data-sit="${x.id}"><option value="fixo"${x.situacao==="fixo"?" selected":""}>Fixo</option><option value="roda"${x.situacao==="roda"?" selected":""}>Roda</option><option value="fora"${x.situacao==="fora"?" selected":""}>Fora</option></select>
+      <button data-desvinc="${x.id}" title="Tirar desta mesa">\u00d7</button></div>`).join("")||'<p class="vazio">Sem anfitri\u00e3o ainda.</p>';
+    return `<article class="mesa-card">
+      <header><input data-nome="${t}" value="${esc(m)}" aria-label="Nome do patrocinador"><small>Mesa ${t+1}</small><button data-rmmesa="${t}" title="Remover mesa">\u00d7</button></header>
+      ${linhas}
+      <div class="anf-add"><input data-novo="${t}" list="listaAnf" placeholder="Buscar anfitri\u00e3o cadastrado" aria-label="Buscar anfitri\u00e3o" autocomplete="off"><button class="btn" data-addanf="${t}">Vincular</button></div>
+    </article>`;
+  }).join("")||'<p class="anf-vazio">Cadastre os patrocinadores na caixa acima.</p>';
+  $("listaAnf").innerHTML=anf.map(x=>`<option value="${esc(x.nome)}">${x.mesa===null?"sem empresa":esc(DB.mesas[x.mesa])}</option>`).join("");
+}
+// mini menu ao clicar no nome de uma pessoa
+function abrirMenuPessoa(el){
+  const pes=DB.pessoas.find(x=>x.id===el.dataset.pid);if(!pes)return;
+  const m=$("menuPessoa"),anf=pes.papel!=="convidado";
+  const empresa=typeof pes.mesa==="number"?DB.mesas[pes.mesa]:null;
+  const sit=pes.situacao==="roda"?"roda entre as mesas":pes.situacao==="fixo"?"fixa na mesa":"fora das rodadas";
+  m.setAttribute("role","menu");m.removeAttribute("aria-label");
+  m.innerHTML=`<div class="cab"><b>${esc(pes.nome)}</b><small>${anf?"Anfitrião":"Convidado"}${empresa?" · "+esc(empresa):""} · ${sit}</small></div>`+
+    `<button data-acao="editar" data-id="${pes.id}">Editar nome</button>`+
+    (pes.situacao==="roda"
+      ? `<button data-acao="rota" data-id="${pes.id}">Ver rota do ${anf?"anfitrião":"convidado"}</button>`
+      : pes.situacao==="fixo"&&empresa
+        ? `<button data-acao="mesa" data-id="${pes.id}">Ver a mesa ${esc(empresa)}</button>`
+        : `<button disabled>Sem rota: está ${sit}</button>`);
+  m.classList.add("on");
+  const r=el.getBoundingClientRect();
+  m.style.left=Math.min(r.left,innerWidth-m.offsetWidth-12)+"px";
+  m.style.top=Math.min(r.bottom+6,innerHeight-m.offsetHeight-12)+"px";
+}
+function abrirEditorNome(pes){
+  const m=$("menuPessoa"),tipo=pes.papel==="convidado"?"convidado":"anfitrião";
+  m.setAttribute("role","dialog");m.setAttribute("aria-label",`Editar nome do ${tipo}`);
+  m.innerHTML=`<div class="cab"><b>Editar nome</b><small>O papel, a mesa e a rota não serão alterados.</small></div>
+    <div class="editar-nome">
+      <label for="editarNomePessoa">Nome do ${tipo}</label>
+      <input id="editarNomePessoa" value="${esc(pes.nome)}" maxlength="120" autocomplete="off">
+      <p class="menu-erro" id="erroEditarNome" aria-live="polite"></p>
+      <div class="menu-acoes"><button type="button" data-acao="cancelar">Cancelar</button><button type="button" class="salvar" data-acao="salvar-nome" data-id="${pes.id}">Salvar nome</button></div>
+    </div>`;
+  requestAnimationFrame(()=>{const campo=$("editarNomePessoa");campo.focus();campo.select();
+    const r=m.getBoundingClientRect();m.style.left=Math.max(12,Math.min(r.left,innerWidth-r.width-12))+"px";m.style.top=Math.max(12,Math.min(r.top,innerHeight-r.height-12))+"px"});
+}
+function salvarNomePessoa(id){
+  const pes=DB.pessoas.find(x=>x.id===id),campo=$("editarNomePessoa"),erro=$("erroEditarNome");if(!pes||!campo)return;
+  const nome=campo.value.trim().replace(/\s+/g," ");
+  if(!nome){erro.textContent="Digite o nome da pessoa.";campo.focus();return}
+  if(DB.pessoas.some(x=>x.id!==id&&norm(x.nome)===norm(nome))){erro.textContent="Já existe uma pessoa cadastrada com esse nome.";campo.focus();campo.select();return}
+  pes.nome=nome;salvarDB();fecharMenuPessoa();run();
+}
+function fecharMenuPessoa(){const m=$("menuPessoa");m.classList.remove("on");m.setAttribute("role","menu");m.removeAttribute("aria-label")}
+document.addEventListener("click",e=>{
+  const alvo=e.target.closest&&e.target.closest(".nome-clic");
+  if(alvo){e.stopPropagation();abrirMenuPessoa(alvo);return}
+  if(!e.target.closest||!e.target.closest("#menuPessoa"))fecharMenuPessoa();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")fecharMenuPessoa()});
+$("menuPessoa").addEventListener("click",e=>{
+  e.stopPropagation();
+  const botao=e.target.closest&&e.target.closest("button[data-acao]");if(!botao)return;
+  const acao=botao.dataset.acao;
+  if(acao==="cancelar"){fecharMenuPessoa();return}
+  const pes=DB.pessoas.find(x=>x.id===botao.dataset.id);if(!pes)return;
+  if(acao==="editar"){abrirEditorNome(pes);return}
+  if(acao==="salvar-nome"){salvarNomePessoa(pes.id);return}
+  fecharMenuPessoa();
+  if(acao==="rota"){
+    $("tab-part").click();
+    const b=$("searchPart");b.value=pes.nome;b.dispatchEvent(new Event("input"));
+    $("panel-part").scrollIntoView({behavior:"smooth",block:"start"});
+  }else{
+    $("tab-mesas").click();
+    const cartoes=[...document.querySelectorAll(".table-card")];
+    const alvo=cartoes.find(c=>c.querySelector(".table-number").textContent.trim()===DB.mesas[pes.mesa]);
+    if(alvo)alvo.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+});
+$("menuPessoa").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.id==="editarNomePessoa"){
+    e.preventDefault();const b=$("menuPessoa").querySelector('[data-acao="salvar-nome"]');if(b)b.click();
+  }
+});
+
+function renderAnfLista(){
+  const anf=DB.pessoas.filter(x=>x.papel!=="convidado");
+  $("anfLista").innerHTML=anf.length?
+    `<p class="hint" style="margin:0 0 6px">${anf.length} anfitrião(ões) cadastrado(s)</p>`+
+    anf.map(x=>`<div class="anf-linha"><span class="nome-clic" data-pid="${x.id}" title="Clique para ver as opções">${esc(x.nome)}</span>
+      <select data-emp="${x.id}" style="max-width:190px"><option value=""${x.mesa===null?" selected":""}>sem empresa</option>${DB.mesas.map((m,k)=>`<option value="${k}"${x.mesa===k?" selected":""}>${esc(m)}</option>`).join("")}</select>
+      <select data-sit="${x.id}"><option value="fixo"${x.situacao==="fixo"?" selected":""}>Fixo</option><option value="roda"${x.situacao==="roda"?" selected":""}>Roda</option><option value="fora"${x.situacao==="fora"?" selected":""}>Fora</option></select>
+      <button data-rmp="${x.id}" title="Remover">×</button></div>`).join("")
+    :'<p class="anf-vazio" style="padding:0">Nenhum anfitrião cadastrado ainda.</p>';
+}
+// os mesmos botões e seletores valem para a lista do bloco Anfitriões
+["mesasCards","anfLista"].forEach(id=>{
+  $(id).addEventListener("click",e=>{
+    const d=e.target.dataset||{};
+    if(d.rmp){DB.pessoas=DB.pessoas.filter(x=>x.id!==d.rmp);salvarDB();run()}
+  });
+  $(id).addEventListener("change",e=>{
+    const d=e.target.dataset||{};
+    if(d.sit){const pes=DB.pessoas.find(x=>x.id===d.sit);if(pes){pes.situacao=e.target.value;salvarDB();run()}return}
+    if(d.emp){const pes=DB.pessoas.find(x=>x.id===d.emp);if(pes){pes.mesa=e.target.value===""?null:+e.target.value;salvarDB();run()}}
+  });
+});
+$("mesasCards").addEventListener("click",e=>{
+  const d=e.target.dataset||{};
+  if(d.desvinc){                                   // sai da mesa, mas continua cadastrado
+    const pes=DB.pessoas.find(x=>x.id===d.desvinc);
+    if(pes){pes.mesa=null;salvarDB();run();$("patroStatus").textContent=`${pes.nome} agora está sem empresa`}
+    return;
+  }
+  if(d.addanf!==undefined){
+    const campo=document.querySelector(`[data-novo="${d.addanf}"]`),nome=campo.value.trim();
+    if(!nome)return;
+    const pes=DB.pessoas.find(x=>x.papel!=="convidado"&&norm(x.nome)===norm(nome))
+      ||DB.pessoas.find(x=>x.papel!=="convidado"&&norm(x.nome).includes(norm(nome)));
+    if(!pes){$("patroStatus").textContent=`"${nome}" ainda não está cadastrado. Adicione na caixa Anfitriões acima.`;return}
+    pes.mesa=+d.addanf;campo.value="";salvarDB();run();
+    $("patroStatus").textContent=`${pes.nome} vinculado a ${DB.mesas[+d.addanf]}`;
+    const foco=document.querySelector(`[data-novo="${d.addanf}"]`);if(foco)foco.focus();
+    return;
+  }
+  if(d.rmmesa!==undefined){
+    const k=+d.rmmesa;DB.mesas.splice(k,1);
+    DB.pessoas.forEach(x=>{if(x.mesa===k)x.mesa=null;else if(typeof x.mesa==="number"&&x.mesa>k)x.mesa--});
+    salvarDB();run();
+  }
+});
+$("mesasCards").addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||e.target.dataset.novo===undefined)return;
+  e.preventDefault();document.querySelector(`[data-addanf="${e.target.dataset.novo}"]`).click();
+});
+$("mesasCards").addEventListener("change",e=>{
+  const d=e.target.dataset||{};
+  if(d.nome!==undefined){const nome=e.target.value.trim();if(nome){DB.mesas[+d.nome]=nome;salvarDB();run()}}
+});
+
+function renderMesasLista(){
+  const anf=DB.pessoas.filter(x=>x.papel!=="convidado");
+  $("mesasLista").innerHTML=DB.mesas.map((m,t)=>{
+    const daMesa=anf.filter(x=>x.mesa===t);
+    const itens=anf.length?anf.map(x=>{
+      const outra=x.mesa!==null&&x.mesa!==t?DB.mesas[x.mesa]:"";
+      return `<label><input type="checkbox" data-vinc="${x.id}" data-mesa="${t}"${x.mesa===t?" checked":""}><span>${esc(x.nome)}</span><small>${x.situacao==="roda"?"roda":x.situacao==="fora"?"fora":"fixo"}${outra?" \u00b7 "+esc(outra):""}</small></label>`;
+    }).join(""):'<p class="anf-vazio">Nenhum anfitri\u00e3o cadastrado ainda. Cole os nomes na caixa ao lado.</p>';
+    return `<details class="mesa-item"${mesasAbertas.has(t)?" open":""} data-mesa="${t}"><summary><b>Mesa ${t+1}</b> \u00b7 ${esc(m)}<span class="qtd">${daMesa.length?daMesa.length+" anfitri\u00e3o"+(daMesa.length>1?"es":""):"sem anfitri\u00e3o"}</span><button class="rm" data-rmmesa="${t}" title="Remover mesa">\u00d7</button></summary><div class="anf-lista">${itens}</div></details>`;
+  }).join("")||'<p class="anf-vazio">Nenhuma mesa cadastrada.</p>';
+}
+$("mesasLista").addEventListener("toggle",e=>{const d=e.target;if(d.dataset&&d.dataset.mesa!==undefined){d.open?mesasAbertas.add(+d.dataset.mesa):mesasAbertas.delete(+d.dataset.mesa)}},true);
+$("mesasLista").addEventListener("change",e=>{
+  const id=e.target.dataset.vinc;if(!id)return;
+  const pes=DB.pessoas.find(x=>x.id===id);if(!pes)return;
+  pes.mesa=e.target.checked?+e.target.dataset.mesa:null;
+  if(e.target.checked&&pes.situacao!=="roda"&&pes.situacao!=="fora")pes.situacao="fixo";
+  salvarDB();run();
+});
+$("mesasLista").addEventListener("click",e=>{
+  const t=e.target.dataset&&e.target.dataset.rmmesa;if(t===undefined)return;
+  e.preventDefault();const k=+t;
+  DB.mesas.splice(k,1);
+  DB.pessoas.forEach(x=>{if(x.mesa===k)x.mesa=null;else if(typeof x.mesa==="number"&&x.mesa>k)x.mesa--});
+  salvarDB();run();
+});
+document.querySelectorAll("[data-add]").forEach(b=>b.addEventListener("click",()=>importar(b.dataset.add)));
+$("pplSearch").addEventListener("input",renderPessoas);
+$("pplFiltro").addEventListener("change",renderPessoas);
+$("pplTabela").addEventListener("change",e=>{
+  const sel=e.target;if(!sel.dataset.campo)return;
+  const id=sel.closest("tr").dataset.id,pes=DB.pessoas.find(x=>x.id===id);if(!pes)return;
+  pes[sel.dataset.campo]=sel.value;
+  if(pes.situacao==="fixo"&&pes.mesa===null)$("pplStatus").textContent="Escolha a mesa de "+pes.nome;
+  salvarDB();run();
+});
+$("pplTabela").addEventListener("click",e=>{
+  const id=e.target.dataset&&e.target.dataset.rm;if(!id)return;
+  DB.pessoas=DB.pessoas.filter(x=>x.id!==id);salvarDB();run();
+});
+$("pplLimpar").addEventListener("click",()=>{
+  if(!DB.pessoas.length&&!DB.mesas.length)return;
+  $("pplStatus").textContent="Clique de novo em Limpar tudo para confirmar";
+  if($("pplLimpar").dataset.armado){DB={mesas:[],pessoas:[]};salvarDB();delete $("pplLimpar").dataset.armado;$("pplStatus").textContent="Cadastro apagado";run()}
+  else $("pplLimpar").dataset.armado="1";
+});
+run();
+})();
+</script>
+</body>
+</html>

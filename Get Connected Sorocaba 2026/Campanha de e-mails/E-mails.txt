@@ -1,0 +1,93 @@
+Semana 1 
+28/08 - já feito
+31/08 (seg)02Networking sem acaso: não é troca aleatória de cartões
+02/09 (qua)03As pessoas certas: empresários, líderes e empresas complementares
+04/09 (sex)04Seis razões para participar  
+Semana 2
+07/09 (seg)05Negócios começam em uma boa conversa
+09/09 (qua)06Conteúdo que aproxima e abre novas oportunidades
+11/09 (sex)07Veja como acontece: fotos e experiência presencial  
+Semana 3
+14/09 (seg)08Quem você pode encontrar no evento
+16/09 (qua)09É para você? Perfil ideal de participante
+18/09 (sex)10Como aproveitar melhor o Get Connected  
+Semana 4
+21/09 (seg)11Falta pouco: reforço de data, local e vagas
+23/09 (qua)12Reta final: consultar disponibilidade e lote vigente
+25/09 (sex)13É hoje: lembrete final e informações do encontro
+
+Semana 1
+31/08 — E-mail 02: Networking sem acaso
+Assunto: Networking não precisa depender da sorte
+Assunto alternativo: E se suas próximas conexões fossem mais intencionais?
+Preheader: No Get Connected, cada conversa é pensada para aproximar pessoas e empresas com potencial de construir algo juntas.
+Corpo:
+Olá, {{contact.first_name}}!
+Você provavelmente já participou de um evento, conversou com muitas pessoas e voltou para casa com vários contatos.
+Mas quantas dessas conversas realmente continuaram?
+Quantas viraram uma reunião, uma indicação, uma parceria ou uma oportunidade concreta?
+O problema não é conhecer pouca gente. Muitas vezes, o problema é depender do acaso para encontrar alguém que tenha relação com o seu momento, com os desafios da sua empresa ou com aquilo que você pode oferecer.
+O Get Connected Sorocaba foi criado para proporcionar uma experiência diferente.
+Aqui, networking não significa circular por uma sala distribuindo cartões. A proposta é criar um ambiente em que empresários e líderes possam conversar com mais intenção, contexto e abertura para construir relações profissionais relevantes.
+A dinâmica guiada ajuda a reduzir a barreira do primeiro contato e aproxima empresas que podem ser complementares. Em vez de apenas perguntar “o que você faz?”, a conversa pode avançar para perguntas mais importantes:
+- Que desafios sua empresa está enfrentando?
+- Que tipo de parceria pode acelerar seus resultados?
+- Quem você precisa conhecer para dar o próximo passo?
+- Como duas empresas podem gerar valor juntas?
+É nesse espaço de confiança e troca que uma conversa deixa de ser apenas uma apresentação e começa a se transformar em oportunidade.
+No dia 25 de setembro, o Espaço Franclei, em Sorocaba, vai receber empresários que acreditam que bons negócios começam com proximidade, escuta e relacionamento.
+Se você também acredita nisso, o seu lugar pode estar nessa conversa.
+CTA: Quero participar do Get Connected
+Link: Página de inscrição na Sympla
+02/09 — E-mail 03: As pessoas certas
+Assunto: Você não precisa conhecer mais pessoas. Precisa conhecer as pessoas certas.
+Assunto alternativo: O valor de estar perto de quem faz acontecer
+Preheader: Empresários, líderes e empresas complementares reunidos em um ambiente preparado para conexões estratégicas.
+Corpo:
+Olá, {{contact.first_name}}!
+Uma única conversa com a pessoa certa pode economizar meses de tentativas.
+Pode apresentar um novo cliente, revelar um fornecedor melhor, abrir uma parceria, gerar uma indicação ou mostrar uma solução que ainda não estava no seu radar.
+Por isso, o valor de um evento de networking não está apenas no número de participantes. Está na qualidade do ambiente, na disposição das pessoas para conversar e na possibilidade de encontrar empresas e profissionais que façam sentido para o seu negócio.
+O Get Connected Sorocaba reúne uma comunidade empresarial interessada em crescimento, colaboração e oportunidades reais.
+É um encontro pensado para quem:
+- lidera uma empresa e participa das decisões;
+- busca parceiros, clientes ou fornecedores estratégicos;
+- possui soluções que podem complementar outros negócios;
+- valoriza relações profissionais construídas com confiança;
+- quer ampliar sua visão por meio da experiência de outros empresários.
+Você pode encontrar alguém que já enfrentou o desafio que sua empresa vive hoje.
+Pode conversar com uma empresa que precisa exatamente da solução que você oferece.
+Pode descobrir que aquele contato que parecia pertencer a outro mercado, na verdade, pode abrir uma oportunidade que você ainda não havia considerado.
+Essas conexões não podem ser garantidas ou previstas com antecedência. Mas é possível criar o ambiente certo para que elas aconteçam.
+E é exatamente essa a proposta do Get Connected: reunir pessoas dispostas a ouvir, compartilhar experiências, identificar pontos de conexão e continuar a conversa depois do primeiro encontro.
+No dia 25 de setembro, em Sorocaba, você terá a oportunidade de estar em um ambiente onde relacionamentos profissionais são tratados como parte essencial do crescimento de uma empresa.
+Talvez a próxima pessoa importante para o seu negócio ainda não saiba quem você é.
+Essa pode ser a oportunidade de mudar isso.
+CTA: Garantir minha vaga
+Link: Página de inscrição na Sympla
+04/09 — E-mail 04: Seis razões para participar
+Assunto: 6 razões para colocar o Get Connected na sua agenda
+Assunto alternativo: Por que empresários estarão no Get Connected Sorocaba?
+Preheader: Negócios, conexões estratégicas, conteúdo e uma experiência que continua depois do evento.
+Corpo:
+Olá, {{contact.first_name}}!
+No dia 25 de setembro, o Get Connected chega a Sorocaba com uma proposta clara: criar um ambiente em que conexões profissionais possam se transformar em parcerias, oportunidades e resultados.
+Se você ainda está avaliando se o encontro faz sentido para o seu momento, reunimos seis razões para participar.
+1. Oportunidades reais de negócios e parcerias
+A dinâmica é pensada para aproximar empresas complementares. Uma conversa pode revelar necessidades, soluções e possibilidades de colaboração que dificilmente apareceriam na rotina do dia a dia.
+2. Conexões estratégicas e qualificadas
+Mais importante do que conversar com muitas pessoas é encontrar quem tenha relação com os objetivos, desafios ou oportunidades da sua empresa.
+3. Ambiente de confiança, colaboração e troca
+Boas relações profissionais precisam de abertura para ouvir e compartilhar. O evento cria espaço para conversas mais humanas, transparentes e produtivas.
+4. Acesso a empresários que pensam grande e agem rápido
+Estar próximo de líderes e pessoas que participam das decisões amplia repertório, acelera aprendizados e pode abrir novos caminhos para o seu negócio.
+5. Uma experiência que começa antes e continua depois
+O encontro presencial é um ponto importante da jornada, mas o relacionamento não precisa terminar quando o evento acaba. O objetivo é incentivar conexões que possam continuar e amadurecer.
+6. Networking guiado, não uma troca aleatória de cartões
+Você não precisa depender apenas da sorte ou da iniciativa de abordar desconhecidos. A proposta é favorecer encontros mais intencionais, com contexto e propósito.
+O Get Connected Sorocaba é para quem entende que uma rede forte não é construída pelo tamanho da lista de contatos, mas pela qualidade das relações que desenvolvemos.
+Data: 25 de setembro de 2026
+Local: Espaço Franclei — Rua Nelson de Gennaro, 128, Sorocaba/SP
+As vagas e os lotes são limitados. Consulte a disponibilidade atual na página de inscrição.
+CTA: Ver detalhes e garantir meu ingresso
+Link: Página de inscrição na Sympla
