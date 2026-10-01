@@ -376,7 +376,7 @@ function ChaosToContext() {
 
   return (
     <section ref={ref} className="relative h-[240vh] border-b border-border bg-[#f4efe6]">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+      <div className="sticky top-[72px] flex h-[calc(100vh-72px)] items-center overflow-hidden">
         <div className="absolute inset-0">
           <svg className="h-full w-full text-[#ded7cb]" viewBox="0 0 1400 900" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 155 H1400 M0 745 H1400 M245 0 V900 M1155 0 V900" fill="none" stroke="currentColor" strokeWidth="1" />
@@ -594,22 +594,52 @@ function ProductStory() {
   });
 
   useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    const next = Math.min(chapters.length - 1, Math.floor(value * chapters.length));
-    setActive(next);
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      const next = Math.min(chapters.length - 1, Math.floor(value * chapters.length));
+      setActive(next);
+    }
   });
 
   const progress = useSpring(scrollYProgress, { stiffness: 85, damping: 24, mass: 0.3 });
 
   return (
-    <section id="produto" ref={ref} className="relative h-[470vh] bg-background">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+    <section id="produto" ref={ref} className="relative bg-background lg:h-[470vh]">
+      <div className="px-5 py-24 sm:px-8 lg:hidden">
+        <SectionKicker number="03">Por dentro do Mesa Certa</SectionKicker>
+        <div className="space-y-20">
+          {chapters.map((item, index) => (
+            <motion.article
+              key={item.id}
+              initial={{ opacity: 0, y: 26 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.16 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="text-[9px] uppercase tracking-[0.18em] text-primary">{item.eyebrow}</div>
+              <h2 className="mt-4 font-display text-[37px] leading-[1.02] tracking-[-0.02em] sm:text-[46px]">{item.title}</h2>
+              <p className="mt-5 text-[13px] leading-6 text-muted-foreground">{item.body}</p>
+              <div className="relative mt-7 min-h-[390px] overflow-hidden border border-[#bcb4a6] bg-[#fffdf9]">
+                <div className="absolute inset-x-0 top-0 z-10 flex h-10 items-center justify-between border-b border-border bg-[#fffdf9] px-4 text-[8px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <span>0{index + 1}</span>
+                  <span>Get Connected Sorocaba</span>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 top-10">
+                  <ChapterVisual id={item.id} />
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden lg:sticky lg:top-[72px] lg:flex lg:h-[calc(100vh-72px)] lg:items-center lg:overflow-hidden">
         <motion.div style={{ scaleX: progress }} className="absolute left-0 top-0 h-[2px] w-full origin-left bg-primary" />
 
-        <div className="mx-auto grid w-full max-w-[1240px] gap-9 px-5 sm:px-8 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
+        <div className="mx-auto grid w-full max-w-[1240px] gap-16 px-8 lg:grid-cols-[.8fr_1.2fr]">
           <div className="self-center">
             <SectionKicker number="03">Por dentro do Mesa Certa</SectionKicker>
 
-            <div className="hidden border-t border-border lg:block">
+            <div className="border-t border-border">
               {chapters.map((item, index) => (
                 <div key={item.id} className={'grid grid-cols-[42px_1fr] border-b border-border py-3.5 text-[11px] transition-colors duration-500 ' + (index === active ? 'text-primary' : 'text-muted-foreground')}>
                   <span className="tnum">0{index + 1}</span>
@@ -618,7 +648,7 @@ function ProductStory() {
               ))}
             </div>
 
-            <div className="mt-8 min-h-[290px] lg:mt-10">
+            <div className="mt-10 min-h-[290px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={chapters[active].id}
@@ -628,20 +658,18 @@ function ProductStory() {
                   transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <div className="text-[9px] uppercase tracking-[0.18em] text-primary">{chapters[active].eyebrow}</div>
-                  <h2 className="mt-4 max-w-[590px] font-display text-[36px] leading-[1.02] tracking-[-0.02em] sm:text-[46px] lg:text-[54px]">
+                  <h2 className="mt-4 max-w-[590px] font-display text-[54px] leading-[1.02] tracking-[-0.02em]">
                     {chapters[active].title}
                   </h2>
-                  <p className="mt-5 max-w-[500px] text-[13px] leading-6 text-muted-foreground sm:text-[14px] sm:leading-7">
-                    {chapters[active].body}
-                  </p>
+                  <p className="mt-5 max-w-[500px] text-[14px] leading-7 text-muted-foreground">{chapters[active].body}</p>
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
 
           <div className="self-center">
-            <div className="relative min-h-[430px] border border-[#bcb4a6] bg-[#fffdf9] shadow-[18px_24px_0_rgba(31,77,70,0.06)] sm:min-h-[500px]">
-              <div className="absolute inset-x-0 top-0 z-10 flex h-11 items-center justify-between border-b border-border bg-[#fffdf9] px-4 text-[8px] uppercase tracking-[0.16em] text-muted-foreground sm:px-6">
+            <div className="relative min-h-[500px] border border-[#bcb4a6] bg-[#fffdf9] shadow-[18px_24px_0_rgba(31,77,70,0.06)]">
+              <div className="absolute inset-x-0 top-0 z-10 flex h-11 items-center justify-between border-b border-border bg-[#fffdf9] px-6 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">
                 <span>{chapters[active].eyebrow}</span>
                 <span>Evento · Get Connected Sorocaba</span>
               </div>
@@ -680,23 +708,93 @@ function NetworkingStory() {
   });
 
   useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    setRound(Math.min(2, Math.floor(value * 3)));
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setRound(Math.min(2, Math.floor(value * 3)));
+    }
   });
 
+  const TableStage = ({ compact = false }) => (
+    <div className={'relative border border-[#42665f] bg-[#12322d] ' + (compact ? 'min-h-[410px]' : 'min-h-[520px]')}>
+      <div className="absolute inset-x-5 top-5 z-20 flex items-center justify-between border-b border-[#42665f] pb-4 text-[9px] uppercase tracking-[0.16em] text-[#9db9b2] sm:inset-x-7">
+        <span>Rodada 0{round + 1}</span>
+        <span>Mesa 04 · NETTOP</span>
+      </div>
+
+      <div className="absolute left-1/2 top-1/2 flex h-36 w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-[#80a99f] sm:h-40 sm:w-44">
+        <span className="text-[9px] uppercase tracking-[0.16em] text-[#9db9b2]">Mesa 04</span>
+        <strong className="mt-2 font-display text-[24px] font-normal">NETTOP</strong>
+        <span className="mt-3 text-[8px] uppercase tracking-[0.12em] text-[#71938b]">6 / 7 lugares</span>
+      </div>
+
+      {networkingRounds[round].map((person) => (
+        <motion.div
+          key={person.name}
+          animate={{ left: person.left, top: person.top }}
+          transition={{ type: 'spring', stiffness: 85, damping: 18, mass: 0.65 }}
+          className={'absolute z-10 flex h-11 w-[78px] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-[#12322d] text-[9px] sm:w-[100px] ' + (person.name === 'Renan' ? 'border-2 border-[#b5d2cb]' : 'border border-[#4d746c]')}
+        >
+          {person.name}
+        </motion.div>
+      ))}
+
+      <div className="absolute bottom-5 left-5 right-5 flex gap-2">
+        {[0, 1, 2].map((index) => (
+          <div key={index} className={'h-[2px] flex-1 transition-colors duration-500 ' + (index <= round ? 'bg-[#a9c9c1]' : 'bg-[#315a52]')} />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <section id="networking" ref={ref} className="relative h-[260vh] bg-[#163b35] text-[#edf5f2]">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+    <section id="networking" ref={ref} className="relative bg-[#163b35] text-[#edf5f2] lg:h-[260vh]">
+      <div className="relative px-5 py-24 sm:px-8 lg:hidden">
+        <SectionKicker number="04" light>Networking que existe no espaço</SectionKicker>
+        <h2 className="font-display text-[43px] leading-[0.98] tracking-[-0.025em] sm:text-[56px]">
+          Você vê a rodada mudar. Não só uma lista atualizar.
+        </h2>
+        <p className="mt-6 text-[13px] leading-6 text-[#bad0ca]">
+          Mesa, assento, anfitrião e movimento fazem parte da operação. Por isso a interface não transforma uma rodada de negócios em uma lista abstrata.
+        </p>
+
+        <div className="mt-7 flex gap-2">
+          {[0, 1, 2].map((index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setRound(index)}
+              className={'flex-1 border px-3 py-2 text-[9px] uppercase tracking-[0.13em] transition-colors ' + (round === index ? 'border-[#b5d2cb] bg-[#204b44] text-white' : 'border-[#42665f] text-[#9db9b2]')}
+            >
+              Rodada 0{index + 1}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-5">
+          <TableStage compact />
+        </div>
+
+        <div className="mt-8 grid grid-cols-3 border-y border-[#42665f] py-5">
+          {[['76', 'convidados'], ['14', 'mesas'], ['14', 'rodadas']].map(([value, label]) => (
+            <div key={label}>
+              <div className="tnum text-[23px]">{value}</div>
+              <div className="mt-1 text-[8px] uppercase tracking-[0.13em] text-[#9db9b2]">{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden lg:sticky lg:top-[72px] lg:flex lg:h-[calc(100vh-72px)] lg:items-center lg:overflow-hidden">
         <svg className="absolute inset-0 h-full w-full text-[#264e47]" viewBox="0 0 1400 900" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 190 H1400 M0 710 H1400 M235 0 V900 M1165 0 V900" fill="none" stroke="currentColor" strokeWidth="1" />
         </svg>
 
-        <div className="relative z-10 mx-auto grid w-full max-w-[1240px] gap-12 px-5 sm:px-8 lg:grid-cols-[.72fr_1.28fr] lg:items-center lg:gap-20">
+        <div className="relative z-10 mx-auto grid w-full max-w-[1240px] grid-cols-[.72fr_1.28fr] items-center gap-20 px-8">
           <div>
             <SectionKicker number="04" light>Networking que existe no espaço</SectionKicker>
-            <h2 className="font-display text-[42px] leading-[0.98] tracking-[-0.025em] sm:text-[58px] lg:text-[66px]">
+            <h2 className="font-display text-[66px] leading-[0.98] tracking-[-0.025em]">
               Você vê a rodada mudar. Não só uma lista atualizar.
             </h2>
-            <p className="mt-6 max-w-[500px] text-[13px] leading-6 text-[#bad0ca] sm:text-[14px] sm:leading-7">
+            <p className="mt-6 max-w-[500px] text-[14px] leading-7 text-[#bad0ca]">
               O módulo nasceu de uma operação real de networking. Por isso a interface trata mesa, assento, anfitrião e movimento como parte do problema — não como detalhe decorativo.
             </p>
 
@@ -715,35 +813,7 @@ function NetworkingStory() {
           </div>
 
           <div>
-            <div className="relative min-h-[440px] border border-[#42665f] bg-[#12322d] sm:min-h-[520px]">
-              <div className="absolute inset-x-5 top-5 z-20 flex items-center justify-between border-b border-[#42665f] pb-4 text-[9px] uppercase tracking-[0.16em] text-[#9db9b2] sm:inset-x-7">
-                <span>Rodada 0{round + 1}</span>
-                <span>Mesa 04 · NETTOP</span>
-              </div>
-
-              <div className="absolute left-1/2 top-1/2 flex h-36 w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-[#80a99f] sm:h-40 sm:w-44">
-                <span className="text-[9px] uppercase tracking-[0.16em] text-[#9db9b2]">Mesa 04</span>
-                <strong className="mt-2 font-display text-[24px] font-normal">NETTOP</strong>
-                <span className="mt-3 text-[8px] uppercase tracking-[0.12em] text-[#71938b]">6 / 7 lugares</span>
-              </div>
-
-              {networkingRounds[round].map((person) => (
-                <motion.div
-                  key={person.name}
-                  animate={{ left: person.left, top: person.top }}
-                  transition={{ type: 'spring', stiffness: 85, damping: 18, mass: 0.65 }}
-                  className={'absolute z-10 flex h-11 w-[84px] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-[#12322d] text-[9px] sm:w-[100px] ' + (person.name === 'Renan' ? 'border-2 border-[#b5d2cb]' : 'border border-[#4d746c]')}
-                >
-                  {person.name}
-                </motion.div>
-              ))}
-
-              <div className="absolute bottom-5 left-5 right-5 flex gap-2">
-                {[0, 1, 2].map((index) => (
-                  <div key={index} className={'h-[2px] flex-1 transition-colors duration-500 ' + (index <= round ? 'bg-[#a9c9c1]' : 'bg-[#315a52]')} />
-                ))}
-              </div>
-            </div>
+            <TableStage />
             <div className="mt-4 flex justify-between text-[8px] uppercase tracking-[0.15em] text-[#73928b]">
               <span>Continue rolando</span>
               <span>A composição muda com a rodada</span>
