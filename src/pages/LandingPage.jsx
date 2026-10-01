@@ -109,6 +109,8 @@ const networkingRounds = [
   ],
 ];
 
+let activeScrollFrame = null;
+
 function easeInOutQuint(t) {
   return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
 }
@@ -120,6 +122,11 @@ function scrollToSection(id, reduceMotion) {
   const offset = 72;
   const from = window.scrollY;
   const to = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+
+  if (activeScrollFrame) {
+    window.cancelAnimationFrame(activeScrollFrame);
+    activeScrollFrame = null;
+  }
 
   if (reduceMotion) {
     window.scrollTo(0, to);
@@ -135,10 +142,14 @@ function scrollToSection(id, reduceMotion) {
     const elapsed = time - startedAt;
     const progress = Math.min(1, elapsed / duration);
     window.scrollTo(0, from + distance * easeInOutQuint(progress));
-    if (progress < 1) window.requestAnimationFrame(frame);
+    if (progress < 1) {
+      activeScrollFrame = window.requestAnimationFrame(frame);
+    } else {
+      activeScrollFrame = null;
+    }
   };
 
-  window.requestAnimationFrame(frame);
+  activeScrollFrame = window.requestAnimationFrame(frame);
 }
 
 function NavButton({ target, children, reduceMotion, className = '' }) {
@@ -196,6 +207,7 @@ function HeroLines({ reduceMotion }) {
 
 function HeroProduct() {
   const [event, setEvent] = useState(0);
+  const reduceMotion = useReducedMotion();
   const events = [
     {
       name: 'Get Connected Sorocaba',
@@ -216,9 +228,10 @@ function HeroProduct() {
   ];
 
   useEffect(() => {
+    if (reduceMotion) return undefined;
     const timer = window.setInterval(() => setEvent((current) => (current + 1) % events.length), 5000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [reduceMotion, events.length]);
 
   const current = events[event];
 
@@ -1169,14 +1182,18 @@ function LandingPage() {
               </p>
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
-                <Link to="/login" className="group inline-flex items-center gap-3 border border-[#86a9a0] px-5 py-3 text-[12px] text-[#edf3f0] transition-colors hover:border-[#bfd1cc]">
-                  Entrar na plataforma
+                <Link to="/register" className="group inline-flex items-center gap-3 border border-[#86a9a0] bg-[#edf3f0] px-5 py-3 text-[12px] text-[#111918] transition-colors hover:bg-white">
+                  Criar conta para explorar
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+                <Link to="/login" className="px-3 py-3 text-[11px] text-[#a9bdb7] transition-colors hover:text-white">
+                  Já tenho conta
                 </Link>
                 <button type="button" onClick={() => scrollToSection('top', reduceMotion)} className="px-3 py-3 text-[11px] text-[#8fa7a1]">
                   Voltar ao início
                 </button>
               </div>
+              <p className="mt-4 text-[9px] uppercase tracking-[0.14em] text-[#66817a]">Criar cadastro não inicia cobrança.</p>
             </div>
           </div>
         </section>
