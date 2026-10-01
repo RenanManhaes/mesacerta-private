@@ -149,16 +149,21 @@ direto em `memberships` para a policy funcionar.
 `organizations` e `memberships` têm regras um pouco diferentes por serem a
 raiz da árvore:
 
-- **Criar organização**: qualquer usuário autenticado pode (`with check
-  (true)` em `organizations_insert`) — vira dono ao criar, na sequência, sua
-  própria `membership` com `role = 'owner'`.
-- **Bootstrapping de `memberships`**: a primeira membership de uma
-  organização (quando ainda não existe nenhuma) pode ser criada por qualquer
-  usuário autenticado — é assim que o criador da organização vira seu
-  primeiro membro. Depois disso, só `owner`/`admin` (`is_org_admin`) adiciona
-  novos membros. Sem essa regra de bootstrap, ninguém conseguiria nunca criar
-  a primeira membership de uma organização nova (a policy padrão exigiria já
-  ser admin de uma organização que ainda não tem nenhum membro — impossível).
+- **Criar organização**: só através da função `public.criar_organizacao(nome
+  text)`, `SECURITY DEFINER` (migration 7 — ver seção **"Vulnerabilidade
+  crítica corrigida"** abaixo para o porquê). `INSERT` direto em
+  `organizations` é **revogado** de `authenticated` (`REVOKE INSERT`); a
+  policy `organizations_insert` (`with check (true)`) continua registrada na
+  tabela mas é inatingível para esse role — sem o `GRANT INSERT`, a policy
+  nunca chega a ser avaliada. A função insere `organizations` e a
+  `membership` de `owner` (`auth.uid()`) num único `INSERT ... WITH ...`
+  (CTE), então as duas linhas nascem juntas ou nenhuma nasce.
+- **`memberships`**: `memberships_insert` é só `is_org_admin(organization_id)`
+  — **sem exceção de bootstrap**. Até 01/10/2026 havia uma segunda cláusula
+  (`or not exists (...)`) que abria a primeira membership de uma organização
+  para qualquer autenticado; era uma escalação de privilégio (ver seção
+  dedicada abaixo). O bootstrap não existe mais como regra de policy — foi
+  substituído por atomicidade na criação (função acima).
 - **Apagar/editar organização ou gerenciar membros**: exige `is_org_admin`
   (`owner` ou `admin`), não só `is_org_member`.
 
@@ -219,6 +224,215 @@ em todas as 21 tabelas depois da limpeza.
 
 ---
 
+## Vulnerabilidade crítica corrigida — escalação de privilégio em `memberships_insert`
+
+**Escrito em 01/10/2026 para quem for auditar este schema depois — não é
+changelog, é o raciocínio completo: o que quebrava, por que quebrava, o que
+foi trocado e como isso foi verificado.**
+
+### O defeito
+
+Entre a migration 2 (`core_tenancy`) e a migration 6, a policy
+`memberships_insert` era:
+
+```sql
+with check (
+  public.is_org_admin(organization_id)
+  or not exists (
+    select 1 from public.memberships m2 where m2.organization_id = memberships.organization_id
+  )
+)
+```
+
+A segunda cláusula era o "bootstrap": sem ela, ninguém conseguiria nunca
+criar a primeira membership de uma organização nova, porque a policy padrão
+exige já ser admin de uma organização que, por definição, ainda não tem
+nenhum membro — uma condição logicamente impossível de satisfazer na
+primeira vez. A intenção era: "se esta organização ainda não tem nenhum
+membro, deixa o primeiro autenticado que aparecer virar o dono".
+
+O defeito está em como "esta organização ainda não tem nenhum membro" foi
+expresso: como uma subquery (`select 1 from memberships m2 where ...`)
+rodando *dentro da mesma sessão do chamador* — e `memberships` tem RLS
+habilitado, com a policy de `SELECT` (`memberships_select`) filtrando por
+`is_org_member(organization_id)`. Toda subquery dentro de uma `WITH CHECK`
+(ou `USING`) de uma policy roda sujeita à RLS do chamador, exatamente como
+qualquer outra query dele — não há um modo "sem RLS" implícito para
+predicados de policy.
+
+Consequência: um usuário autenticado que **não é membro de organização
+nenhuma** não vê nenhuma linha de `memberships` de nenhuma organização —
+nem a sua (não tem), nem a de terceiros (RLS bloqueia). Para esse usuário,
+`not exists (select 1 from memberships m2 where m2.organization_id = <X>)`
+é **sempre verdadeiro**, qualquer que seja `X` — inclusive para uma
+organização `X` que já tem um owner havia meses, com evento e dado real.
+"Não existe membership visível para mim" (o que a subquery de fato mede,
+por causa da RLS) foi confundido com "não existe membership" (o que o
+predicado precisava medir). São fatos diferentes, e só o segundo é
+seguro como predicado de bootstrap.
+
+Exploração: `INSERT INTO memberships (organization_id, user_id, role)
+VALUES ('<qualquer org existente>', auth.uid(), 'owner')` — passava a
+`WITH CHECK` pela cláusula de bootstrap, sempre. A partir daí, o atacante
+era membro `owner` legítimo (do ponto de vista de toda outra policy RLS do
+schema, que usa `is_org_member`/`is_org_admin` sem distinguir "membro desde
+sempre" de "membro há um segundo") da organização inteira: lia e escrevia
+as 19 tabelas de domínio, inclusive dado financeiro e eventos privados.
+
+### Por que a prova anterior não pegou isso
+
+A prova de isolamento registrada acima (seção "Prova de isolamento —
+executada e revertida nesta sessão") testou leitura e escrita de **dado**
+(`participants`, `events`, `organizations` via UPDATE/DELETE) entre duas
+organizações já populadas, com usuários já vinculados por `membership`
+criada via `execute_sql` como `service_role` (que ignora RLS). Nunca testou
+**inserir uma `membership` nova como usuário autenticado comum** — o único
+vetor onde o bug vivia. A prova provou "não dá para ler dado de outra
+organização *sendo quem eu já sou*"; não provou "não dá para virar membro
+de uma organização que não é minha". O buraco era exatamente esse: do
+tamanho do caso que não foi testado.
+
+### A correção (migration `20261001160000_fix_membership_bootstrap.sql`)
+
+Em vez de consertar o predicado (qualquer subquery sobre uma tabela com RLS,
+rodando na sessão do chamador, carrega o mesmo risco — remendar a condição
+não muda a classe do erro), o bootstrap foi **eliminado da policy**. Criação
+de organização passa a ser atômica, via função `SECURITY DEFINER`:
+
+1. `public.criar_organizacao(p_nome text) returns uuid` — `SECURITY
+   DEFINER`, `search_path = public, pg_temp` fixo (mesma prática das demais
+   funções do schema, ver migration 5). Levanta exceção se `auth.uid()` é
+   nulo. Insere `organizations` e a `membership` de `owner` (`auth.uid()`,
+   não um parâmetro — o chamador não escolhe de quem é a membership) num
+   único statement (`WITH ... INSERT ... INSERT ...`), então as duas linhas
+   existem juntas ou a transação inteira desfaz; nunca existe organização
+   sem owner.
+2. `memberships_insert` passa a ser só `with check
+   (public.is_org_admin(organization_id))` — sem cláusula de escape. Quem
+   não é admin de uma organização não insere membership nela, ponto; a
+   primeira membership de uma organização nova não nasce mais por essa
+   policy, nasce dentro da função.
+3. `INSERT` direto em `organizations` é revogado de `authenticated`
+   (`REVOKE INSERT ON public.organizations FROM authenticated`) — bloqueia
+   na camada de privilégio, antes mesmo de a RLS ser avaliada. A função
+   continua funcionando porque `SECURITY DEFINER` roda como o dono da
+   função (não como `authenticated`), então o `REVOKE` não a afeta.
+4. `EXECUTE` de `criar_organizacao` concedido a `authenticated`, revogado de
+   `anon` (mesmo padrão de `is_org_member`/`is_org_admin`, migration 5).
+
+Resultado: não existe mais um caminho onde "não existe membership" é
+decidido por uma query sujeita à RLS do próprio atacante. A única forma de
+uma organização ganhar seu primeiro membro é a função, que decide isso a
+partir de `auth.uid()` (dado de sessão, não de tabela), dentro da mesma
+transação que cria a organização.
+
+### Varredura das outras 20 tabelas (prova obrigatória 6)
+
+Todas as 84 policies do schema (21 tabelas × 4 operações) foram lidas de
+`pg_policies` depois da correção. Único padrão usado fora de
+`memberships_insert` original: `is_org_member(organization_id)` /
+`is_org_admin(organization_id)` / `is_org_admin(id)` — chamadas de função
+`SECURITY DEFINER`, não subqueries inline sujeitas à RLS do chamador (as
+funções fazem `select ... from memberships` *dentro* do corpo
+`SECURITY DEFINER`, que roda com os privilégios do dono da função, não do
+chamador — por isso não herdam a RLS de `memberships_select`; é a mesma
+razão pela qual `is_org_member`/`is_org_admin` funcionam sem o chamador
+precisar de `SELECT` direto em `memberships`, documentado desde a migration
+2). A única exceção inline era `organizations_insert` (`with check (true)`
+— sem subquery, não tem o defeito) e a própria `memberships_insert`
+vulnerável, já corrigida. Veredito: nenhuma outra policy usa subquery
+filtrada por RLS como predicado de segurança; nada mais foi alterado no
+restante do schema.
+
+### Provas executadas (transação com `ROLLBACK`, saída literal)
+
+Via `execute_sql`, projeto `zcsvoeznilzqborkycmi`, tudo dentro de `BEGIN` /
+`ROLLBACK` — nenhum dado de teste persistiu (confirmado no fim: 0 linhas nas
+21 tabelas de domínio e 0 linhas de `auth.users` de teste).
+
+**1) O ataque original agora falha.** Organização B criada com owner
+(`service_role`) + evento privado; atacante autenticado sem vínculo nenhum
+tenta `INSERT INTO memberships (organization_id, user_id, role) VALUES
+('<org B>', '<id do atacante>', 'owner')`:
+
+```
+prova1_ataque_insert_membership = "bloqueado: SQLSTATE=42501 MSG=new row
+violates row-level security policy for table \"memberships\""
+```
+
+**2) O atacante continua sem ler nada da org B** depois da tentativa, na
+mesma sessão do atacante:
+
+```
+prova2_events = 0
+prova2_participants = 0
+prova2_memberships = 0
+```
+
+(Se o ataque tivesse funcionado, `prova2_memberships` seria 1 — o atacante
+teria acabado de se inserir e, sendo membro, passaria a ver a própria
+linha.)
+
+**3) O caminho legítimo funciona.** Usuário autenticado sem organização
+nenhuma chama `select public.criar_organizacao('Minha Org')`, depois cria e
+lê um evento:
+
+```
+org_criada           = 78a1119a-0de8-42c1-a2ba-b4961a07348d
+papel_do_criador      = owner
+evento_criado         = aec6423e-8a8c-4286-bebb-c66904f2046d
+evento_lido_de_volta  = "Meu evento"
+```
+
+**4) Não existe organização órfã.** `INSERT INTO organizations (nome)
+VALUES (...)` direto, como `authenticated`:
+
+```
+prova4_insert_direto_organizations = "bloqueado: SQLSTATE=42501
+MSG=permission denied for table organizations"
+```
+
+(Bloqueado em `REVOKE`, nem chega a avaliar a RLS — por isso a mensagem é
+`permission denied`, não `row-level security policy`.)
+
+**5) Membro comum não se promove nem insere outras memberships.** Inserido
+como `member` numa organização com outro `owner`; como esse usuário:
+
+- `UPDATE memberships SET role = 'owner' WHERE id = <própria membership>`:
+  `prova5a_autopromocao_update = "linhas_afetadas=0"` (a `USING`/`WITH CHECK`
+  de `memberships_update`, `is_org_admin(organization_id)`, não bate para um
+  `member` — o `UPDATE` casa zero linhas, silenciosamente, comportamento
+  padrão de RLS em `UPDATE`; não é erro, é "nada para atualizar").
+- `INSERT INTO memberships (...)` para um terceiro usuário como `owner`:
+  `prova5b_insert_outra_membership = "bloqueado: SQLSTATE=42501 MSG=new row
+  violates row-level security policy for table \"memberships\""`.
+- Conferido ao final: `papel_final_do_atacante = "member"`,
+  `total_memberships_na_org = 2` (as duas originais, nenhuma a mais).
+
+**6) Varredura das outras tabelas** — ver seção acima.
+
+**7) `get_advisors`** — ver seção "`get_advisors` — achados e o que foi
+feito" abaixo; o único achado novo depois desta migration é
+`criar_organizacao` aparecer como `SECURITY DEFINER` executável por
+`authenticated`, justificado nessa seção (é a função que substitui o
+bootstrap — tem que ser chamável por `authenticated`, é o ponto da
+migration).
+
+### Vetor que não foi possível testar
+
+`criar_organizacao` não limita quantas organizações um mesmo `auth.uid()`
+pode criar (sem rate limit nem unicidade de nome) — um usuário autenticado
+pode chamar a função em loop e criar N organizações das quais vira owner.
+Isso não é uma quebra de isolamento entre tenants (cada organização nova é
+isolada das demais, como qualquer outra) nem uma escalação de privilégio
+(ele só vira owner do que ele mesmo criou) — é, na pior hipótese, abuso de
+recurso/spam de linhas. Não foi testado porque está fora do que as 7 provas
+pedidas cobrem e fora do raio da vulnerabilidade relatada; fica registrado
+como algo a decidir no produto (limite de organizações por usuário, se
+fizer sentido) e não como parte desta correção.
+
+---
+
 ## Migrations (ordem de aplicação)
 
 | # | Arquivo | Conteúdo |
@@ -229,9 +443,10 @@ em todas as 21 tabelas depois da limpeza.
 | 4 | `20261001150300_networking.sql` | `networking_tables`, `seats`, `hosts`, `distribution_versions`, `rounds`, `assignments` + triggers + RLS. |
 | 5 | `20261001150400_security_performance_hardening.sql` | Correções do `get_advisors` (ver abaixo): `search_path` fixo nas funções trigger, `EXECUTE` de `is_org_member`/`is_org_admin` restrito a `authenticated`/`service_role`, índice esquecido em `locations.event_id`, índice em `organization_id` de toda tabela filha, índices de FK que faltavam (`hosts.participant_id`, `assignments.host_id`/`seat_id`, `payments.expense_id`/`revenue_id`/`supplier_id`/`sponsor_id`). |
 | 6 | `20261001150500_organization_id_cascade.sql` | Corrige `organization_id` para `ON DELETE CASCADE` em toda tabela filha (achado durante a prova de isolamento, ver decisão #5). |
+| 7 | `20261001160000_fix_membership_bootstrap.sql` | Corrige a escalação de privilégio em `memberships_insert` (ver seção **"Vulnerabilidade crítica corrigida"** acima): função `criar_organizacao()` `SECURITY DEFINER`, `memberships_insert` sem cláusula de bootstrap, `INSERT` em `organizations` revogado de `authenticated`. |
 
 Aplicadas via `apply_migration` do MCP, em ordem, uma a uma. `list_migrations`
-confirma as 6 no projeto `zcsvoeznilzqborkycmi`. Os arquivos locais em
+confirma as 7 no projeto `zcsvoeznilzqborkycmi`. Os arquivos locais em
 `supabase/migrations/` têm o mesmo conteúdo e a mesma ordem (por timestamp no
 nome do arquivo) — rodar todos do zero, em ordem, recria o schema inteiro
 num projeto Supabase novo.
@@ -247,6 +462,7 @@ num projeto Supabase novo.
 | `set_updated_at()`/`set_organization_id_from_event()` com `search_path` mutável | WARN | Corrigido (migration 5): `search_path = public, pg_temp` fixo nas duas funções. |
 | `is_org_member`/`is_org_admin` executáveis via RPC por `anon` | WARN | Corrigido (migration 5): `REVOKE EXECUTE ... FROM public, anon`. |
 | `is_org_member`/`is_org_admin` executáveis via RPC por `authenticated` | WARN | **Não corrigido — justificado.** As duas funções são `SECURITY DEFINER` e usadas dentro de toda policy RLS das 21 tabelas; o role que dispara essas policies é `authenticated`, então revogar `EXECUTE` de `authenticated` quebraria a RLS inteira (toda query a qualquer tabela de domínio passaria a falhar com `permission denied for function`). Chamar a função diretamente via `/rest/v1/rpc/is_org_member` não vaza nada que o usuário não descubra de outra forma: o retorno é só "sou membro desta organização?", sobre uma organização cujo `id` ele teria que já conhecer, e cuja resposta ele já pode inferir tentando ler a própria tabela `organizations`. Risco residual aceito. |
+| `criar_organizacao` executável via RPC por `authenticated` (apareceu depois da migration 7) | WARN | **Não corrigido — é a correção.** A função existe exatamente para ser chamada por `authenticated` via `/rest/v1/rpc/criar_organizacao` — é o único caminho de criação de organização depois que `INSERT` direto foi revogado (ver "Vulnerabilidade crítica corrigida"). Não há parâmetro de `organization_id` nem de `user_id`: o owner é sempre `auth.uid()` da sessão que chama, nunca escolhido pelo chamador, então `SECURITY DEFINER` não abre escalação — a função decide por conta própria quem é o dono (o próprio chamador autenticado), não aceita essa decisão como input. |
 
 ### Performance
 

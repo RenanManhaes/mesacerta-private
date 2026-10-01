@@ -1,6 +1,9 @@
 // Gerado por mcp__claude_ai_Supabase__generate_typescript_types a partir do
 // projeto zcsvoeznilzqborkycmi ("Mesa Certa", sa-east-1) em 2026-10-01, depois
-// de aplicar as migrations 0001-0006 (supabase/migrations/).
+// de aplicar as migrations 0001-0007 (supabase/migrations/) — 0007 corrige a
+// escalação de privilégio em memberships_insert e adiciona a função
+// criar_organizacao() (ver docs/modelo-de-dados.md, seção "Vulnerabilidade
+// crítica corrigida").
 //
 // Não editar à mão. Para atualizar, rode generate_typescript_types de novo e
 // substitua este arquivo inteiro.
@@ -1324,6 +1327,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      criar_organizacao: { Args: { p_nome: string }; Returns: string }
       is_org_admin: { Args: { p_organization_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organization_id: string }; Returns: boolean }
     }
