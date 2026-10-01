@@ -113,7 +113,6 @@
   body {
     @apply bg-background text-foreground font-body;
     font-feature-settings: "ss01", "cv01";
-    overflow-x: hidden;
   }
 
   ::selection {
