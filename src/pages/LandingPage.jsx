@@ -91,15 +91,18 @@ function SectionLabel({ children }) {
 
 function EventPreview() {
   const [event, setEvent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reduceMotion = useReducedMotion();
   const events = [
     { name: 'Get Connected Sorocaba', date: '25 set 2026', place: 'Sorocaba, SP', revenue: 'R$ 31.206', expense: 'R$ 29.719', margin: '4,8%', attention: '3 pontos' },
     { name: 'Summit Conecta 2026', date: '18 nov 2026', place: 'São Paulo, SP', revenue: 'R$ 74.800', expense: 'R$ 43.200', margin: '42,2%', attention: '5 pontos' },
   ];
 
   useEffect(() => {
+    if (reduceMotion || paused) return;
     const timer = window.setInterval(() => setEvent((value) => (value + 1) % events.length), 5200);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [reduceMotion, paused, events.length]);
 
   const current = events[event];
 
@@ -115,13 +118,16 @@ function EventPreview() {
             <button
               key={item.name}
               type="button"
-              onClick={() => setEvent(index)}
+              onClick={() => { setEvent(index); setPaused(true); }}
               aria-label={`Ver ${item.name}`}
+              aria-pressed={index === event}
               className={`h-1.5 w-7 transition-colors ${index === event ? 'bg-primary' : 'bg-border'}`}
             />
           ))}
         </div>
       </div>
+
+      {!reduceMotion && <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} className="px-4 py-2 text-[11px] text-muted-foreground underline focus-ring">{paused ? 'Retomar troca de exemplos' : 'Pausar troca de exemplos'}</button>}
 
       <div className="grid sm:grid-cols-[1fr_180px]">
         <div className="p-5 sm:p-6">
@@ -156,10 +162,10 @@ function EventPreview() {
         <div className="border-t border-border p-4 sm:border-l sm:border-t-0">
           <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Rodada 04</div>
           <div className="relative mx-auto mt-4 h-[210px] max-w-[160px]">
-            <button className="absolute left-1/2 top-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 border-2 border-border bg-background px-2 text-center text-[10px]">
+            <div className="absolute left-1/2 top-1/2 flex h-24 w-20 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-border bg-background px-2 text-center text-[10px]">
               <strong className="block">MESA 04</strong>
               <span className="mt-1 block text-muted-foreground">NETTOP</span>
-            </button>
+            </div>
             {[
               ['Ana', '50%', '10px'],
               ['João', '5%', '62px'],
@@ -321,12 +327,11 @@ function LandingPage() {
             <Link to="/login" className="px-3 py-2 text-[12px] text-muted-foreground hover:text-foreground">Entrar</Link>
             <a href="#produto" className="border border-primary bg-primary px-4 py-2 text-[12px] font-medium text-primary-foreground">Conhecer a plataforma</a>
           </div>
-          <button type="button" onClick={() => setMenuOpen((value) => !value)} className="p-2 lg:hidden" aria-label="Abrir menu">
+          <button type="button" onClick={() => setMenuOpen((value) => !value)} className="p-2 lg:hidden focus-ring" aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="landing-mobile-menu">
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-        {menuOpen && (
-          <div className="border-t border-border bg-background px-5 py-5 lg:hidden">
+          <div id="landing-mobile-menu" hidden={!menuOpen} className="border-t border-border bg-background px-5 py-5 lg:hidden">
             <div className="grid gap-4 text-[13px]">
               {[
                 ['Produto', '#produto'],
@@ -338,7 +343,6 @@ function LandingPage() {
               <Link to="/login" className="border-t border-border pt-4 text-primary">Entrar na plataforma</Link>
             </div>
           </div>
-        )}
       </header>
 
       <main id="top">
@@ -433,10 +437,10 @@ function LandingPage() {
                 <div className="pt-7">
                   <div className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Precisa da sua atenção</div>
                   {[
-                    [AlertTriangle, 'Crítico', '3 tarefas vencidas'],
-                    [CircleDollarSign, 'Atenção', 'Pagamento do buffet vence amanhã'],
-                    [Clock3, 'Atenção', 'Programação ultrapassa o horário em 25 min'],
-                  ].map(([Icon, level, text], index) => (
+                    { icon: AlertTriangle, level: 'Crítico', text: '3 tarefas vencidas' },
+                    { icon: CircleDollarSign, level: 'Atenção', text: 'Pagamento do buffet vence amanhã' },
+                    { icon: Clock3, level: 'Atenção', text: 'Programação ultrapassa o horário em 25 min' },
+                  ].map(({ icon: Icon, level, text }, index) => (
                     <div key={text} className="flex items-center gap-4 border-b border-border py-4">
                       <Icon className={`h-4 w-4 ${index === 0 ? 'text-danger' : 'text-warning'}`} />
                       <span className="w-16 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">{level}</span>
@@ -468,13 +472,13 @@ function LandingPage() {
             <div className="grid gap-10 lg:grid-cols-[360px_1fr] lg:gap-16">
               <div className="border-t border-border">
                 {chapters.map((item) => (
-                  <button key={item.id} type="button" onClick={() => setChapter(item.id)} className={`grid w-full grid-cols-[42px_1fr] border-b border-border py-4 text-left transition-colors ${chapter === item.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                  <button key={item.id} type="button" onClick={() => setChapter(item.id)} aria-pressed={chapter === item.id} aria-controls="landing-chapter-content" className={`grid w-full grid-cols-[42px_1fr] border-b border-border py-4 text-left transition-colors focus-ring ${chapter === item.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
                     <span className="tnum text-[10px]">{item.number}</span>
                     <span className="text-[13px] font-medium">{item.label}</span>
                   </button>
                 ))}
               </div>
-              <div>
+              <div id="landing-chapter-content" aria-live="polite">
                 {chapters.filter((item) => item.id === chapter).map((item) => (
                   <div key={item.id}>
                     <div className="min-h-[150px]">
@@ -583,11 +587,12 @@ function LandingPage() {
 
         <section id="planos" className="mx-auto max-w-[1240px] px-5 py-20 sm:px-8 sm:py-28">
           <motion.div {...reveal}>
-            <SectionLabel>Oferta proposta</SectionLabel>
+            <SectionLabel>Planos em breve</SectionLabel>
             <div className="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-20">
               <div>
                 <h2 className="font-display text-[40px] leading-[1.02] tracking-tight sm:text-[54px]">Uma oferta. Duas formas de contratação.</h2>
-                <p className="mt-5 max-w-[440px] text-[13px] leading-6 text-muted-foreground">Os preços abaixo fazem parte da estratégia comercial inicial e ainda dependem da liberação operacional da venda. A landing não simula checkout enquanto essa etapa não estiver pronta.</p>
+                <p className="mt-5 max-w-[440px] text-[13px] leading-6 text-muted-foreground">Estamos preparando a abertura das vendas. Estes são os preços previstos para os dois planos. Você já pode criar sua conta; o cadastro não contrata um plano nem gera cobrança.</p>
+                <Link to="/register" className="mt-6 inline-flex items-center gap-2 border border-primary px-4 py-3 text-[13px] text-primary focus-ring">Criar minha conta <ArrowRight className="h-4 w-4" /></Link>
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="border border-border p-6">
@@ -626,10 +631,10 @@ function LandingPage() {
               <div className="border-t border-border">
                 {faq.map(([question, answer], index) => (
                   <div key={question} className="border-b border-border">
-                    <button type="button" className="flex w-full items-center justify-between gap-6 py-5 text-left text-[13px] font-medium" onClick={() => setOpenFaq(openFaq === index ? -1 : index)}>
+                    <button id={`landing-faq-button-${index}`} type="button" className="flex w-full items-center justify-between gap-6 py-5 text-left text-[13px] font-medium focus-ring" aria-expanded={openFaq === index} aria-controls={`landing-faq-answer-${index}`} onClick={() => setOpenFaq(openFaq === index ? -1 : index)}>
                       {question}<ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${openFaq === index ? 'rotate-180' : ''}`} />
                     </button>
-                    {openFaq === index && <p className="max-w-[700px] pb-6 text-[13px] leading-6 text-muted-foreground">{answer}</p>}
+                    <p id={`landing-faq-answer-${index}`} aria-labelledby={`landing-faq-button-${index}`} hidden={openFaq !== index} className="max-w-[700px] pb-6 text-[13px] leading-6 text-muted-foreground">{answer}</p>
                   </div>
                 ))}
               </div>
