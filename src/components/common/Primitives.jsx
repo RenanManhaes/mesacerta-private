@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/format';
 
+/** @param {{children: React.ReactNode, className?: string}} props */
 export function SectionLabel({ children, className }) {
   return (
     <div className={cn('text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground', className)}>
@@ -10,10 +11,12 @@ export function SectionLabel({ children, className }) {
   );
 }
 
+/** @param {{value: number, className?: string, exact?: boolean}} props */
 export function Money({ value, className, exact }) {
   return <span className={cn('tnum', className)}>{exact ? formatBRL(value) : formatBRL(value)}</span>;
 }
 
+/** @param {{label: React.ReactNode, value: React.ReactNode, sub?: React.ReactNode, accent?: boolean, className?: string}} props */
 export function Stat({ label, value, sub, accent, className }) {
   return (
     <div className={className}>
@@ -24,6 +27,7 @@ export function Stat({ label, value, sub, accent, className }) {
   );
 }
 
+/** @param {{status: string, className?: string}} props */
 export function StatusPill({ status, className }) {
   const map = {
     ok: 'text-positive',
@@ -53,6 +57,7 @@ export function StatusPill({ status, className }) {
   );
 }
 
+/** @param {{text: React.ReactNode, children?: React.ReactNode}} props */
 export function InfoTip({ text, children }) {
   return (
     <span className="group relative inline-flex items-center">
@@ -70,6 +75,7 @@ export function Divider({ className }) {
   return <div className={cn('h-px w-full bg-border', className)} />;
 }
 
+/** @param {{title: React.ReactNode, hint?: React.ReactNode, action?: React.ReactNode}} props */
 export function EmptyState({ title, hint, action }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">

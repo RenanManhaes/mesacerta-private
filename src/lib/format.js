@@ -15,29 +15,29 @@ const MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out
 export const formatDate = (iso) => {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');
-  if (isNaN(d)) return '—';
+  if (Number.isNaN(d.getTime())) return '—';
   return `${d.getDate()} de ${MONTHS[d.getMonth()]}`;
 };
 export const formatDateFull = (iso) => {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');
-  if (isNaN(d)) return '—';
+  if (Number.isNaN(d.getTime())) return '—';
   return `${d.getDate()} de ${MONTHS[d.getMonth()]} de ${d.getFullYear()}`;
 };
 export const formatDateShort = (iso) => {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');
-  if (isNaN(d)) return '—';
+  if (Number.isNaN(d.getTime())) return '—';
   return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
 };
 
 export const daysUntil = (iso, from = new Date()) => {
   if (!iso) return 0;
   const d = new Date(iso + 'T00:00:00');
-  if (isNaN(d)) return 0;
+  if (Number.isNaN(d.getTime())) return 0;
   const f = new Date(from);
   f.setHours(0, 0, 0, 0);
-  return Math.round((d - f) / 86400000);
+  return Math.round((d.getTime() - f.getTime()) / 86400000);
 };
 
 export const timeToMinutes = (t) => {

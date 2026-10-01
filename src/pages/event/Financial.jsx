@@ -6,6 +6,7 @@ import { SectionLabel, InfoTip, StatusPill } from '@/components/common/Primitive
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
+/** @param {{label: React.ReactNode, value: React.ReactNode, sub?: React.ReactNode, strong?: boolean, tone?: string}} props */
 function Line({ label, value, sub, strong, tone }) {
   return (
     <div className="flex items-baseline justify-between py-2.5 border-b border-border last:border-0">
