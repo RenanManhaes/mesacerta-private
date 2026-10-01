@@ -11,6 +11,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import LandingPage from '@/pages/LandingPage';
 import { EventProvider } from '@/context/EventContext';
 import Events from '@/pages/Events';
 import CreateEvent from '@/pages/CreateEvent';
@@ -31,7 +32,7 @@ import EventSettings from '@/pages/event/EventSettings';
 import DesignSystem from '@/pages/DesignSystem';
 
 const AuthenticatedApp = () => {
-  const { authChecked } = useAuth();
+  const { authChecked, isAuthenticated } = useAuth();
 
   // Show loading spinner while the initial Supabase session check runs
   if (!authChecked) {
@@ -42,17 +43,16 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Render the main app
   return (
     <EventProvider>
       <Routes>
+        <Route path="/" element={isAuthenticated ? <Events /> : <LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/design-system" element={<DesignSystem />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-          <Route path="/" element={<Events />} />
           <Route path="/novo" element={<CreateEvent />} />
           <Route path="/event/:eventId" element={<AppLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -78,7 +78,6 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
