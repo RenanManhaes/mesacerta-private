@@ -178,18 +178,18 @@ function SectionKicker({ number, children, light = false }) {
   );
 }
 
-function HeroLines({ progress }) {
-  const path1 = useTransform(progress, [0, 0.28], [0, 1]);
-  const path2 = useTransform(progress, [0.06, 0.34], [0, 1]);
-  const path3 = useTransform(progress, [0.12, 0.4], [0, 1]);
+function HeroLines({ reduceMotion }) {
+  const lineMotion = reduceMotion
+    ? { initial: false, animate: { pathLength: 1 } }
+    : { initial: { pathLength: 0 }, animate: { pathLength: 1 } };
 
   return (
     <svg viewBox="0 0 1000 820" className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden="true">
-      <motion.path d="M80 710 H920 V110 H245 V535 H760" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#d8d1c5]" style={{ pathLength: path1 }} />
-      <motion.path d="M0 265 H410 V0 M710 820 V450 H1000" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#e4ded3]" style={{ pathLength: path2 }} />
-      <motion.path d="M150 0 V125 H860 V820" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#ede7dd]" style={{ pathLength: path3 }} />
-      <circle cx="245" cy="535" r="5" fill="currentColor" className="text-primary" />
-      <circle cx="760" cy="535" r="5" fill="currentColor" className="text-primary" />
+      <motion.path {...lineMotion} transition={{ duration: 1.25, delay: 0.05, ease: [0.22, 1, 0.36, 1] }} d="M80 710 H920 V110 H245 V535 H760" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#d8d1c5]" />
+      <motion.path {...lineMotion} transition={{ duration: 1.1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }} d="M0 265 H410 V0 M710 820 V450 H1000" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#e4ded3]" />
+      <motion.path {...lineMotion} transition={{ duration: 1.15, delay: 0.34, ease: [0.22, 1, 0.36, 1] }} d="M150 0 V125 H860 V820" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#ede7dd]" />
+      <motion.circle initial={reduceMotion ? false : { opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.9 }} cx="245" cy="535" r="5" fill="currentColor" className="text-primary" />
+      <motion.circle initial={reduceMotion ? false : { opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.05 }} cx="760" cy="535" r="5" fill="currentColor" className="text-primary" />
     </svg>
   );
 }
@@ -351,13 +351,15 @@ function ChaosFragment({ item, progress, index }) {
   const opacity = useTransform(progress, [0, 0.1, 0.76, 0.9], [0, 1, 1, 0]);
 
   return (
-    <motion.div
-      style={{ x, y, rotate, opacity }}
-      className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap border border-[#c9c1b4] bg-[#fffdf9] px-4 py-3 text-[11px] shadow-[6px_7px_0_rgba(31,77,70,0.04)] sm:text-[12px]"
-    >
-      <span className="mr-2 tnum text-[8px] text-muted-foreground">0{index + 1}</span>
-      {item.label}
-    </motion.div>
+    <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+      <motion.div
+        style={{ x, y, rotate, opacity }}
+        className="whitespace-nowrap border border-[#c9c1b4] bg-[#fffdf9] px-4 py-3 text-[11px] shadow-[6px_7px_0_rgba(31,77,70,0.04)] sm:text-[12px]"
+      >
+        <span className="mr-2 tnum text-[8px] text-muted-foreground">0{index + 1}</span>
+        {item.label}
+      </motion.div>
+    </div>
   );
 }
 
@@ -394,10 +396,11 @@ function ChaosToContext() {
           ))}
         </div>
 
-        <motion.div
-          style={{ opacity: centralOpacity, scale: centralScale }}
-          className="absolute left-1/2 top-1/2 z-10 w-[86vw] max-w-[760px] -translate-x-1/2 -translate-y-1/2 border-2 border-primary bg-background px-5 py-6 sm:px-8 sm:py-8"
-        >
+        <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+          <motion.div
+            style={{ opacity: centralOpacity, scale: centralScale }}
+            className="w-[86vw] max-w-[760px] border-2 border-primary bg-background px-5 py-6 sm:px-8 sm:py-8"
+          >
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div>
               <div className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Evento</div>
@@ -414,7 +417,8 @@ function ChaosToContext() {
           <div className="border-t border-border pt-4 text-[12px] text-muted-foreground">
             Você para de procurar a informação. Passa a abrir o evento.
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div style={{ opacity: resolvedOpacity }} className="absolute bottom-[8vh] left-1/2 z-30 w-full max-w-[780px] -translate-x-1/2 px-5 text-center">
           <div className="font-display text-[30px] leading-tight sm:text-[42px]">Um evento. Um contexto. Uma operação que faz sentido.</div>
@@ -889,7 +893,7 @@ function LandingPage() {
 
       <main id="top">
         <section className="relative min-h-screen overflow-hidden border-b border-border pt-[72px]">
-          <HeroLines progress={smoothProgress} />
+          <HeroLines reduceMotion={reduceMotion} />
 
           <div className="relative z-10 mx-auto grid min-h-[calc(100vh-72px)] max-w-[1240px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:gap-14">
             <div>
