@@ -1,27 +1,13 @@
-import { getAccessToken } from '@base44/sdk';
-
-const isNode = typeof window === 'undefined';
-
-const isClearAccessTokenRequested = () =>
-  !isNode && new URLSearchParams(window.location.search).get("clear_access_token") === 'true';
-
-const clearStoredAccessToken = () => {
-  window.localStorage.removeItem('base44_access_token');
-  window.localStorage.removeItem('token');
-}
-
-const getAppParams = () => {
-  if (isClearAccessTokenRequested()) {
-    clearStoredAccessToken();
-  }
-  return {
-    appId: import.meta.env.VITE_BASE44_APP_ID,
-    token: getAccessToken(),
-    functionsVersion: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION,
-    appBaseUrl: import.meta.env.VITE_BASE44_APP_BASE_URL,
-  }
-}
+// Supabase client configuration, read from Vite env vars. See .env.example.
+//
+// VITE_SUPABASE_PUBLISHABLE_KEY is a publishable key by design: it ships in
+// the client bundle and is safe to expose because every table is protected
+// by Row Level Security (RLS) — see docs/modelo-de-dados.md. It is not a
+// secret and does not need to be treated as one.
+export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export const appParams = {
-  ...getAppParams()
-}
+  supabaseUrl,
+  supabaseAnonKey,
+};

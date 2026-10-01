@@ -1,10 +1,11 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
+import { useAuth } from '@/lib/AuthContext';
 import { formatDateFull, daysUntil } from '@/lib/format';
 import {
   LayoutDashboard, CalendarDays, ListChecks, Users, Truck,
-  Wallet, Ticket, Sparkles, Gauge, Network, Settings, ChevronDown
+  Wallet, Ticket, Sparkles, Gauge, Network, Settings, ChevronDown, LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -46,9 +47,16 @@ const sections = [
 
 export function SidebarContent({ onNavigate }) {
   const { events, currentEvent, setCurrentEventId } = useEvent();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const base = `/event/${currentEvent?.id || ''}`;
+
+  const handleSignOut = async () => {
+    await signOut();
+    onNavigate?.();
+    navigate('/login', { replace: true });
+  };
 
   const switchEvent = (id) => {
     setCurrentEventId(id);
@@ -123,6 +131,16 @@ export function SidebarContent({ onNavigate }) {
         {currentEvent?.date && (
           <>Faltam <span className="font-medium text-foreground">{daysUntil(currentEvent.date)} dias</span> para o evento</>
         )}
+      </div>
+      <div className="border-t border-border px-3 py-2.5">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors focus-ring"
+        >
+          <LogOut className={iconCls} />
+          Sair
+        </button>
       </div>
     </div>
   );

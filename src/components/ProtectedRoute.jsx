@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import CreateOrganization from '@/pages/CreateOrganization';
 
 const DefaultFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -10,27 +9,25 @@ const DefaultFallback = () => (
 );
 
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
-  const { isAuthenticated, isLoadingAuth, authChecked, authError, checkUserAuth } = useAuth();
+  const { isAuthenticated, authChecked, memberships, membershipsLoading } = useAuth();
 
-  useEffect(() => {
-    if (!authChecked && !isLoadingAuth) {
-      checkUserAuth();
-    }
-  }, [authChecked, isLoadingAuth, checkUserAuth]);
-
-  if (isLoadingAuth || !authChecked) {
+  if (!authChecked) {
     return fallback;
-  }
-
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    }
-    return unauthenticatedElement;
   }
 
   if (!isAuthenticated) {
     return unauthenticatedElement;
+  }
+
+  if (membershipsLoading) {
+    return fallback;
+  }
+
+  // Authenticated but no organization yet: RLS (is_org_member) means the
+  // user sees nothing in any domain table until one exists. Gate on this
+  // before rendering the protected tree, not after it renders empty.
+  if (memberships.length === 0) {
+    return <CreateOrganization />;
   }
 
   return <Outlet />;

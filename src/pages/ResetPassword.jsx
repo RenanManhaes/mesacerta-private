@@ -1,53 +1,92 @@
-import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/api/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 
+// Reached from the "reset password" email link. Supabase's client reads the
+// recovery token straight out of the URL (detectSessionInUrl, configured in
+// src/api/supabaseClient.js) and turns it into a real session before this
+// component ever renders a form — so there is no token to parse by hand here,
+// only the resulting session to check for.
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setHasSession(!!data.session);
+      setChecking(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setHasSession(!!session);
+    });
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("A senha precisa ter pelo menos 6 caracteres");
       return;
     }
     setLoading(true);
-    try {
-      await base44.auth.resetPassword({ resetToken, newPassword });
-      window.location.href = "/login";
-    } catch (err) {
-      setError(err.message || "Failed to reset password");
-    } finally {
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) {
       setLoading(false);
+      setError(updateError.message || "Não foi possível redefinir a senha");
+      return;
     }
+    await supabase.auth.signOut();
+    setLoading(false);
+    navigate("/login", { replace: true });
   };
 
-  if (!resetToken) {
+  if (checking) {
+    return (
+      <AuthLayout icon={Lock} title="Redefinir senha">
+        <div className="flex items-center justify-center py-6 text-muted-foreground">
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
+          Carregando…
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (!hasSession) {
     return (
       <AuthLayout
         icon={AlertTriangle}
-        title="Invalid reset link"
-        subtitle="This password reset link is missing or invalid"
+        title="Link inválido"
+        subtitle="Este link de redefinição de senha está ausente ou expirou"
         footer={
           <Link to="/forgot-password" className="text-primary font-medium hover:underline">
-            Request a new link
+            Solicitar um novo link
           </Link>
         }
       >
         <p className="text-sm text-foreground text-center">
-          The link you used appears to be incomplete. Please request a new password reset email.
+          O link que você usou parece incompleto ou já expirou. Solicite um novo e-mail de redefinição.
         </p>
       </AuthLayout>
     );
@@ -56,8 +95,8 @@ export default function ResetPassword() {
   return (
     <AuthLayout
       icon={Lock}
-      title="New password"
-      subtitle="Enter your new password below"
+      title="Nova senha"
+      subtitle="Digite sua nova senha abaixo"
     >
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -66,7 +105,7 @@ export default function ResetPassword() {
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password">Nova senha</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -83,7 +122,7 @@ export default function ResetPassword() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+          <Label htmlFor="confirm">Confirmar senha</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -102,10 +141,10 @@ export default function ResetPassword() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Resetting...
+              Redefinindo...
             </>
           ) : (
-            "Reset password"
+            "Redefinir senha"
           )}
         </Button>
       </form>

@@ -1,142 +1,90 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { supabase } from '@/api/supabaseClient';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
-  const [authError, setAuthError] = useState(null);
+  const [session, setSession] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  const [memberships, setMemberships] = useState([]);
+  const [membershipsLoading, setMembershipsLoading] = useState(false);
 
-  useEffect(() => {
-    checkAppState();
+  // RLS (is_org_member) already scopes `memberships` to organizations the
+  // caller belongs to; filtering by user_id here keeps this specifically to
+  // "my own membership rows" (an org can have teammates whose rows would
+  // otherwise also come back). Zero rows means: authenticated, but no
+  // organization yet — see docs/modelo-de-dados.md, "Vulnerabilidade crítica
+  // corrigida" for why there is no bootstrap exception in the policy anymore.
+  const loadMemberships = useCallback(async (userId) => {
+    if (!userId) {
+      setMemberships([]);
+      return;
+    }
+    setMembershipsLoading(true);
+    const { data, error } = await supabase
+      .from('memberships')
+      .select('id, organization_id, role, organizations ( id, nome )')
+      .eq('user_id', userId);
+    if (error) {
+      console.error('Falha ao carregar organizações do usuário:', error);
+      setMemberships([]);
+    } else {
+      setMemberships(data || []);
+    }
+    setMembershipsLoading(false);
   }, []);
 
-  const checkAppState = async () => {
-    try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
+  useEffect(() => {
+    let mounted = true;
 
-      try {
-        const publicSettings = await base44.app.getPublicSettings();
-        setAppPublicSettings(publicSettings);
-
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-          setAuthChecked(true);
-        }
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const checkUserAuth = async () => {
-    try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setSession(data.session);
       setAuthChecked(true);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
-      setAuthChecked(true);
-
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+      if (data.session?.user?.id) {
+        loadMemberships(data.session.user.id);
       }
-    }
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!mounted) return;
+      setSession(newSession);
+      setAuthChecked(true);
+      if (newSession?.user?.id) {
+        loadMemberships(newSession.user.id);
+      } else {
+        setMemberships([]);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [loadMemberships]);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setMemberships([]);
+  }, []);
+
+  const refreshMemberships = useCallback(() => {
+    return loadMemberships(session?.user?.id);
+  }, [loadMemberships, session]);
+
+  const value = {
+    session,
+    user: session?.user ?? null,
+    isAuthenticated: !!session,
+    authChecked,
+    memberships,
+    membershipsLoading,
+    refreshMemberships,
+    signOut,
   };
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
-    }
-  };
-
-  const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
-  };
-
-  return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      isLoadingAuth,
-      isLoadingPublicSettings,
-      authError,
-      appPublicSettings,
-      authChecked,
-      logout,
-      navigateToLogin,
-      checkUserAuth,
-      checkAppState
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
