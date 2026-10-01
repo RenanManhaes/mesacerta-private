@@ -44,6 +44,7 @@ export function build(P, T, R, seed) {
   const C = Math.ceil(R / T);
   const lastLen = R - (C - 1) * T;
 
+  /** @type {number[][][]} */
   const F = [];
   for (let c = 0; c < C; c++) {
     F.push([]);
@@ -211,6 +212,7 @@ export function evitarCasa(tab, P, T, R, casa) {
  * E daqui que saem os conflitos exibidos antes de publicar (PRD secao 27.7).
  */
 export function analyze(tab, P, T, R) {
+  /** @type {number[][][]} */
   const at = [];
   for (let r = 0; r < R; r++) {
     at.push([]);
@@ -264,7 +266,7 @@ export function analyze(tab, P, T, R) {
     if (same) sameTable++;
     pairs.push({ a: Math.floor(id / P), b: id % P, ev, same });
   }
-  pairs.sort((x, y) => y.same - x.same || y.ev.length - x.ev.length || x.a - y.a);
+  pairs.sort((x, y) => Number(y.same) - Number(x.same) || y.ev.length - x.ev.length || x.a - y.a);
 
   const person = [];
   for (let i = 0; i < P; i++) person.push({ known: 0, again: [], sameTable: false });
