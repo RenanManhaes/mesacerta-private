@@ -17,7 +17,6 @@ import {
   CircleDollarSign,
   Clock3,
   Menu,
-  Sparkles,
   Users,
   X,
 } from 'lucide-react';
@@ -827,7 +826,7 @@ function LandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <motion.div style={{ scaleX: smoothProgress }} className="fixed left-0 top-0 z-[80] h-[2px] w-full origin-left bg-primary" />
 
-      <header className="fixed inset-x-0 top-0 z-[70] border-b border-border/80 bg-background/90 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-[70] border-b border-border bg-background/95">
         <div className="mx-auto flex h-[72px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
           <button type="button" onClick={() => scrollToSection('top', reduceMotion)} className="focus-ring">
             <BrandMark />
