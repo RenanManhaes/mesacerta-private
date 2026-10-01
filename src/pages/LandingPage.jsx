@@ -910,7 +910,7 @@ function LandingPage() {
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 28, mass: 0.3 });
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <motion.div style={{ scaleX: smoothProgress }} className="fixed left-0 top-0 z-[80] h-[2px] w-full origin-left bg-primary" />
 
       <header className="fixed inset-x-0 top-0 z-[70] border-b border-border bg-background/95">
