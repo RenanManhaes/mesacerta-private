@@ -1,0 +1,214 @@
+{
+  "source": "Base da configuração - MesaCerta.xlsx / Despesas (valores originais, sem alterar a planilha)",
+  "audience": 100,
+  "totalRevenue": 31206,
+  "sponsorRevenue": 20658,
+  "expectedTotal": 29718.98,
+  "expectedMargin": 4.8,
+  "expenses": [
+    {
+      "row": 13,
+      "description": "Locação do espaço (diária)",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 5500,
+      "expected": 5500
+    },
+    {
+      "row": 14,
+      "description": "Brinde Patrocinador",
+      "type": "fixed",
+      "qty": 17,
+      "unitValue": 68,
+      "expected": 1156
+    },
+    {
+      "row": 15,
+      "description": "Locação de mesas e cadeiras",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 0,
+      "expected": 0
+    },
+    {
+      "row": 16,
+      "description": "Sonorização (PA, microfones e operador)",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 0,
+      "expected": 0
+    },
+    {
+      "row": 17,
+      "description": "Locação de tela e projetor / Lead",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 1600,
+      "expected": 1600
+    },
+    {
+      "row": 18,
+      "description": "Caneta e Caderno",
+      "type": "fixed",
+      "qty": 90,
+      "unitValue": 12,
+      "expected": 1080
+    },
+    {
+      "row": 19,
+      "description": "Painel / backdrop de patrocinador",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 720,
+      "expected": 720
+    },
+    {
+      "row": 20,
+      "description": "Camisetas",
+      "type": "fixed",
+      "qty": 11,
+      "unitValue": 78,
+      "expected": 858
+    },
+    {
+      "row": 21,
+      "description": "Fotografia e vídeo — cobertura do dia",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 2000,
+      "expected": 2000
+    },
+    {
+      "row": 22,
+      "description": "Sinalização, crachás e impressos",
+      "type": "fixed",
+      "qty": 90,
+      "unitValue": 8,
+      "expected": 720
+    },
+    {
+      "row": 23,
+      "description": "Toalhas de mesas",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 520,
+      "expected": 520,
+      "note": "D23 literal 520; C23 vazia. Unitário derivado de D23/B23, não do piloto."
+    },
+    {
+      "row": 24,
+      "description": "Design gráfico e peças de divulgação  LOLA LILI",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 0,
+      "expected": 0
+    },
+    {
+      "row": 25,
+      "description": "Sache Marcela",
+      "type": "fixed",
+      "qty": 17,
+      "unitValue": 7,
+      "expected": 119
+    },
+    {
+      "row": 26,
+      "description": "Sax",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 250,
+      "expected": 250
+    },
+    {
+      "row": 27,
+      "description": "Sacolas",
+      "type": "fixed",
+      "qty": 90,
+      "unitValue": 18,
+      "expected": 1620
+    },
+    {
+      "row": 28,
+      "description": "Divulgação e tráfego pago",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 705.58,
+      "expected": 705.58
+    },
+    {
+      "row": 29,
+      "description": "Seguro / taxas e licenças do evento",
+      "type": "fixed",
+      "qty": 1,
+      "unitValue": 0,
+      "expected": 0
+    },
+    {
+      "row": 34,
+      "description": "Café de recepção (08:00 às 09:30)",
+      "type": "perParticipant",
+      "qty": 100,
+      "unitValue": 60,
+      "expected": 6000
+    },
+    {
+      "row": 35,
+      "description": "Coffee break do intervalo da manhã",
+      "type": "perParticipant",
+      "qty": 0,
+      "unitValue": 0,
+      "expected": 0
+    },
+    {
+      "row": 36,
+      "description": "Almoço",
+      "type": "perParticipant",
+      "qty": 100,
+      "unitValue": 60,
+      "expected": 6000
+    },
+    {
+      "row": 37,
+      "description": "Água e bebidas ao longo do dia",
+      "type": "perParticipant",
+      "qty": 360,
+      "unitValue": 2.417777778,
+      "expected": 870.4
+    },
+    {
+      "row": 38,
+      "description": "Kit do participante (crachá, bloco, caneta)",
+      "type": "perParticipant",
+      "qty": 0,
+      "unitValue": 8,
+      "expected": 0
+    },
+    {
+      "row": 44,
+      "description": "Taxa de cartão / boleto sobre o patrocínio",
+      "type": "percent",
+      "qty": 0,
+      "unitValue": 0,
+      "expected": 0,
+      "revenueBase": "sponsors"
+    },
+    {
+      "row": 45,
+      "description": "Impostos sobre o faturamento (Simples Nacional)",
+      "type": "percent",
+      "qty": 0,
+      "unitValue": 0,
+      "expected": 0,
+      "revenueBase": "total"
+    },
+    {
+      "row": 46,
+      "description": "Reserva de contingência",
+      "type": "percent",
+      "qty": 31206,
+      "unitValue": 0,
+      "expected": 0,
+      "revenueBase": "total"
+    }
+  ]
+}

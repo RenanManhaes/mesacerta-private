@@ -1,0 +1,42 @@
+exit_code=0
+PASS CA1: 4% de 31206 = 1248.24; públicos 0/82/100/1000 não alteram o valor
+PASS CA2: 4% de patrocínio 20658 = 826.32, diferente de 1248.24
+PASS CA3: fixo qty=0 → 0; qty ausente → 1 unidade; qty=17 × 68 → 1156
+  D13 fixed: planilha=5500.00 sistema=5500.00
+  D14 fixed: planilha=1156.00 sistema=1156.00
+  D15 fixed: planilha=0.00 sistema=0.00
+  D16 fixed: planilha=0.00 sistema=0.00
+  D17 fixed: planilha=1600.00 sistema=1600.00
+  D18 fixed: planilha=1080.00 sistema=1080.00
+  D19 fixed: planilha=720.00 sistema=720.00
+  D20 fixed: planilha=858.00 sistema=858.00
+  D21 fixed: planilha=2000.00 sistema=2000.00
+  D22 fixed: planilha=720.00 sistema=720.00
+  D23 fixed: planilha=520.00 sistema=520.00
+  D24 fixed: planilha=0.00 sistema=0.00
+  D25 fixed: planilha=119.00 sistema=119.00
+  D26 fixed: planilha=250.00 sistema=250.00
+  D27 fixed: planilha=1620.00 sistema=1620.00
+  D28 fixed: planilha=705.58 sistema=705.58
+  D29 fixed: planilha=0.00 sistema=0.00
+  D34 perParticipant: planilha=6000.00 sistema=6000.00
+  D35 perParticipant: planilha=0.00 sistema=0.00
+  D36 perParticipant: planilha=6000.00 sistema=6000.00
+  D37 perParticipant: planilha=870.40 sistema=870.40
+  D38 perParticipant: planilha=0.00 sistema=0.00
+  D44 percent: planilha=0.00 sistema=0.00
+  D45 percent: planilha=0.00 sistema=0.00
+  D46 percent: planilha=0.00 sistema=0.00
+PASS CA4/CA5: 25 linhas reais — comparação individual planilha × seletor
+PASS CA4: total planilha=29718.98 sistema=29718.98; margem planilha=4.8% sistema=4.8%
+PASS CA5: por participante recalcula; café real 60 × 100 = 6000; × 82 = 4920
+PASS Receita alterada recalcula somente a base selecionada; defaults sem público
+PASS Resumo/pagamentos/margem e alerta usam a mesma base de receita
+PASS Centavos arredondados por lançamento; 0.10 × 3 = 0.30; 1.005 → 1.01
+PASS Ponto de equilíbrio inclui taxa total na contribuição e taxa de patrocínio na receita líquida
+PASS Taxa de 100% com custos descobertos não anuncia equilíbrio em zero ingressos
+PASS Review: duas taxas de 25% arredondadas — equilíbrio em 3 vendas, não 2
+PASS Review: contribuição mínima usa estimativa conservadora explícita e sem busca excessiva
+PASS Review: equilíbrio pontual em 1 venda seguido de prejuízo em 2 não anuncia lucro a partir de 1
+PASS Eventos independentes: A receita=50000 despesa=22000; B receita=80000 despesa=22700
+15/15 testes MCT-34 PASS

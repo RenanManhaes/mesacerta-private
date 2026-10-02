@@ -1,0 +1,394 @@
+exit_code=1
+
+> base44-app@0.0.0 typecheck
+> tsc -p ./jsconfig.json
+
+src/components/ui/button.jsx(37,36): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/button.jsx(37,47): error TS2339: Property 'variant' does not exist on type '{}'.
+src/components/ui/button.jsx(37,56): error TS2339: Property 'size' does not exist on type '{}'.
+src/components/ui/button.jsx(37,62): error TS2339: Property 'asChild' does not exist on type '{}'.
+src/components/ui/dialog.jsx(17,43): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/dialog.jsx(28,43): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/dialog.jsx(28,54): error TS2339: Property 'children' does not exist on type '{}'.
+src/components/ui/dialog.jsx(69,41): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/dialog.jsx(77,47): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/input.jsx(5,35): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/input.jsx(5,46): error TS2339: Property 'type' does not exist on type '{}'.
+src/components/ui/label.jsx(11,35): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(15,43): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(15,54): error TS2339: Property 'children' does not exist on type '{}'.
+src/components/ui/select.jsx(31,50): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(41,52): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(52,43): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(52,54): error TS2339: Property 'children' does not exist on type '{}'.
+src/components/ui/select.jsx(52,64): error TS2339: Property 'position' does not exist on type '{}'.
+src/components/ui/select.jsx(76,41): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(84,40): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/select.jsx(84,51): error TS2339: Property 'children' does not exist on type '{}'.
+src/components/ui/select.jsx(85,4): error TS2741: Property 'value' is missing in type '{ children: Element[]; ref: ForwardedRef<any>; className: string; }' but required in type 'SelectItemProps'.
+src/components/ui/select.jsx(102,45): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/slider.jsx(6,36): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/switch.jsx(6,36): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/tabs.jsx(8,38): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/tabs.jsx(19,41): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/tabs.jsx(20,4): error TS2741: Property 'value' is missing in type '{ ref: ForwardedRef<any>; className: string; }' but required in type 'TabsTriggerProps'.
+src/components/ui/tabs.jsx(30,41): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/tabs.jsx(31,4): error TS2741: Property 'value' is missing in type '{ ref: ForwardedRef<any>; className: string; }' but required in type 'TabsContentProps'.
+src/lib/app-params.js(7,40): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/lib/app-params.js(8,44): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/lib/format.js(18,13): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'number'.
+src/lib/format.js(24,13): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'number'.
+src/lib/format.js(30,13): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'number'.
+src/lib/format.js(37,13): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'number'.
+src/lib/format.js(40,22): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/format.js(40,26): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/networking/engine.js(132,21): error TS2532: Object is possibly 'undefined'.
+src/lib/networking/engine.js(219,59): error TS2532: Object is possibly 'undefined'.
+src/lib/networking/engine.js(267,24): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/networking/engine.js(267,33): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/lib/networking/engine.js(293,23): error TS2532: Object is possibly 'undefined'.
+src/lib/networking/engine.js(305,17): error TS2532: Object is possibly 'undefined'.
+src/pages/CreateEvent.jsx(61,12): error TS2322: Type '{ children: Element; variant: string; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(81,21): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(81,80): error TS2322: Type '{ className: string; placeholder: string; value: string; onChange: (e: any) => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(82,21): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(82,70): error TS2322: Type '{ type: string; className: string; value: string; onChange: (e: any) => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(83,21): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(83,80): error TS2322: Type '{ className: string; placeholder: string; value: string; onChange: (e: any) => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(94,18): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(95,24): error TS2322: Type '{ type: string; className: string; placeholder: string; value: string; onChange: (e: any) => void; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(98,18): error TS2322: Type '{ children: (string | Element)[]; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(99,24): error TS2322: Type '{ type: string; className: string; placeholder: string; value: string; onChange: (e: any) => void; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(135,12): error TS2322: Type '{ children: string; variant: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(137,14): error TS2322: Type '{ children: (string | Element)[]; disabled: boolean; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateEvent.jsx(139,14): error TS2322: Type '{ children: (string | Element)[]; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateOrganization.jsx(60,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateOrganization.jsx(62,13): error TS2322: Type '{ id: string; autoFocus: true; value: string; onChange: (e: any) => void; placeholder: string; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/CreateOrganization.jsx(71,10): error TS2322: Type '{ children: string | Element; type: string; className: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/DesignSystem.jsx(116,12): error TS2741: Property 'className' is missing in type '{ children: string; }' but required in type '{ children: any; className: any; }'.
+src/pages/DesignSystem.jsx(206,14): error TS2741: Property 'className' is missing in type '{ status: string; }' but required in type '{ status: any; className: any; }'.
+src/pages/DesignSystem.jsx(207,14): error TS2741: Property 'className' is missing in type '{ status: string; }' but required in type '{ status: any; className: any; }'.
+src/pages/DesignSystem.jsx(208,14): error TS2741: Property 'className' is missing in type '{ status: string; }' but required in type '{ status: any; className: any; }'.
+src/pages/DesignSystem.jsx(209,14): error TS2741: Property 'className' is missing in type '{ status: string; }' but required in type '{ status: any; className: any; }'.
+src/pages/DesignSystem.jsx(344,20): error TS2741: Property 'className' is missing in type '{ children: string; }' but required in type '{ children: any; className: any; }'.
+src/pages/event/Capacity.jsx(12,8): error TS2322: Type '{ children: any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Capacity.jsx(14,16): error TS2322: Type '{ type: string; value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Dashboard.jsx(66,12): error TS2741: Property 'className' is missing in type '{ children: string; }' but required in type '{ children: any; className: any; }'.
+src/pages/event/Dashboard.jsx(89,18): error TS2741: Property 'children' is missing in type '{ text: string; }' but required in type '{ text: any; children: any; }'.
+src/pages/event/Dashboard.jsx(124,16): error TS2741: Property 'children' is missing in type '{ text: string; }' but required in type '{ text: any; children: any; }'.
+src/pages/event/Dashboard.jsx(174,90): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/EventSettings.jsx(38,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(38,66): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(39,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(39,66): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(40,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(40,76): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(41,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(41,67): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(42,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(44,16): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(45,16): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(45,96): error TS2322: Type '{ children: string; key: string; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(48,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(48,89): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(55,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(55,78): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(56,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(56,72): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(57,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(57,73): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(58,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(58,71): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(65,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(65,86): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(66,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(66,91): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(67,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(67,68): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(77,23): error TS2322: Type '{ checked: any; onCheckedChange: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'checked' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/EventSettings.jsx(90,12): error TS2322: Type '{ children: string; variant: string; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(32,10): error TS2322: Type '{ children: (string | Element)[]; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(50,24): error TS2322: Type '{ value: any; onChange: (evt: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(51,24): error TS2322: Type '{ type: string; value: any; onChange: (evt: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(55,20): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(56,20): error TS2559: Type '{ children: any; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(56,66): error TS2322: Type '{ children: any; key: any; value: any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(65,26): error TS2322: Type '{ type: string; value: any; onChange: (evt: any) => any; className: string; title: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(68,20): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(69,20): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(70,22): error TS2322: Type '{ children: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(71,22): error TS2322: Type '{ children: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Expenses.jsx(72,22): error TS2322: Type '{ children: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(29,12): error TS2739: Type '{ label: string; value: string; strong: true; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, tone
+src/pages/event/Financial.jsx(30,12): error TS2739: Type '{ label: string; value: string; tone: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong
+src/pages/event/Financial.jsx(31,12): error TS2739: Type '{ label: string; value: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong, tone
+src/pages/event/Financial.jsx(43,12): error TS2739: Type '{ label: string; value: string; strong: true; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, tone
+src/pages/event/Financial.jsx(44,12): error TS2739: Type '{ label: string; value: string; tone: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong
+src/pages/event/Financial.jsx(45,12): error TS2739: Type '{ label: string; value: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong, tone
+src/pages/event/Financial.jsx(57,12): error TS2741: Property 'sub' is missing in type '{ label: string; value: string; strong: true; tone: string; }' but required in type '{ label: any; value: any; sub: any; strong: any; tone: any; }'.
+src/pages/event/Financial.jsx(58,12): error TS2739: Type '{ label: string; value: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong, tone
+src/pages/event/Financial.jsx(59,12): error TS2739: Type '{ label: string; value: string; tone: string; }' is missing the following properties from type '{ label: any; value: any; sub: any; strong: any; tone: any; }': sub, strong
+src/pages/event/Financial.jsx(64,14): error TS2741: Property 'children' is missing in type '{ text: string; }' but required in type '{ text: any; children: any; }'.
+src/pages/event/Financial.jsx(96,57): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/Financial.jsx(125,59): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/Financial.jsx(185,10): error TS2322: Type '{ children: Element[]; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(187,14): error TS2322: Type '{ children: string; key: string; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(192,10): error TS2322: Type '{ children: Element; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(193,10): error TS2322: Type '{ children: Element; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(194,10): error TS2322: Type '{ children: Element; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Financial.jsx(195,10): error TS2322: Type '{ children: Element; value: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(49,12): error TS2322: Type '{ children: (string | Element)[]; variant: string; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(56,18): error TS2322: Type '{ value: string; onChange: (e: any) => void; placeholder: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(59,12): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(60,12): error TS2559: Type '{ children: (Element | Element[])[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(60,27): error TS2322: Type '{ children: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(60,94): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(63,12): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(64,12): error TS2559: Type '{ children: (Element | Element[])[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(64,27): error TS2322: Type '{ children: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(64,98): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(69,10): error TS2741: Property 'action' is missing in type '{ title: string; hint: string; }' but required in type '{ title: any; hint: any; action: any; }'.
+src/pages/event/Participants.jsx(82,20): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(83,20): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(83,51): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(88,20): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(89,20): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Participants.jsx(89,54): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(48,24): error TS2322: Type '{ type: string; value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(82,10): error TS2322: Type '{ children: (string | Element)[]; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(86,58): error TS2741: Property 'className' is missing in type '{ children: string; }' but required in type '{ children: any; className: any; }'.
+src/pages/event/Revenues.jsx(86,96): error TS2741: Property 'children' is missing in type '{ text: string; }' but required in type '{ text: any; children: any; }'.
+src/pages/event/Revenues.jsx(97,50): error TS2322: Type '{ value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(99,50): error TS2322: Type '{ type: string; value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(100,50): error TS2322: Type '{ type: string; value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(101,61): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/Revenues.jsx(109,10): error TS2322: Type '{ children: Element[]; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(110,12): error TS2741: Property 'className' is missing in type '{ children: Element; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/event/Revenues.jsx(110,26): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(111,17): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(111,66): error TS2322: Type '{ className: string; value: string; onChange: (e: any) => void; placeholder: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(112,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/event/Revenues.jsx(112,26): error TS2322: Type '{ children: string; variant: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Revenues.jsx(112,122): error TS2322: Type '{ children: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(27,12): error TS2322: Type '{ children: Element; variant: string; size: string; className: string; disabled: boolean; onClick: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(28,12): error TS2322: Type '{ children: Element; variant: string; size: string; className: string; disabled: boolean; onClick: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(29,12): error TS2322: Type '{ children: Element; variant: string; size: string; className: string; onClick: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(30,12): error TS2322: Type '{ children: Element; variant: string; size: string; className: string; onClick: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(35,113): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(36,90): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(37,97): error TS2322: Type '{ type: string; className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(40,16): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(41,16): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(41,47): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(44,95): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(45,90): error TS2322: Type '{ className: string; value: any; onChange: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Schedule.jsx(88,10): error TS2322: Type '{ children: (string | Element)[]; size: string; className: string; onClick: () => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(58,57): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(59,21): error TS2322: Type '{ value: any[]; onValueChange: (v: any) => void; min: number; max: any; step: number; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(62,57): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(63,21): error TS2322: Type '{ value: number[]; onValueChange: (v: any) => void; min: number; max: number; step: number; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(66,57): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(67,21): error TS2322: Type '{ value: any[]; onValueChange: (v: any) => void; min: number; max: number; step: number; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(70,57): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(71,21): error TS2322: Type '{ value: any[]; onValueChange: (v: any) => void; min: number; max: number; step: number; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(74,57): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(75,21): error TS2322: Type '{ value: number[]; onValueChange: (v: any) => void; min: number; max: number; step: number; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(77,12): error TS2322: Type '{ children: string; variant: string; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Simulator.jsx(98,16): error TS2741: Property 'children' is missing in type '{ text: string; }' but required in type '{ text: any; children: any; }'.
+src/pages/event/Sponsors.jsx(35,10): error TS2322: Type '{ children: (string | Element)[]; size: string; variant: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(54,12): error TS2741: Property 'action' is missing in type '{ title: string; hint: string; }' but required in type '{ title: any; hint: any; action: any; }'.
+src/pages/event/Sponsors.jsx(67,63): error TS2322: Type '{ type: string; value: any; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(69,63): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/Sponsors.jsx(77,10): error TS2322: Type '{ children: Element[]; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(78,12): error TS2741: Property 'className' is missing in type '{ children: Element; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/event/Sponsors.jsx(78,26): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(80,19): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(80,77): error TS2322: Type '{ className: string; value: string; onChange: (e: any) => void; placeholder: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(82,21): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(82,71): error TS2322: Type '{ type: string; className: string; value: string; onChange: (e: any) => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(83,21): error TS2322: Type '{ children: string; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(83,77): error TS2322: Type '{ type: string; className: string; value: string; onChange: (e: any) => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(86,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/event/Sponsors.jsx(86,26): error TS2322: Type '{ children: string; variant: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Sponsors.jsx(86,126): error TS2322: Type '{ children: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Suppliers.jsx(44,18): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/event/Suppliers.jsx(60,26): error TS2322: Type '{ type: string; placeholder: string; className: string; onChange: () => void; onBlur: (e: any) => any; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'type' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Suppliers.jsx(61,20): error TS2322: Type '{ children: (string | Element)[]; size: string; variant: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Tasks.jsx(50,10): error TS2741: Property 'action' is missing in type '{ title: string; hint: string; }' but required in type '{ title: any; hint: any; action: any; }'.
+src/pages/event/Tasks.jsx(66,26): error TS2322: Type '{ value: any; placeholder: string; onChange: (e: any) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'value' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Tasks.jsx(70,22): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Tasks.jsx(71,22): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/event/Tasks.jsx(71,86): error TS2322: Type '{ children: string; key: string; value: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Events.jsx(30,10): error TS2741: Property 'className' is missing in type '{ status: any; }' but required in type '{ status: any; className: any; }'.
+src/pages/Events.jsx(67,12): error TS2322: Type '{ children: (string | Element)[]; size: string; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ForgotPassword.jsx(48,14): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ForgotPassword.jsx(52,17): error TS2322: Type '{ id: string; type: string; autoComplete: string; autoFocus: true; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ForgotPassword.jsx(64,12): error TS2322: Type '{ children: string | Element; type: string; className: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Login.jsx(68,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Login.jsx(72,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; autoFocus: true; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Login.jsx(86,14): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Login.jsx(94,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Login.jsx(105,10): error TS2322: Type '{ children: string | Element; type: string; className: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(103,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(107,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; autoFocus: true; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(120,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(124,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(136,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(140,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/Register.jsx(151,10): error TS2322: Type '{ children: string | Element; type: string; className: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ResetPassword.jsx(67,8): error TS2739: Type '{ children: Element; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; title: string; }' is missing the following properties from type '{ icon: any; title: any; subtitle: any; footer: any; children: any; }': subtitle, footer
+src/pages/ResetPassword.jsx(96,6): error TS2741: Property 'footer' is missing in type '{ children: Element[]; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; title: string; subtitle: string; }' but required in type '{ icon: any; title: any; subtitle: any; footer: any; children: any; }'.
+src/pages/ResetPassword.jsx(108,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ResetPassword.jsx(112,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; autoFocus: true; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ResetPassword.jsx(125,12): error TS2322: Type '{ children: string; htmlFor: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ResetPassword.jsx(129,15): error TS2322: Type '{ id: string; type: string; autoComplete: string; placeholder: string; value: string; onChange: (e: any) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+src/pages/ResetPassword.jsx(140,10): error TS2322: Type '{ children: string | Element; type: string; className: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<any>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<any>'.
+

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Plus, User, ListChecks, Wallet, Ticket, Truck, CalendarDays, Sparkles } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import ExpenseCostFields from '@/components/financial/ExpenseCostFields';
 
 const TYPES = [
   { key: 'participante', label: 'Participante', icon: User },
@@ -42,7 +43,7 @@ export default function AddMenu() {
         case 'tarefa':
           return { ...ev, tasks: [{ id: uid(), name: form.name || 'Nova tarefa', owner: form.owner || '', date: form.date || '', category: form.category || 'Operação', priority: form.priority || 'Normal', status: 'A fazer' }, ...ev.tasks] };
         case 'despesa':
-          return { ...ev, expenses: [{ id: uid(), description: form.description || 'Despesa', category: form.category || 'Outros', type: form.type || 'fixed', qty: 1, unitValue: Number(form.unitValue) || 0, dueDate: form.dueDate || '', status: 'pendente', note: '' }, ...ev.expenses] };
+          return { ...ev, expenses: [{ id: uid(), description: form.description || 'Despesa', category: form.category || 'Outros', type: form.type || 'fixed', revenueBase: form.revenueBase || 'total', qty: Number(form.qty ?? 1), unitValue: Number(form.unitValue) || 0, dueDate: form.dueDate || '', status: 'pendente', note: '' }, ...ev.expenses] };
         case 'receita':
           return { ...ev, revenues: [{ id: uid(), description: form.description || 'Receita', type: form.type || 'Outros', expected: Number(form.expected) || 0, received: 0, expectedDate: form.expectedDate || '', receivedDate: null, category: form.type || 'Outros', status: 'previsto' }, ...ev.revenues] };
         case 'fornecedor':
@@ -118,12 +119,7 @@ export default function AddMenu() {
                   <SelectTrigger className={fieldCls}><SelectValue /></SelectTrigger><SelectContent>{currentEvent.expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label className={labelCls}>Tipo</Label>
-                <Select value={form.type || 'fixed'} onValueChange={v => set('type', v)}>
-                  <SelectTrigger className={fieldCls}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="fixed">Custo fixo</SelectItem><SelectItem value="perParticipant">Por participante</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div><Label className={labelCls}>Valor unitário</Label><Input type="number" className={fieldCls} value={form.unitValue || ''} onChange={e => set('unitValue', e.target.value)} /></div>
+              <div className="col-span-2"><ExpenseCostFields expense={form} onChange={patch => setForm(f => ({ ...f, ...patch }))} /></div>
               <div><Label className={labelCls}>Vencimento</Label><Input type="date" className={fieldCls} value={form.dueDate || ''} onChange={e => set('dueDate', e.target.value)} /></div>
             </div>
           )}

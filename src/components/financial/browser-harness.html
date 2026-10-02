@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MCT-34 — fixture de componentes</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React from 'react';
+      import { createRoot } from 'react-dom/client';
+      import '/src/index.css';
+      import { EventProvider } from '/src/context/EventContext.jsx';
+      import Expenses from '/src/pages/event/Expenses.jsx';
+      import Financial from '/src/pages/event/Financial.jsx';
+      import Simulator from '/src/pages/event/Simulator.jsx';
+      import AddMenu from '/src/components/layout/AddMenu.jsx';
+      const view = new URL(location.href).searchParams.get('view');
+      createRoot(document.getElementById('root')).render(
+        React.createElement(EventProvider, null,
+          React.createElement('main', { style: { padding: '24px' } },
+            view === 'simulator' ? React.createElement(Simulator)
+              : view === 'financial' ? React.createElement(Financial)
+              : React.createElement(React.Fragment, null, React.createElement(AddMenu), React.createElement(Expenses))
+          )
+        )
+      );
+    </script>
+  </body>
+</html>

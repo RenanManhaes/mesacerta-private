@@ -1,12 +1,22 @@
-import { timeToMinutes, minutesToTime, daysUntil, formatBRL } from './format';
+import { timeToMinutes, minutesToTime, daysUntil } from './format.js';
 
 const sum = (arr, f) => arr.reduce((a, b) => a + (f(b) || 0), 0);
 
-export function expenseTotal(exp, audience = 0) {
+const money = value => {
+  const cents = Math.abs(value) * 100;
+  return Math.sign(value) * Math.round(cents + Number.EPSILON * cents) / 100;
+};
+
+// Percentages are percentage points (4 = 4%). Missing revenueBase defaults to
+// total revenue for existing rows; audience is used ONLY for perParticipant.
+export function expenseTotal(exp, audience = 0, revenue = { faturamentoPrevisto: 0, sponsorExpected: 0 }) {
   if (!exp) return 0;
-  if (exp.type === 'perParticipant') return (exp.unitValue || 0) * (audience || 0);
-  if (exp.type === 'percent') return (exp.unitValue || 0) * (audience || 0) / 100; // percent of revenue handled outside
-  return (exp.qty || 1) * (exp.unitValue || 0);
+  if (exp.type === 'perParticipant') return money((exp.unitValue || 0) * (audience || 0));
+  if (exp.type === 'percent') {
+    const base = exp.revenueBase === 'sponsors' ? revenue.sponsorExpected : revenue.faturamentoPrevisto;
+    return money((exp.unitValue || 0) * (base || 0) / 100);
+  }
+  return money((exp.qty ?? 1) * (exp.unitValue || 0));
 }
 
 export function financialSummary(ev) {
@@ -27,30 +37,61 @@ export function financialSummary(ev) {
   const faturamentoPrevisto = ticketExpected + sponsorExpected + otherExpected;
   const recebido = ticketReceived + sponsorReceived + otherReceived;
   const aReceber = faturamentoPrevisto - recebido;
+  const revenue = { faturamentoPrevisto, sponsorExpected };
 
-  const despesasPrevistas = sum(ev.expenses || [], e => expenseTotal(e, audience));
-  const pago = sum(ev.expenses || [], e => {
-    const total = expenseTotal(e, audience);
+  const despesasPrevistas = money(sum(ev.expenses || [], e => expenseTotal(e, audience, revenue)));
+  const pago = money(sum(ev.expenses || [], e => {
+    const total = expenseTotal(e, audience, revenue);
     if (e.status === 'pago') return total;
     if (e.status === 'parcial') return Math.min(total, (e.paidAmount || 0));
     return 0;
-  });
-  const aPagar = despesasPrevistas - pago;
+  }));
+  const aPagar = money(despesasPrevistas - pago);
 
-  const resultadoPrevisto = faturamentoPrevisto - despesasPrevistas;
-  const resultadoAtual = recebido - pago;
+  const resultadoPrevisto = money(faturamentoPrevisto - despesasPrevistas);
+  const resultadoAtual = money(recebido - pago);
   const margem = faturamentoPrevisto ? (resultadoPrevisto / faturamentoPrevisto) * 100 : 0;
 
   const meta = ev.goalRevenue || 0;
   const metaPct = meta ? (faturamentoPrevisto / meta) * 100 : 0;
   const faltaMeta = Math.max(0, meta - faturamentoPrevisto);
 
-  const fixedCosts = sum((ev.expenses || []).filter(e => e.type !== 'perParticipant'), e => expenseTotal(e, audience));
+  const fixedCosts = money(sum((ev.expenses || []).filter(e => e.type !== 'perParticipant' && e.type !== 'percent'), e => expenseTotal(e, audience, revenue)));
+  const percentExpenses = (ev.expenses || []).filter(e => e.type === 'percent');
+  const percentCosts = money(sum(percentExpenses, e => expenseTotal(e, audience, revenue)));
+  const totalRate = sum(percentExpenses.filter(e => e.revenueBase !== 'sponsors'), e => (e.unitValue || 0) / 100);
+  const sponsorRate = sum(percentExpenses.filter(e => e.revenueBase === 'sponsors'), e => (e.unitValue || 0) / 100);
   const variablePerParticipant = sum((ev.expenses || []).filter(e => e.type === 'perParticipant'), e => e.unitValue || 0);
   const avgTicket = ticketExpectedCount ? ticketExpected / ticketExpectedCount : 0;
-  const contribution = avgTicket - variablePerParticipant;
-  const breakEven = contribution > 0 ? Math.ceil((fixedCosts - sponsorExpected - otherExpected) / contribution) : 0;
-  const breakEvenSafe = Math.max(0, breakEven);
+  const contribution = avgTicket * (1 - totalRate) - variablePerParticipant;
+  const uncoveredCosts = fixedCosts - sponsorExpected * (1 - totalRate - sponsorRate) - otherExpected * (1 - totalRate);
+  // Check the rounded line totals near the analytical threshold. Summing rates
+  // alone can announce break-even while the rounded expenses still exceed sales.
+  const resultAt = sales => {
+    const base = { faturamentoPrevisto: money(avgTicket * sales + sponsorExpected + otherExpected), sponsorExpected };
+    return money(base.faturamentoPrevisto - sum(ev.expenses || [], e => expenseTotal(e, sales, base)));
+  };
+  let breakEvenSafe = 0;
+  let breakEvenApproximate = false;
+  const breakEvenPossible = resultAt(0) >= 0 || contribution > 0;
+  if (resultAt(0) < 0 && contribution > 0) {
+    // Every rounded line and the revenue can differ by at most half a cent.
+    const slack = ((ev.expenses || []).length + 1) * 0.005 + 0.01;
+    const first = Math.max(0, Math.ceil((uncoveredCosts - slack) / contribution));
+    const last = Math.max(first, Math.ceil((uncoveredCosts + slack) / contribution));
+    breakEvenSafe = last;
+    // Extremely small contributions can create an enormous search interval.
+    // Use a conservative upper bound, explicitly labelled as an estimate.
+    breakEvenApproximate = last - first > 1000;
+    if (!breakEvenApproximate) {
+      breakEvenSafe = first;
+      // Roundings can make one sale break even and the next lose a cent.
+      // Find the last loss, so "from N sales" remains true for larger volumes.
+      for (let sales = last; sales >= first; sales--) {
+        if (resultAt(sales) < 0) { breakEvenSafe = sales + 1; break; }
+      }
+    }
+  }
 
   return {
     ticketExpected, ticketReceived, ticketSold, ticketCapacity, ticketExpectedCount,
@@ -59,7 +100,7 @@ export function financialSummary(ev) {
     despesasPrevistas, pago, aPagar,
     resultadoPrevisto, resultadoAtual, margem,
     meta, metaPct, faltaMeta,
-    fixedCosts, variablePerParticipant, avgTicket, contribution, breakEven: breakEvenSafe
+    fixedCosts, percentCosts, variablePerParticipant, avgTicket, contribution, breakEven: breakEvenSafe, breakEvenPossible, breakEvenApproximate
   };
 }
 
@@ -132,7 +173,7 @@ export function alerts(ev) {
   // catering over budget
   const catering = (ev.expenses || []).find(e => e.category === 'Alimentação');
   if (catering && ev.cateringBudget) {
-    const actual = expenseTotal(catering, ev.expectedAudience);
+    const actual = expenseTotal(catering, ev.expectedAudience, fin);
     const pct = ev.cateringBudget ? ((actual - ev.cateringBudget) / ev.cateringBudget) * 100 : 0;
     if (pct > 5) out.push({ level: 'atencao', title: `O orçamento de alimentação está ${pct.toFixed(0)}% acima do planejado.`, to: 'financeiro' });
   }

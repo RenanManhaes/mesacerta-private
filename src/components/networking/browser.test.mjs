@@ -174,8 +174,8 @@ try {
     const event = { expectedAudience: 100, expenses: [expense], revenues: [{ expected: 1000 }], modules: { networking: true }, schedule: [{ id: 'a', start: '09:00', duration: 30 }, { id: 'b', start: '11:00', duration: 30 }], capacity: 100, confirmed: 0, participants: [{ status: 'Confirmado' }] };
     return { percentExpense: financialSummary(event).despesasPrevistas, zeroQuantity: expenseTotal({ type: 'fixed', unitValue: 25, qty: 0 }), secondComputedStart: scheduleSummary(event).computed[1].computedStart, reserved: capacitySummary(event).reserved, networkingAlert: alerts(event).find(a => a.to === 'networking').title };
   });
-  assert.equal(findings.percentExpense, 10); assert.equal(findings.zeroQuantity, 25); assert.equal(findings.secondComputedStart, '09:30'); assert.equal(findings.reserved, 0);
-  console.log('MCT-1 achados reproduzidos:', JSON.stringify(findings));
+  assert.equal(findings.percentExpense, 100); assert.equal(findings.zeroQuantity, 0); assert.equal(findings.secondComputedStart, '09:30'); assert.equal(findings.reserved, 0);
+  console.log('MCT-34 corrigido / demais achados MCT-1 preservados:', JSON.stringify(findings));
   assert.deepEqual(errors, []);
   pass('Navegacao e fluxos: zero erros JS/console (APIs isoladas por mock de teste)');
   writeFileSync(`${output}/browser-result.json`, JSON.stringify({ checks, errors, environment: 'Edge headless / auth API mocked / named fixtures' }, null, 2));

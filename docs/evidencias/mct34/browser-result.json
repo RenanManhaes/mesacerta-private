@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "25 linhas renderizadas; total da tela R$ 29.718,98",
+    "Editor percentual: 4% do faturamento R$ 31.206 → R$ 1.248,24",
+    "Troca de base por linha: 4% de R$ 20.658 → R$ 826,32; público 1000 mantém valor",
+    "Mobile 375px: percentual/base acessíveis e sem overflow horizontal",
+    "Editor fixo: quantidade zero → R$ 0,00; quantidade 2 × R$ 4,00 → R$ 8,00",
+    "Editor por pessoa: R$ 60 × público 1000 → R$ 60.000,00",
+    "Criação rápida preserva percentual 4 e base patrocínio",
+    "Financeiro: margem dos 25 lançamentos reais exibida como 4,8%",
+    "Financeiro: total e rótulo percentual usam faturamento",
+    "Simulador recalcula 4% com patrocínio 60000 + outras receitas 10548 → despesa 2821.92",
+    "Zero erros de JavaScript/console nos componentes testados"
+  ],
+  "errors": [],
+  "environment": "Edge headless, EventContext de fixture em memória; sem auth/persistência"
+}

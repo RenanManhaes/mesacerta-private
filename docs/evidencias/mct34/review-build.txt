@@ -1,0 +1,28 @@
+exit_code=0
+
+> base44-app@0.0.0 build
+> vite build
+
+[base44] Warning: VITE_BASE44_APP_ID is not set — this build
+[base44] will not know its app id and its API calls will fail.
+[base44] Build with:  base44 build   (or base44 deploy --build)
+[base44] Proxy not enabled (VITE_BASE44_APP_BASE_URL not set)
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 2005 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                        1.89 kB │ gzip:   0.87 kB
+dist/assets/index-CVpPO-4R.css        73.68 kB │ gzip:  13.19 kB
+dist/assets/purify.es-Bvo9QlJ8.js     28.08 kB │ gzip:  11.08 kB
+dist/assets/index.es-DtHUwwp1.js     151.40 kB │ gzip:  48.89 kB
+dist/assets/html2canvas-BlomTLYH.js  199.48 kB │ gzip:  46.77 kB
+dist/assets/export-UZNlCyUD.js       400.57 kB │ gzip: 130.32 kB
+dist/assets/index-CkVGqhA5.js        776.15 kB │ gzip: 219.29 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.59s

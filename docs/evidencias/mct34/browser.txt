@@ -1,0 +1,14 @@
+exit_code=0
+PASS 25 linhas renderizadas; total da tela R$ 29.718,98
+PASS Editor percentual: 4% do faturamento R$ 31.206 → R$ 1.248,24
+PASS Troca de base por linha: 4% de R$ 20.658 → R$ 826,32; público 1000 mantém valor
+PASS Mobile 375px: percentual/base acessíveis e sem overflow horizontal
+PASS Editor fixo: quantidade zero → R$ 0,00; quantidade 2 × R$ 4,00 → R$ 8,00
+PASS Editor por pessoa: R$ 60 × público 1000 → R$ 60.000,00
+PASS Criação rápida preserva percentual 4 e base patrocínio
+PASS Financeiro: margem dos 25 lançamentos reais exibida como 4,8%
+PASS Financeiro: total e rótulo percentual usam faturamento
+PASS Simulador recalcula 4% com patrocínio 60000 + outras receitas 10548 → despesa 2821.92
+PASS Zero erros de JavaScript/console nos componentes testados
+11/11 verificações UI MCT-34 PASS
+

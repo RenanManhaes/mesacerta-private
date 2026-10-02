@@ -9,7 +9,7 @@ O Jev responde perguntas tipadas sobre texto e devolve valor + probabilidade
 calibrada. Ele **não** decide fluxo, não gera código e não faz conta.
 
 No Mesa Certa isso separa o produto em dois territórios:
-
+<!--  -->
 | Território | Quem resolve |
 |---|---|
 | Distribuição das mesas, recozimento simulado, detecção de conflito, rota | **Código.** Combinatória determinística. Jev nunca entra. |

@@ -47,6 +47,7 @@ function Resumo() {
         </div>
         <div className="mt-4 text-[12px] text-muted-foreground space-y-1">
           <div className="flex justify-between"><span>Custos fixos</span><span className="tnum">{formatBRL(fin.fixedCosts)}</span></div>
+          <div className="flex justify-between"><span>Percentuais sobre receita</span><span className="tnum">{formatBRLc(fin.percentCosts)}</span></div>
           <div className="flex justify-between"><span>Custo por participante</span><span className="tnum">{formatBRLc(fin.variablePerParticipant)} × {ev.expectedAudience}</span></div>
         </div>
       </div>
@@ -64,8 +65,9 @@ function Resumo() {
             <InfoTip text="Quantidade mínima de vendas necessária para que receitas e despesas se igualem." />
           </div>
           <div className="mt-1.5 text-[13px] text-muted-foreground">
-            Seu evento passa a gerar resultado positivo a partir de
-            <span className="text-foreground font-medium tnum"> {fin.breakEven} ingressos pagantes</span>.
+            {fin.breakEvenPossible ? <>{fin.breakEvenApproximate ? 'Estimativa conservadora de equilíbrio a partir de' : 'Seu evento atinge o ponto de equilíbrio a partir de'}
+              <span className="text-foreground font-medium tnum"> {fin.breakEven} ingressos pagantes</span>.</>
+              : 'Inviável nas condições atuais: a receita líquida por ingresso não cobre o custo variável.'}
           </div>
         </div>
       </div>
@@ -101,9 +103,10 @@ function ReceitasTab() {
 
 function DespesasTab() {
   const { currentEvent: ev } = useEvent();
+  const fin = financialSummary(ev);
   const byCat = {};
   ev.expenses.forEach(e => {
-    const total = expenseTotal(e, ev.expectedAudience);
+    const total = expenseTotal(e, ev.expectedAudience, fin);
     byCat[e.category] = (byCat[e.category] || 0) + total;
   });
   return (
@@ -113,13 +116,13 @@ function DespesasTab() {
         <div className="col-span-2 text-right">Tipo</div><div className="col-span-2 text-right">Total</div><div className="col-span-1 text-right">Status</div>
       </div>
       {ev.expenses.map(e => {
-        const total = expenseTotal(e, ev.expectedAudience);
+        const total = expenseTotal(e, ev.expectedAudience, fin);
         return (
           <div key={e.id} className="grid grid-cols-12 gap-4 px-2 py-2.5 border-b border-border items-center text-[13px]">
             <div className="col-span-5 min-w-0"><div className="truncate font-medium">{e.description}</div>{e.note && <div className="text-[11px] text-muted-foreground">{e.note}</div>}</div>
             <div className="col-span-2 text-muted-foreground">{e.category}</div>
-            <div className="col-span-2 text-right text-[12px] text-muted-foreground">{e.type === 'perParticipant' ? `${formatBRLc(e.unitValue)}/pessoa` : 'Fixo'}</div>
-            <div className="col-span-2 text-right tnum">{formatBRL(total)}</div>
+            <div className="col-span-2 text-right text-[12px] text-muted-foreground">{e.type === 'percent' ? `${e.unitValue}% ${e.revenueBase === 'sponsors' ? 'do patrocínio' : 'do faturamento'}` : e.type === 'perParticipant' ? `${formatBRLc(e.unitValue)}/pessoa` : 'Fixo'}</div>
+            <div className="col-span-2 text-right tnum">{formatBRLc(total)}</div>
             <div className="col-span-1 flex justify-end"><StatusPill status={e.status} /></div>
           </div>
         );
@@ -130,7 +133,7 @@ function DespesasTab() {
           {Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([cat, v]) => (
             <div key={cat} className="flex justify-between py-2 border-b border-border text-[13px]">
               <span className="text-muted-foreground">{cat}</span>
-              <span className="tnum">{formatBRL(v)}</span>
+              <span className="tnum">{formatBRLc(v)}</span>
             </div>
           ))}
         </div>

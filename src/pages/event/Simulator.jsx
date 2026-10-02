@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary } from '@/lib/selectors';
-import { formatBRL, formatPercent } from '@/lib/format';
+import { formatBRL, formatBRLc, formatPercent } from '@/lib/format';
 import { SectionLabel, InfoTip } from '@/components/common/Primitives';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -13,29 +13,34 @@ export default function Simulator() {
   const { currentEvent: ev } = useEvent();
   const current = financialSummary(ev);
 
-  const [participants, setParticipants] = useState(ev.expectedAudience || 150);
-  const [price, setPrice] = useState(Math.round(current.avgTicket) || 299);
-  const [sponsors, setSponsors] = useState(current.sponsorExpected || 25000);
-  const [costPerParticipant, setCostPerParticipant] = useState(current.variablePerParticipant || 72);
-  const [fixedCosts, setFixedCosts] = useState(current.fixedCosts || 18000);
+  const [participants, setParticipants] = useState(ev.expectedAudience ?? 0);
+  const [price, setPrice] = useState(current.avgTicket);
+  const [sponsors, setSponsors] = useState(current.sponsorExpected);
+  const [costPerParticipant, setCostPerParticipant] = useState(current.variablePerParticipant);
+  const [fixedCosts, setFixedCosts] = useState(current.fixedCosts);
 
   const result = useMemo(() => {
-    const faturamento = participants * price + sponsors;
-    const despesas = fixedCosts + costPerParticipant * participants;
-    const resultado = faturamento - despesas;
-    const margem = faturamento ? (resultado / faturamento) * 100 : 0;
-    const contribution = price - costPerParticipant;
-    const breakEven = contribution > 0 ? Math.ceil((fixedCosts - sponsors) / contribution) : 0;
+    const scenario = financialSummary({
+      expectedAudience: participants,
+      tickets: [{ lots: [{ price, expectedSales: participants }] }],
+      sponsors: [{ negotiated: sponsors }],
+      revenues: ev.revenues,
+      expenses: [
+        { type: 'fixed', qty: 1, unitValue: fixedCosts },
+        { type: 'perParticipant', unitValue: costPerParticipant },
+        ...(ev.expenses || []).filter(e => e.type === 'percent'),
+      ],
+    });
     const capacityOk = ev.capacity ? participants <= ev.capacity : true;
-    return { faturamento, despesas, resultado, margem, breakEven: Math.max(0, breakEven), capacityOk };
-  }, [participants, price, sponsors, costPerParticipant, fixedCosts, ev.capacity]);
+    return { faturamento: scenario.faturamentoPrevisto, despesas: scenario.despesasPrevistas, resultado: scenario.resultadoPrevisto, margem: scenario.margem, breakEven: scenario.breakEven, breakEvenPossible: scenario.breakEvenPossible, breakEvenApproximate: scenario.breakEvenApproximate, capacityOk };
+  }, [participants, price, sponsors, costPerParticipant, fixedCosts, ev.capacity, ev.revenues, ev.expenses]);
 
   const compare = () => {
-    setParticipants(ev.expectedAudience || 150);
-    setPrice(Math.round(current.avgTicket) || 299);
-    setSponsors(current.sponsorExpected || 25000);
-    setCostPerParticipant(current.variablePerParticipant || 72);
-    setFixedCosts(current.fixedCosts || 18000);
+    setParticipants(ev.expectedAudience ?? 0);
+    setPrice(current.avgTicket);
+    setSponsors(current.sponsorExpected);
+    setCostPerParticipant(current.variablePerParticipant);
+    setFixedCosts(current.fixedCosts);
   };
 
   return (
@@ -43,6 +48,7 @@ export default function Simulator() {
       <div>
         <h1 className="font-display text-[26px] tracking-tight">Simulador</h1>
         <p className="mt-1 text-[14px] text-muted-foreground">Simule antes de decidir. Os valores não alteram o seu evento real.</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">Os percentuais mantêm a base escolhida em cada despesa e acompanham a receita simulada. Outras receitas previstas são mantidas.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -80,7 +86,7 @@ export default function Simulator() {
               <div className="font-display text-[34px] leading-none tracking-tight tnum mt-1">{formatBRL(result.faturamento)}</div>
             </div>
             <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-              <div><div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Despesas</div><div className="tnum text-[18px] font-medium mt-1">{formatBRL(result.despesas)}</div></div>
+              <div><div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Despesas</div><div className="tnum text-[18px] font-medium mt-1">{formatBRLc(result.despesas)}</div></div>
               <div><div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Margem</div><div className="tnum text-[18px] font-medium mt-1">{formatPercent(result.margem)}</div></div>
             </div>
             <div className="border-t border-border pt-4">
@@ -90,7 +96,7 @@ export default function Simulator() {
             <div className="border-t border-border pt-4 flex items-center gap-1.5">
               <span className="text-[13px] text-muted-foreground">Ponto de equilíbrio</span>
               <InfoTip text="Ingressos pagantes necessários para cobrir os custos, considerando patrocínios." />
-              <span className="ml-auto tnum text-[14px] font-medium">{result.breakEven} ingressos</span>
+              <span className="ml-auto tnum text-[14px] font-medium">{result.breakEvenPossible ? `${result.breakEvenApproximate ? 'Estimativa: ' : ''}${result.breakEven} ingressos` : 'Inviável'}</span>
             </div>
             <div className={cn('flex items-center gap-2 border-t border-border pt-4 text-[13px]', result.capacityOk ? 'text-positive' : 'text-danger')}>
               {result.capacityOk ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
