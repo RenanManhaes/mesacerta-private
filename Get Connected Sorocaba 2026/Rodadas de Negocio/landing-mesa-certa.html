@@ -1,0 +1,406 @@
+<title>Mesa Certa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: página escura, uma coluna central de 1120px, seções separadas por faixas de luz verde-água.
+   O desenho das mesas redondas é o elemento de marca e se repete no hero e nas etapas. */
+:root{
+  --ink:#F2F7F6; --ink-2:#A9BDBB; --ink-3:#74908D;
+  --night:#07100F; --night-2:#0C1A18; --surface:#11211F; --line:#1E3330;
+  --mint:#5FD6C2; --mint-deep:#0E6B66; --gold:#E8B84A; --rose:#E8796E;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--night);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding:0 16px 0;overflow-x:hidden;
+}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto}
+section{padding-block:clamp(56px,8vw,104px)}
+.eyebrow{font:600 11.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mint);margin:0 0 14px}
+.lead{color:var(--ink-2);font-size:17px;max-width:62ch;margin:14px 0 0}
+
+/* navegação */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;gap:18px;
+  max-width:1120px;margin:0 auto;padding:12px 0;background:rgba(7,16,15,.86);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:10px;font:800 17px var(--display);letter-spacing:-.01em}
+.logo i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2BA695,var(--mint-deep));
+  font:800 11px var(--mono);font-style:normal;color:#04100E}
+.nav nav{display:flex;gap:20px;margin-left:auto;font-size:14px;color:var(--ink-2)}
+.nav nav a:hover{color:var(--mint)}
+@media (max-width:860px){.nav nav{display:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 20px;font:600 14.5px var(--body);
+  text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
+.btn-primary{background:var(--mint);color:#04100E}
+.btn-primary:hover{transform:translateY(-1px);background:#7BE3D1}
+.btn-ghost{border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--mint);color:var(--mint)}
+
+/* hero */
+.hero{position:relative;padding-block:clamp(48px,7vw,86px) clamp(40px,6vw,72px)}
+.hero::before{content:"";position:absolute;inset:-120px -30% auto;height:620px;z-index:-1;
+  background:radial-gradient(circle at 30% 25%,rgba(95,214,194,.22),transparent 60%),
+             radial-gradient(circle at 75% 10%,rgba(232,184,74,.12),transparent 55%)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,64px);align-items:center}
+@media (max-width:900px){.hero-grid{grid-template-columns:minmax(0,1fr)}}
+.badge{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:999px;padding:6px 14px;
+  font-size:12.5px;color:var(--ink-2);background:rgba(17,33,31,.7)}
+.badge b{color:var(--mint);font-weight:600}
+h1{font-size:clamp(34px,5.4vw,60px);line-height:1.04;letter-spacing:-.02em;margin:20px 0 0}
+h1 em{font-style:normal;color:var(--mint)}
+.hero p.lead{font-size:18px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.hero-note{margin:18px 0 0;font-size:13px;color:var(--ink-3)}
+.hero-trust{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;font-size:13px;color:var(--ink-2)}
+.hero-trust span{display:flex;align-items:center;gap:7px}
+.hero-trust i{width:6px;height:6px;border-radius:50%;background:var(--mint);font-style:normal}
+
+/* desenho da mesa */
+.mesa-art{position:relative;aspect-ratio:1;max-width:420px;margin-inline:auto;width:100%}
+.mesa-art .ring{position:absolute;inset:8%;border:1px dashed rgba(95,214,194,.28);border-radius:50%}
+.mesa-art .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38%;aspect-ratio:1;border-radius:50%;
+  display:grid;place-items:center;text-align:center;gap:2px;color:#04100E;
+  background:radial-gradient(circle at 34% 28%,#6FE0CB,var(--mint-deep) 70%);box-shadow:0 20px 50px rgba(14,107,102,.4)}
+.mesa-art .core small{font:600 9px var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.mesa-art .core b{font:800 15px var(--display);line-height:1.1;padding:0 8px}
+.seat{position:absolute;left:50%;top:50%;display:grid;place-items:center;min-width:62px;padding:6px 10px;border-radius:12px;
+  transform:translate(-50%,-50%) rotate(var(--a)) translateY(-42%) rotate(calc(var(--a) * -1));
+  background:var(--surface);border:1px solid var(--line);font:500 11.5px var(--mono);color:var(--ink-2);white-space:nowrap}
+.seat.on{border-color:var(--mint);color:var(--mint)}
+.seat.host{background:var(--mint-deep);border-color:var(--mint-deep);color:#EAFFFB;font-weight:600}
+
+/* faixa rolante */
+.marquee{border-block:1px solid var(--line);background:var(--night-2);overflow:hidden;padding:14px 0;
+  margin-inline:calc(50% - 50vw);width:100vw}
+.marquee ul{display:flex;gap:34px;margin:0;padding:0;list-style:none;width:max-content;animation:slide 32s linear infinite}
+.marquee li{display:flex;align-items:center;gap:34px;font:600 12.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.marquee li::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--mint-deep)}
+@keyframes slide{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.marquee ul{animation:none}}
+
+/* números */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.stat{background:var(--night-2);padding:26px 24px}
+.stat b{display:block;font:800 clamp(30px,4vw,42px)/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:10px;font-size:13.5px;color:var(--ink-2)}
+
+/* blocos */
+.head{max-width:720px;margin-bottom:clamp(28px,4vw,44px)}
+h2{font-size:clamp(26px,3.6vw,40px);line-height:1.12;letter-spacing:-.015em}
+h3{font-size:18px;letter-spacing:-.01em}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;min-width:0}
+.card p{color:var(--ink-2);font-size:14.5px;margin:10px 0 0}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(95,214,194,.12);
+  color:var(--mint);font:600 12.5px var(--mono);margin-bottom:14px}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.tag{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12px;color:var(--ink-3)}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center}
+@media (max-width:860px){.split{grid-template-columns:minmax(0,1fr)}}
+.rulebox{background:linear-gradient(160deg,var(--surface),var(--night-2));border:1px solid var(--line);border-radius:20px;padding:26px}
+.rule{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
+.rule:last-child{border-bottom:0;padding-bottom:0}
+.rule:first-child{padding-top:0}
+.rule i{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;
+  background:rgba(95,214,194,.14);color:var(--mint)}
+.rule p{margin:4px 0 0;font-size:14px;color:var(--ink-2)}
+.rule b{font-size:14.5px}
+
+/* tabela comparativa */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14.5px}
+th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line)}
+thead th{background:var(--night-2);font:600 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+thead th:last-child{color:var(--mint)}
+tbody tr:last-child td{border-bottom:0}
+td.yes{color:var(--mint);font-weight:600}
+td.no{color:var(--ink-3)}
+
+/* planos */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px;align-items:start}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;min-width:0}
+.plan.destaque{border-color:var(--mint);box-shadow:0 18px 50px rgba(14,107,102,.22)}
+.price{font:800 30px var(--display);margin:16px 0 2px}
+.price small{font:500 13px var(--body);color:var(--ink-3)}
+.plan ul{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:9px;font-size:14px;color:var(--ink-2)}
+.plan li{display:flex;gap:9px}
+.plan li::before{content:"";flex:none;width:7px;height:7px;margin-top:8px;border-radius:50%;background:var(--mint-deep)}
+.plan .btn{width:100%;justify-content:center;margin-top:20px}
+
+/* faq */
+details{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:10px}
+summary{cursor:pointer;list-style:none;padding:16px 20px;font-weight:600;display:flex;gap:12px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;color:var(--mint);font:500 18px var(--mono)}
+details[open] summary::after{content:"\2212"}
+details p{margin:0;padding:0 20px 18px;color:var(--ink-2);font-size:14.5px}
+
+/* cta final + rodapé */
+.cta{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:26px;padding:clamp(30px,5vw,56px);
+  background:radial-gradient(circle at 18% 20%,rgba(95,214,194,.16),transparent 55%),var(--night-2);text-align:center}
+.cta h2{max-width:18ch;margin-inline:auto}
+.cta .hero-actions{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:40px 32px;color:var(--ink-3);font-size:13.5px}
+.foot-grid{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:28px}
+@media (max-width:760px){.foot-grid{grid-template-columns:minmax(0,1fr)}}
+footer h4{font:600 11.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin:0 0 12px}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+footer a{text-decoration:none}
+footer a:hover{color:var(--mint)}
+.copy{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:space-between}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px;border-radius:6px}
+</style>
+
+<header class="nav">
+  <a class="logo" href="#topo"><i>MC</i>Mesa Certa</a>
+  <nav>
+    <a href="#como">Como funciona</a>
+    <a href="#regras">Regras</a>
+    <a href="#comparar">Por que Mesa Certa</a>
+    <a href="#planos">Planos</a>
+    <a href="#duvidas">Dúvidas</a>
+  </nav>
+  <a class="btn btn-primary" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Abrir o simulador</a>
+</header>
+
+<main class="wrap" id="topo">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="badge"><b>Rodadas de negócio</b> · feito em evento real</span>
+        <h1>Ninguém repete mesa. <em>Nenhum patrocinador fala duas vezes com a mesma pessoa.</em></h1>
+        <p class="lead">O Mesa Certa monta a escala das rodadas de negócio do seu evento: distribui os convidados entre as mesas dos patrocinadores, respeita quem fica fixo e entrega o roteiro individual de cada pessoa, pronto para imprimir.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Abrir o simulador</a>
+          <a class="btn btn-ghost" href="#como">Ver como funciona</a>
+        </div>
+        <p class="hero-note">Abre no navegador, sem instalar nada. O cadastro fica no seu computador.</p>
+        <div class="hero-trust">
+          <span><i></i>Usado no Get Connected Sorocaba 2026</span>
+          <span><i></i>14 mesas e 76 convidados</span>
+          <span><i></i>Grade recalculada em menos de 1 segundo</span>
+        </div>
+      </div>
+      <div class="mesa-art" aria-hidden="true">
+        <div class="ring"></div>
+        <span class="seat host" style="--a:0deg">Ana · fixa</span>
+        <span class="seat on" style="--a:51deg">Camila</span>
+        <span class="seat" style="--a:102deg">Renato</span>
+        <span class="seat" style="--a:153deg">James</span>
+        <span class="seat on" style="--a:204deg">Jaqueline</span>
+        <span class="seat" style="--a:255deg">Michael</span>
+        <span class="seat" style="--a:306deg">Araceli</span>
+        <div class="core"><small>Patrocinador</small><b>INTERFOCUS</b></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="marquee" aria-hidden="true">
+  <ul>
+    <li>Mesas</li><li>Rodadas</li><li>Patrocinadores</li><li>Anfitriões fixos</li><li>Convidados</li><li>Roteiro individual</li><li>Lotação</li><li>Reencontros</li><li>PDF</li><li>Exportação</li>
+    <li>Mesas</li><li>Rodadas</li><li>Patrocinadores</li><li>Anfitriões fixos</li><li>Convidados</li><li>Roteiro individual</li><li>Lotação</li><li>Reencontros</li><li>PDF</li><li>Exportação</li>
+  </ul>
+</div>
+
+<main class="wrap">
+  <section>
+    <div class="head">
+      <p class="eyebrow">O que o Mesa Certa resolve</p>
+      <h2>Montar essa escala à mão não fecha</h2>
+      <p class="lead">Com 14 mesas e 76 convidados são 196 lugares para distribuir, sem ninguém repetir mesa e sem estourar a lotação. Uma planilha até começa, mas não avisa quando a conta não fecha.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>196</b><span>lugares distribuídos em 14 rodadas</span></div>
+      <div class="stat"><b>0</b><span>convidados repetindo mesa</span></div>
+      <div class="stat"><b>0</b><span>duplas repetidas para o mesmo patrocinador</span></div>
+      <div class="stat"><b>2h05</b><span>de rodadas, calculadas pelo tempo de fala</span></div>
+    </div>
+  </section>
+
+  <section id="regras">
+    <div class="split">
+      <div>
+        <p class="eyebrow">As regras que o sistema garante</p>
+        <h2>Quatro regras, sempre na mesma ordem</h2>
+        <p class="lead">Cada mudança no cenário refaz a grade inteira e revalida as quatro. Quando alguma não cabe na matemática, o sistema diz o que mudar.</p>
+        <div class="hero-actions">
+          <a class="btn btn-ghost" href="https://claude.ai/code/artifact/9d27431d-9d29-433e-9635-b3e9b3829cd4" target="_blank" rel="noopener">Ler o documento de regras</a>
+        </div>
+      </div>
+      <div class="rulebox">
+        <div class="rule"><i>1</i><div><b>Ninguém repete mesa</b><p>Com rodadas até o número de mesas, cada convidado passa por mesas sempre diferentes.</p></div></div>
+        <div class="rule"><i>2</i><div><b>O patrocinador não repete dupla</b><p>Se alguém volta a uma mesa, encontra outras pessoas. O empresário nunca conversa duas vezes com a mesma gente.</p></div></div>
+        <div class="rule"><i>3</i><div><b>Ninguém senta na mesa da própria empresa</b><p>O convidado do patrocinador que circula é trocado de lugar automaticamente, enquanto houver folga de mesas.</p></div></div>
+        <div class="rule"><i>4</i><div><b>Os convidados se misturam ao máximo</b><p>O sistema testa várias combinações e fica com a que espalha melhor os encontros.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="head">
+      <p class="eyebrow">Como um evento roda aqui dentro</p>
+      <h2>Do cadastro ao roteiro na mão do convidado</h2>
+    </div>
+    <div class="cards">
+      <div class="card"><span class="num">01</span><h3>Cadastre os patrocinadores</h3><p>Cada empresa vira uma mesa. Cole a lista inteira de uma vez ou acrescente uma por uma.</p><div class="tags"><span class="tag">Uma mesa por empresa</span><span class="tag">Colar em massa</span></div></div>
+      <div class="card"><span class="num">02</span><h3>Diga quem é anfitrião</h3><p>No cartão de cada mesa você liga as pessoas da empresa e define quem fica fixo e quem circula.</p><div class="tags"><span class="tag">Fixo</span><span class="tag">Roda</span><span class="tag">Fora</span></div></div>
+      <div class="card"><span class="num">03</span><h3>Cole os convidados</h3><p>Um nome por linha. Eles entram rodando, e os números do evento se atualizam sozinhos.</p><div class="tags"><span class="tag">Um por linha</span></div></div>
+      <div class="card"><span class="num">04</span><h3>Ajuste o cenário</h3><p>Mesas, rodadas e pessoas por mesa. A grade é refeita na hora e os avisos dizem o que não fecha.</p><div class="tags"><span class="tag">Recalcula na hora</span></div></div>
+      <div class="card"><span class="num">05</span><h3>Confira a grade</h3><p>Veja as mesas rodada a rodada, a rota de cada convidado e quem se reencontra.</p><div class="tags"><span class="tag">Mesas por rodada</span><span class="tag">Encontros</span></div></div>
+      <div class="card"><span class="num">06</span><h3>Entregue o roteiro</h3><p>Texto pronto para o WhatsApp, planilha por mesa e PDF com um roteiro por pessoa.</p><div class="tags"><span class="tag">WhatsApp</span><span class="tag">Excel</span><span class="tag">PDF</span></div></div>
+    </div>
+  </section>
+
+  <section id="comparar">
+    <div class="head">
+      <p class="eyebrow">Por que Mesa Certa</p>
+      <h2>Planilha e sorteio não enxergam a regra</h2>
+      <p class="lead">Dá para começar na mão. O problema aparece quando um patrocinador leva dois convidados, uma mesa tem dois fixos e o número de rodadas muda na semana do evento.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>O que a rodada precisa</th><th>Planilha</th><th>Sorteio na hora</th><th>Mesa Certa</th></tr></thead>
+        <tbody>
+          <tr><td>Ninguém repete mesa</td><td class="no">Manual</td><td class="no">Sem controle</td><td class="yes">Garantido</td></tr>
+          <tr><td>Patrocinador não repete dupla</td><td class="no">Não</td><td class="no">Não</td><td class="yes">Verificado</td></tr>
+          <tr><td>Anfitrião fixo ocupando lugar</td><td class="no">Conta à parte</td><td class="no">Não</td><td class="yes">Entra na lotação</td></tr>
+          <tr><td>Mudar o número de rodadas</td><td class="no">Refaz tudo</td><td class="no">Refaz tudo</td><td class="yes">Recalcula na hora</td></tr>
+          <tr><td>Roteiro individual pronto</td><td class="no">Digitar</td><td class="no">Não existe</td><td class="yes">Texto e PDF</td></tr>
+          <tr><td>Aviso quando a conta não fecha</td><td class="no">Não</td><td class="no">Descobre no dia</td><td class="yes">Antes do evento</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="split">
+      <div class="rulebox">
+        <p class="eyebrow" style="margin-bottom:8px">Exemplo real</p>
+        <h3>Get Connected Sorocaba 2026</h3>
+        <p class="lead" style="font-size:15px">76 convidados, 14 patrocinadores, 14 rodadas de 8 minutos. Cada convidado conhece os 14 patrocinadores e entre 49 e 59 pessoas diferentes. Quando dois convidados se cruzam de novo, é sempre em outra mesa, com outro patrocinador.</p>
+        <div class="tags">
+          <span class="tag">5 a 6 convidados por mesa</span>
+          <span class="tag">0 repetições de mesa</span>
+          <span class="tag">2h05 de duração</span>
+        </div>
+      </div>
+      <div>
+        <p class="eyebrow">O que você economiza</p>
+        <h2>O tempo sai da planilha e volta para o evento</h2>
+        <p class="lead">A grade que levava uma tarde de tentativa e erro passa a ser feita em segundos, e qualquer mudança de última hora, como um patrocinador a mais ou uma rodada a menos, é só trocar o número.</p>
+        <p class="lead">Na véspera, o roteiro de cada convidado sai em PDF, duas colunas por página, sem nenhuma tabela cortada.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="planos">
+    <div class="head">
+      <p class="eyebrow">Planos</p>
+      <h2>Escolha pelo tamanho do evento</h2>
+      <p class="lead">Os valores abaixo são um rascunho para a sua definição: nada está cobrando ainda. Diga os preços e os limites e eu ajusto esta seção.</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>Evento único</h3>
+        <p style="color:var(--ink-2);font-size:14.5px;margin:8px 0 0">Para quem vai rodar uma edição e quer resolver a escala.</p>
+        <p class="price">a definir<small> / evento</small></p>
+        <ul>
+          <li>Até 20 mesas e 200 convidados</li>
+          <li>Grade com as quatro regras</li>
+          <li>Roteiro em texto e PDF</li>
+          <li>Exportação para Excel</li>
+        </ul>
+        <a class="btn btn-ghost" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Testar o simulador</a>
+      </div>
+      <div class="plan destaque">
+        <h3>Produtora</h3>
+        <p style="color:var(--ink-2);font-size:14.5px;margin:8px 0 0">Para quem produz várias edições por ano.</p>
+        <p class="price">a definir<small> / mês</small></p>
+        <ul>
+          <li>Eventos ilimitados</li>
+          <li>Cadastro salvo por evento</li>
+          <li>Roteiro com a marca do evento</li>
+          <li>Suporte na montagem da primeira grade</li>
+        </ul>
+        <a class="btn btn-primary" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Testar o simulador</a>
+      </div>
+      <div class="plan">
+        <h3>Marca própria</h3>
+        <p style="color:var(--ink-2);font-size:14.5px;margin:8px 0 0">Para quem quer o Mesa Certa com a própria identidade.</p>
+        <p class="price">a definir<small> / ano</small></p>
+        <ul>
+          <li>Logo e cores do seu negócio</li>
+          <li>Endereço próprio</li>
+          <li>Ajustes de regra sob medida</li>
+          <li>Atendimento direto</li>
+        </ul>
+        <a class="btn btn-ghost" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Testar o simulador</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="duvidas">
+    <div class="head">
+      <p class="eyebrow">Perguntas frequentes</p>
+      <h2>Ainda ficou alguma dúvida?</h2>
+    </div>
+    <details open><summary>Preciso instalar alguma coisa?</summary><p>Não. O Mesa Certa abre no navegador, no computador ou no celular. O cadastro de pessoas fica salvo no navegador de quem usa.</p></details>
+    <details><summary>E se um patrocinador levar dois convidados?</summary><p>Você cadastra os dois como anfitriões daquela empresa e escolhe quem fica fixo na mesa e quem circula. Quem circula não cai na mesa da própria empresa, desde que haja menos rodadas que mesas.</p></details>
+    <details><summary>Dá para ter mais de uma pessoa fixa na mesma mesa?</summary><p>Sim. A lotação considera os fixos daquela mesa, então ela recebe menos convidados girando e o total por mesa continua igual ao das outras.</p></details>
+    <details><summary>O que acontece se eu tiver mais rodadas que mesas?</summary><p>A repetição de mesa passa a ser inevitável e o sistema avisa quantas visitas serão repetidas. Nesse caso ele garante que, na volta, o convidado encontre outras pessoas na mesa.</p></details>
+    <details><summary>Alguém pode se encontrar duas vezes?</summary><p>Pode, e é matemática: com 76 convidados em 14 rodadas acontecem mais encontros do que pares possíveis. Quando isso ocorre, é sempre em outra mesa, e a aba Encontros mostra quem, onde e como reduzir.</p></details>
+    <details><summary>E se alguém faltar no dia?</summary><p>Deixe a cadeira vazia. O resto da grade continua valendo, sem precisar reimprimir nada.</p></details>
+    <details><summary>Como entrego o roteiro para cada convidado?</summary><p>Pelo texto pronto para WhatsApp, pela planilha por mesa e rodada, ou pelo PDF com um roteiro por pessoa, duas colunas por página.</p></details>
+  </section>
+
+  <section>
+    <div class="cta">
+      <p class="eyebrow">Pronto para parar de montar na mão?</p>
+      <h2>Monte a sua rodada em um minuto</h2>
+      <p class="lead" style="margin-inline:auto">Abra o simulador, cole a lista de patrocinadores e convidados e veja a grade inteira pronta, com o roteiro de cada pessoa.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Abrir o simulador</a>
+        <a class="btn btn-ghost" href="#como">Rever como funciona</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="foot-grid">
+    <div>
+      <a class="logo" href="#topo"><i>MC</i>Mesa Certa</a>
+      <p style="margin:12px 0 0;max-width:38ch">A escala das rodadas de negócio, do cadastro ao roteiro na mão do convidado.</p>
+    </div>
+    <div>
+      <h4>Produto</h4>
+      <ul>
+        <li><a href="https://mesacerta-brasil.vercel.app" target="_blank" rel="noopener">Simulador</a></li>
+        <li><a href="https://claude.ai/code/artifact/9d27431d-9d29-433e-9635-b3e9b3829cd4" target="_blank" rel="noopener">Regras e objetivos</a></li>
+        <li><a href="#como">Como funciona</a></li>
+        <li><a href="#planos">Planos</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <ul>
+        <li>Recomendo Networking</li>
+        <li>Sorocaba · São Paulo</li>
+        <li>renanmanhaessolucao@gmail.com</li>
+      </ul>
+    </div>
+  </div>
+  <div class="copy">
+    <span>© 2026 Mesa Certa · Recomendo Networking</span>
+    <a href="#topo">Voltar ao topo</a>
+  </div>
+</footer>
