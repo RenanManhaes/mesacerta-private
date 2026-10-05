@@ -24,6 +24,7 @@ export default function LandingPage() {
 <div className="cta-row" data-reveal style={{ '--d': '3' }}><a className="btn btn-p" href="#planos" data-scroll="planos">Começar agora<ArrowRight aria-hidden="true" /></a><button className="btn" data-scroll="rodadas">Ver as rodadas em ação</button></div>
 <div className="trust" data-reveal style={{ '--d': '4' }}><span><Check aria-hidden="true" />Funciona no navegador</span><span><Check aria-hidden="true" />Vários eventos ao mesmo tempo</span><span><Check aria-hidden="true" />Feito para quem produz evento</span></div>
 </div>
+<div style={{ display: 'flex', justifyContent: 'center' }}><span className="try" data-reveal style={{ '--d': '5' }}><i></i>Experimente: clique no menu e nos cards do painel</span></div>
 <div className="shot-w"><div className="shot">
 <div className="frame">
 <div className="fr-bar"><span className="dots"><i></i><i></i><i></i></span><span className="url">app.mesacerta.com.br/seu-evento</span><span style={{ width: '46px' }}></span></div>

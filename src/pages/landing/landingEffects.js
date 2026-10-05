@@ -1,4 +1,5 @@
 // @ts-nocheck -- animações manipulam estilos e atributos DOM com valores dinâmicos.
+import { initHeroApp } from './heroApp';
 // Animações e interações da landing. initLanding(root) retorna uma função de limpeza.
 const NAMES = ['Ana Prado','João Moreira','Maria Lima','Lucas Teixeira','Pedro Rocha','Beatriz Nunes','Rafael Barros','Camila Faria','Thiago Campos','Marina Costa','Larissa Duarte','Bruno Pires','Juliana Mendes','Diego Ramos','Fernanda Lopes','Gustavo Reis','Patrícia Alves','Felipe Souza','Aline Costa','Rodrigo Melo','Carla Viana','Marcelo Dias','Isabela Torres','Vinícius Brito','Letícia Gomes','André Lacerda','Priscila Rangel','Eduardo Sales','Natália Freitas','Leonardo Cunha','Gabriela Sá','Fábio Azevedo','Vanessa Paiva','Ricardo Leal','Tatiane Bastos','Daniel Fonseca','Mariana Couto','Paulo Matos','Bianca Serra','Sérgio Macedo','Renata Coelho','Otávio Prates'];
 const HOSTS = ['Nuvex','Meridiano','Andrade','Montanha','Vértice','Prisma','Lumen'];
@@ -185,7 +186,10 @@ export function initLanding(root) {
   on(window, 'resize', () => { mini(); layout(); render(round, true); });
   raf(() => { mini(); layout(); render(RM ? 0 : -1, true); });
 
+  const heroCleanup = initHeroApp(root);
+
   return () => {
+    heroCleanup();
     alive = false;
     clearTimeout(timer);
     rafs.forEach(id => cancelAnimationFrame(id)); rafs.clear();
