@@ -65,7 +65,12 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut({ scope: 'local' });
-    if (error) throw error;
+    if (error) {
+      // Current Supabase SDK can clear local storage even if remote revocation
+      // fails. Only report a failed logout when the session still exists.
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || data.session) throw error;
+    }
     setSession(null);
     setMemberships([]);
   }, []);
