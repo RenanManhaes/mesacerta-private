@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { formatDateFull } from '@/lib/format';
-import { Search, Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import AddMenu from './AddMenu';
 import LogoutButton from '@/components/LogoutButton';
-import { alerts as alertsFn } from '@/lib/selectors';
+import NotificationsMenu from './NotificationsMenu';
 
 
 export default function TopBar() {
@@ -16,7 +15,6 @@ export default function TopBar() {
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
   const [search, setSearch] = useState('');
-  const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
 
   const onSearch = (e) => {
     e.preventDefault();
@@ -43,10 +41,7 @@ export default function TopBar() {
           </div>
         </form>
 
-        <Button variant="ghost" size="icon" className="h-8 w-8 relative" aria-label="Notificações" onClick={() => navigate(`/event/${currentEvent.id}/dashboard`)}>
-          <Bell className="h-4 w-4" />
-          {attention > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" />}
-        </Button>
+        <NotificationsMenu />
 
         <AddMenu />
         <LogoutButton className="h-8 gap-1.5 text-[13px] shrink-0" />
