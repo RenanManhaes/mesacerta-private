@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
@@ -32,27 +32,17 @@ import EventSettings from '@/pages/event/EventSettings';
 import DesignSystem from '@/pages/DesignSystem';
 
 const AuthenticatedApp = () => {
-  const { authChecked, isAuthenticated } = useAuth();
-
-  // Show loading spinner while the initial Supabase session check runs
-  if (!authChecked) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
   return (
     <EventProvider>
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Events /> : <LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/design-system" element={<DesignSystem />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+          <Route path="/eventos" element={<Events />} />
           <Route path="/novo" element={<CreateEvent />} />
           <Route path="/event/:eventId" element={<AppLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
