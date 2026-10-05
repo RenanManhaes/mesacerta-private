@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Plus, User, ListChecks, Wallet, Ticket, Truck, CalendarDays, Sparkles } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ExpenseCostFields from '@/components/financial/ExpenseCostFields';
+import TaskOwnerSelect from '@/components/common/TaskOwnerSelect';
 
 const TYPES = [
   { key: 'participante', label: 'Participante', icon: User },
@@ -41,7 +42,7 @@ export default function AddMenu() {
         case 'participante':
           return { ...ev, participants: [{ id: uid(), name: form.name || 'Sem nome', email: form.email || '', phone: '', company: form.company || '', type: form.type || 'Participante', status: 'Pendente' }, ...ev.participants] };
         case 'tarefa':
-          return { ...ev, tasks: [{ id: uid(), name: form.name || 'Nova tarefa', owner: form.owner || '', date: form.date || '', category: form.category || 'Operação', priority: form.priority || 'Normal', status: 'A fazer' }, ...ev.tasks] };
+          return { ...ev, tasks: [{ id: uid(), name: form.name || 'Nova tarefa', ownerId: form.ownerId || '', owner: (ev.staffMembers || []).find(p=>p.id===form.ownerId && p.active!==false)?.name || '', date: form.date || '', category: form.category || 'Operação', priority: form.priority || 'Normal', status: 'A fazer' }, ...ev.tasks] };
         case 'despesa':
           return { ...ev, expenses: [{ id: uid(), description: form.description || 'Despesa', category: form.category || 'Outros', type: form.type || 'fixed', revenueBase: form.revenueBase || 'total', qty: Number(form.qty ?? 1), unitValue: Number(form.unitValue) || 0, dueDate: form.dueDate || '', status: 'pendente', note: '' }, ...ev.expenses] };
         case 'receita':
@@ -101,7 +102,7 @@ export default function AddMenu() {
           {type === 'tarefa' && (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2"><Label className={labelCls}>Tarefa</Label><Input className={fieldCls} value={form.name || ''} onChange={e => set('name', e.target.value)} /></div>
-              <div><Label className={labelCls}>Responsável</Label><Input className={fieldCls} value={form.owner || ''} onChange={e => set('owner', e.target.value)} /></div>
+              <div><Label className={labelCls}>Responsável</Label><TaskOwnerSelect members={currentEvent.staffMembers || []} ownerId={form.ownerId || ''} onChange={id=>set('ownerId',id)}/></div>
               <div><Label className={labelCls}>Data</Label><Input type="date" className={fieldCls} value={form.date || ''} onChange={e => set('date', e.target.value)} /></div>
               <div><Label className={labelCls}>Prioridade</Label>
                 <Select value={form.priority || 'Normal'} onValueChange={v => set('priority', v)}>

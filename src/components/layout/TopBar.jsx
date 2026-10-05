@@ -14,7 +14,7 @@ export default function TopBar() {
   const { currentEvent, saveStatus } = useEvent();
   const navigate = useNavigate();
   const location = useLocation();
-  const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
+  const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
   const [search, setSearch] = useState('');
   const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
 

@@ -21,6 +21,7 @@ import Dashboard from '@/pages/event/Dashboard';
 import Financial from '@/pages/event/Financial';
 import Schedule from '@/pages/event/Schedule';
 import Tasks from '@/pages/event/Tasks';
+import Staff from '@/pages/event/Staff';
 import Participants from '@/pages/event/Participants';
 import Suppliers from '@/pages/event/Suppliers';
 import Revenues from '@/pages/event/Revenues';
@@ -50,6 +51,7 @@ const AuthenticatedApp = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="programacao" element={<Schedule />} />
             <Route path="tarefas" element={<Tasks />} />
+            <Route path="diretores-staffs" element={<Staff />} />
             <Route path="participantes" element={<Participants />} />
             <Route path="fornecedores" element={<Suppliers />} />
             <Route path="financeiro" element={<Financial />} />

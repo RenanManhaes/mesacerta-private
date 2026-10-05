@@ -3,7 +3,8 @@ import { useEvent } from '@/context/EventContext';
 import { taskSummary } from '@/lib/selectors';
 import { daysUntil, formatDateShort } from '@/lib/format';
 import { EmptyState } from '@/components/common/Primitives';
-import { Input } from '@/components/ui/input';
+import TaskOwnerSelect from '@/components/common/TaskOwnerSelect';
+import { assignTask } from '@/lib/staff';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +22,7 @@ export default function Tasks() {
   const s = taskSummary(ev);
 
   const setStatus = (id, status) => updateCurrent(e => ({ ...e, tasks: e.tasks.map(t => t.id === id ? { ...t, status } : t) }));
-  const setOwner = (id, owner) => updateCurrent(e => ({ ...e, tasks: e.tasks.map(t => t.id === id ? { ...t, owner } : t) }));
+  const setOwner = (id, ownerId) => updateCurrent(e => assignTask(e,id,ownerId));
 
   let list = ev.tasks;
   if (filter === 'minhas') list = list.filter(t => t.owner);
@@ -65,7 +66,7 @@ export default function Tasks() {
                   <div className="text-[11px] text-muted-foreground mt-0.5">{t.category} · {t.date ? formatDateShort(t.date) : 'sem data'} {overdue && <span className="text-danger">· atrasada</span>}</div>
                 </div>
                 <div className="col-span-12">
-                  <Input aria-label={`Responsável por ${t.name}`} value={t.owner || ''} placeholder="Responsável" onChange={e => setOwner(t.id, e.target.value)} className="h-8 text-[12px]" />
+                  <TaskOwnerSelect label={`Responsável por ${t.name}`} members={ev.staffMembers || []} ownerId={t.ownerId || ''} owner={t.owner || ''} onChange={id=>setOwner(t.id,id)}/>
                 </div>
                 <div className="col-span-12 flex justify-end">
                   <Select value={t.status} onValueChange={v => setStatus(t.id, v)}>
