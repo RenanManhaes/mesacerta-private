@@ -1,194 +1,71 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import { financialSummary, capacitySummary, scheduleSummary, taskSummary, supplierSummary, alerts, upcomingActions, relativeLabel } from '@/lib/selectors';
+import { financialSummary, scheduleSummary, taskSummary, supplierSummary, alerts, upcomingActions, relativeLabel } from '@/lib/selectors';
 import { formatBRL, formatPercent, formatDateFull, daysUntil, formatDateShort } from '@/lib/format';
-import { SectionLabel, InfoTip, StatusPill } from '@/components/common/Primitives';
-import { AlertTriangle, AlertCircle, CheckCircle2, ArrowRight, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { StatusPill } from '@/components/common/Primitives';
+import { Wallet, Users, TrendingUp, ArrowDownRight, AlertTriangle, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 
-const alertStyle = {
-  critico: { icon: AlertTriangle, color: 'text-danger', dot: 'bg-danger' },
-  atencao: { icon: AlertCircle, color: 'text-warning', dot: 'bg-warning' },
-  ok: { icon: CheckCircle2, color: 'text-positive', dot: 'bg-positive' }
-};
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
-
-function OrgLine({ label, value, to }) {
-  const navigate = useNavigate();
-  const { currentEvent } = useEvent();
-  return (
-    <button onClick={() => navigate(`/event/${currentEvent.id}/${to}`)} className="w-full flex items-center justify-between py-2.5 border-b border-border last:border-0 group">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span className="flex items-center gap-2">
-        <span className="text-[13px] font-medium tnum text-right">{value}</span>
-        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-      </span>
-    </button>
-  );
-}
+const alertStyle = { critico: { icon: AlertTriangle, color: 'text-danger' }, atencao: { icon: AlertCircle, color: 'text-warning' }, ok: { icon: CheckCircle2, color: 'text-positive' } };
 
 export default function Dashboard() {
-  const { currentEvent } = useEvent();
+  const { currentEvent: ev } = useEvent();
   const navigate = useNavigate();
-  if (!currentEvent) return null;
-
-  const fin = financialSummary(currentEvent);
-  const cap = capacitySummary(currentEvent);
-  const sch = scheduleSummary(currentEvent);
-  const tasks = taskSummary(currentEvent);
-  const sup = supplierSummary(currentEvent);
-  const al = alerts(currentEvent);
-  const actions = upcomingActions(currentEvent);
-  const ev = currentEvent;
-
+  if (!ev) return null;
+  const fin = financialSummary(ev), sch = scheduleSummary(ev), tasks = taskSummary(ev), sup = supplierSummary(ev);
+  const al = alerts(ev), actions = upcomingActions(ev);
+  const go = to => navigate(`/event/${ev.id}/${to}`);
+  const hour = new Date().getHours();
+  const summary = [
+    { label: 'Faturamento previsto', value: formatBRL(fin.faturamentoPrevisto), sub: `${formatBRL(fin.recebido)} recebido`, icon: Wallet, to: 'financeiro' },
+    { label: 'Despesas previstas', value: formatBRL(fin.despesasPrevistas), sub: `${formatBRL(fin.aPagar)} a pagar`, icon: ArrowDownRight, to: 'despesas' },
+    { label: 'Resultado previsto', value: formatBRL(fin.resultadoPrevisto), sub: `Margem de ${formatPercent(fin.margem)}`, icon: TrendingUp, to: 'financeiro', highlight: true },
+    { label: 'Confirmados', value: ev.confirmed || 0, sub: `de ${ev.expectedAudience || 0} esperados`, icon: Users, to: 'participantes' }
+  ];
+  const operational = [
+    ['Participantes', `${ev.confirmed || 0} confirmados / ${ev.expectedAudience || 0} esperados`, 'participantes'],
+    ['Programação', `${sch.count} atividades / ${sch.durationText}`, 'programacao'],
+    ['Tarefas', `${tasks.done} concluídas / ${tasks.pending} pendentes / ${tasks.overdue} atrasadas`, 'tarefas'],
+    ['Fornecedores', `${sup.count} contratados / ${sup.pendingPayments} pagamentos pendentes`, 'fornecedores'],
+    ...(ev.modules?.networking ? [['Networking', `${ev.networking.tables} mesas / ${ev.networking.rounds} rodadas`, 'networking']] : [])
+  ];
   return (
-    <div className="space-y-10 animate-fade-in">
-      {/* Greeting */}
+    <div className="space-y-6 animate-fade-in">
       <div>
-        <p className="text-[13px] text-muted-foreground">{greeting()}. Veja como está o seu evento.</p>
-        <h1 className="font-display text-[30px] sm:text-[34px] leading-tight tracking-tight mt-1">{ev.name}</h1>
-        <p className="mt-1 text-[14px] text-muted-foreground">
-          {formatDateFull(ev.date)} · {ev.location || ev.city}
-          {ev.date && <> · <span className="text-foreground font-medium">faltam {daysUntil(ev.date)} dias</span></>}
-        </p>
+        <p className="platform-eyebrow">Visão geral</p>
+        <h1 className="mt-2">{ev.name}</h1>
+        <p className="text-muted-foreground mt-2">{hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'}. Veja como está o seu evento.</p>
+        <p className="text-muted-foreground mt-1 text-[13px]">{formatDateFull(ev.date)} · {ev.location || ev.city}{ev.date && <> · {daysUntil(ev.date)} dias para o evento</>}</p>
       </div>
-
-      {/* Financial summary — editorial hierarchy */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <SectionLabel>Resumo financeiro</SectionLabel>
-          <button onClick={() => navigate(`/event/${ev.id}/financeiro`)} className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1">
-            Ver financeiro <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-12 gap-x-8 gap-y-6 border-t border-border pt-5">
-          {/* Primary: faturamento + resultado */}
-          <div className="col-span-12 lg:col-span-5">
-            <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Faturamento previsto</div>
-            <div className="mt-1 font-display text-[40px] leading-none tracking-tight tnum">{formatBRL(fin.faturamentoPrevisto)}</div>
-            <div className="mt-2 text-[13px] text-muted-foreground">
-              {fin.recebido > 0 && <>Recebido <span className="text-positive font-medium tnum">{formatBRL(fin.recebido)}</span></>}
-              {fin.aReceber > 0 && <> · A receber <span className="tnum">{formatBRL(fin.aReceber)}</span></>}
-            </div>
-
-            <div className="mt-6 pt-5 border-t border-border">
-              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Resultado previsto</div>
-              <div className={cn('mt-1 font-display text-[30px] leading-none tracking-tight tnum', fin.resultadoPrevisto >= 0 ? 'text-foreground' : 'text-danger')}>
-                {formatBRL(fin.resultadoPrevisto)}
-              </div>
-              <div className="mt-2 text-[13px] text-muted-foreground">
-                Margem prevista <span className="font-medium text-foreground tnum">{formatPercent(fin.margem)}</span>
-                <InfoTip text="Margem é o resultado previsto dividido pelo faturamento previsto." />
-              </div>
-            </div>
-          </div>
-
-          {/* Secondary lines */}
-          <div className="col-span-12 lg:col-span-4 lg:border-l lg:border-border lg:pl-8">
-            <dl className="space-y-3.5">
-              <div className="flex justify-between items-baseline">
-                <dt className="text-[13px] text-muted-foreground">Despesas previstas</dt>
-                <dd className="tnum text-[14px] font-medium">{formatBRL(fin.despesasPrevistas)}</dd>
-              </div>
-              <div className="flex justify-between items-baseline pl-3">
-                <dt className="text-[12px] text-muted-foreground/80">Já pago</dt>
-                <dd className="tnum text-[12px] text-muted-foreground">{formatBRL(fin.pago)}</dd>
-              </div>
-              <div className="flex justify-between items-baseline pl-3">
-                <dt className="text-[12px] text-muted-foreground/80">A pagar</dt>
-                <dd className="tnum text-[12px] text-muted-foreground">{formatBRL(fin.aPagar)}</dd>
-              </div>
-              <div className="flex justify-between items-baseline pt-2 border-t border-border">
-                <dt className="text-[13px] text-muted-foreground">Recebido</dt>
-                <dd className="tnum text-[14px] font-medium text-positive">{formatBRL(fin.recebido)}</dd>
-              </div>
-              <div className="flex justify-between items-baseline">
-                <dt className="text-[13px] text-muted-foreground">Patrocínios</dt>
-                <dd className="tnum text-[13px]">{formatBRL(fin.sponsorReceived)} <span className="text-muted-foreground">/ {formatBRL(fin.sponsorExpected)}</span></dd>
-              </div>
-            </dl>
-          </div>
-
-          {/* Meta */}
-          <div className="col-span-12 lg:col-span-3 lg:border-l lg:border-border lg:pl-8">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Meta de faturamento</span>
-              <InfoTip text="A meta é o faturamento que você quer alcançar. Defina em Configurações." />
-            </div>
-            <div className="mt-1 tnum text-[20px] font-medium">{formatBRL(fin.meta)}</div>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-700" style={{ width: `${Math.min(100, fin.metaPct)}%` }} />
-            </div>
-            <div className="mt-2 text-[13px]">
-              <span className="font-medium tnum">{formatPercent(fin.metaPct)}</span>
-              <span className="text-muted-foreground"> da meta</span>
-            </div>
-            <div className="mt-1 text-[12px] text-muted-foreground">
-              {fin.faltaMeta > 0 ? <>Faltam <span className="text-foreground font-medium tnum">{formatBRL(fin.faltaMeta)}</span></> : <>Meta atingida</>}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Attention */}
-      <section>
-        <SectionLabel className="mb-3">Precisa da sua atenção</SectionLabel>
-        <div className="border-t border-border">
-          {al.map((a, i) => {
-            const s = alertStyle[a.level];
-            const Icon = s.icon;
-            return (
-              <button key={i} onClick={() => navigate(`/event/${ev.id}/${a.to}`)} className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left hover:bg-secondary/40 transition-colors group">
-                <Icon className={cn('h-4 w-4 shrink-0', s.color)} />
-                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground w-16 shrink-0">{a.level === 'critico' ? 'Crítico' : a.level === 'atencao' ? 'Atenção' : 'OK'}</span>
-                <span className="flex-1 text-[13px]">{a.title}</span>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Actions + Organization */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <section>
-          <SectionLabel className="mb-3">Próximas ações</SectionLabel>
-          <div className="border-t border-border">
-            {actions.length === 0 && <div className="py-4 text-[13px] text-muted-foreground">Nada urgente nos próximos dias.</div>}
-            {actions.map((a, i) => (
-              <div key={i} className="flex items-start gap-3 py-3 border-b border-border last:border-0">
-                <div className="w-16 shrink-0">
-                  <div className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{relativeLabel(a.days)}</div>
-                  <div className="text-[11px] text-muted-foreground/70 tnum">{formatDateShort(a.date)}</div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-medium">{a.label}</div>
-                  <div className="mt-0.5 text-[12px] text-muted-foreground">{a.owner} · <StatusPill status={a.status} /></div>
-                </div>
-              </div>
-            ))}
+      <div className="platform-kpis">
+        {summary.map(({ label, value, sub, icon: Icon, to, highlight }) => <button key={label} onClick={() => go(to)} className={`platform-kpi ${highlight ? 'highlight' : ''}`}><small><Icon className="w-4 h-4" />{label}</small><b>{value}</b><span>{sub}</span></button>)}
+      </div>
+      <div className="platform-dashboard-grid">
+        <section className="platform-panel">
+          <div className="flex items-center justify-between mb-5"><h2>Resumo financeiro</h2><button className="text-sm text-info" onClick={() => go('financeiro')}>Ver financeiro →</button></div>
+          <dl className="grid sm:grid-cols-2 gap-5">
+            {[
+              ['Recebido', fin.recebido], ['A receber', fin.aReceber], ['Já pago', fin.pago], ['A pagar', fin.aPagar], ['Patrocínios previstos', fin.sponsorExpected], ['Patrocínios recebidos', fin.sponsorReceived]
+            ].map(([label, value]) => <div key={label}><dt className="text-muted-foreground text-[13px]">{label}</dt><dd className="font-semibold text-lg mt-1">{formatBRL(Number(value))}</dd></div>)}
+          </dl>
+          <div className="mt-6 pt-5 border-t border-border">
+            <div className="flex justify-between gap-3 text-sm mb-3"><span>Meta de faturamento</span><strong>{formatBRL(fin.meta)}</strong></div>
+            <div className="platform-bar"><div style={{ width: `${Math.max(0, Math.min(100, fin.metaPct))}%` }} /></div>
+            <p className="text-muted-foreground text-sm mt-3">{formatPercent(fin.metaPct)} da meta · {fin.faltaMeta > 0 ? `Faltam ${formatBRL(fin.faltaMeta)}` : 'Meta atingida'}</p>
           </div>
         </section>
-
-        <section>
-          <SectionLabel className="mb-3">Organização</SectionLabel>
-          <div className="border-t border-border pt-1">
-            <OrgLine label="Participantes" value={`${ev.confirmed} confirmados / ${ev.expectedAudience} esperados`} to="participantes" />
-            <OrgLine label="Programação" value={`${sch.count} atividades / ${sch.durationText}`} to="programacao" />
-            <OrgLine label="Tarefas" value={`${tasks.done} concluídas / ${tasks.pending} pendentes / ${tasks.overdue} atrasadas`} to="tarefas" />
-            <OrgLine label="Fornecedores" value={`${sup.count} contratados / ${sup.pendingPayments} pagamentos pendentes`} to="fornecedores" />
-            {ev.modules?.networking && (
-              <OrgLine label="Networking" value={`${ev.networking.tables} mesas / ${ev.networking.rounds} rodadas`} to="networking" />
-            )}
-          </div>
+        <section className="platform-panel">
+          <h2 className="mb-3">Precisa da sua atenção</h2>
+          {al.map((a, i) => { const { icon: Icon, color } = alertStyle[a.level]; return <button key={i} onClick={() => go(a.to)} className="w-full flex items-center gap-3 text-left py-3 border-b border-border last:border-0 hover:bg-secondary rounded-lg"><Icon className={`w-4 h-4 shrink-0 ${color}`} /><span className="flex-1 text-sm">{a.title}</span><ChevronRight className="w-4 h-4 text-muted-foreground" /></button>; })}
+        </section>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-4">
+        <section className="platform-panel"><h2 className="mb-3">Próximas ações</h2>
+          {!actions.length && <p className="text-muted-foreground text-sm py-4">Nada urgente nos próximos dias.</p>}
+          {actions.map((a, i) => <div key={i} className="flex items-start gap-3 py-3 border-b border-border last:border-0"><div className="w-16 shrink-0 text-xs text-muted-foreground"><b>{relativeLabel(a.days)}</b><div>{formatDateShort(a.date)}</div></div><div className="min-w-0"><div className="font-medium text-sm">{a.label}</div><div className="text-xs text-muted-foreground mt-1">{a.owner} · <StatusPill status={a.status} /></div></div></div>)}
+        </section>
+        <section className="platform-panel"><h2 className="mb-3">Organização</h2>
+          {operational.map(([label, value, to]) => <button key={label} onClick={() => go(to)} className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left"><span className="text-sm text-muted-foreground">{label}</span><span className="flex-1 text-right text-sm font-medium">{value}</span><ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" /></button>)}
         </section>
       </div>
     </div>

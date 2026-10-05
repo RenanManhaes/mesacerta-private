@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useEvent } from '@/context/EventContext';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import './platform.css';
 
 export default function AppLayout() {
   const { eventId } = useParams();
@@ -17,9 +18,9 @@ export default function AppLayout() {
   }, [eventId, setCurrentEventId]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="platform-ui min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-60 flex-col border-r border-border bg-sidebar z-30">
+      <aside className="platform-sidebar hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-border bg-card z-30">
         <SidebarContent />
       </aside>
 
@@ -37,9 +38,9 @@ export default function AppLayout() {
         </SheetContent>
       </Sheet>
 
-      <div className="lg:pl-60">
+      <div className="lg:pl-64">
         <TopBar />
-        <main className="px-5 sm:px-8 lg:px-12 py-6 lg:py-8 max-w-[1400px] mx-auto">
+        <main className="platform-main px-5 sm:px-8 lg:px-9 py-6 lg:py-8 max-w-[1400px] mx-auto">
           <Outlet />
         </main>
       </div>

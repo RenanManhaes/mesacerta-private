@@ -55,7 +55,7 @@ export default function CreateEvent() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="platform-ui min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="max-w-[640px] mx-auto px-5 sm:px-8 h-14 flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => step === 0 ? navigate('/eventos') : setStep(s => s - 1)}>

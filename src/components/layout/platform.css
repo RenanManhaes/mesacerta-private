@@ -1,0 +1,77 @@
+/* Visual da Plataforma.html do pacote do usuário, adaptado aos componentes reais. */
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap');
+:root {
+  --background: 60 14% 97%; --foreground: 220 43% 11%;
+  --card: 0 0% 100%; --card-foreground: 220 43% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 220 43% 11%;
+  --primary: 14 79% 57%; --primary-foreground: 0 0% 100%;
+  --secondary: 80 10% 94%; --secondary-foreground: 220 27% 22%;
+  --muted: 80 10% 94%; --muted-foreground: 219 12% 42%;
+  --accent: 219 44% 94%; --accent-foreground: 219 58% 27%;
+  --border: 80 6% 90%; --input: 214 8% 83%; --ring: 219 58% 27%;
+  --positive: 154 63% 33%; --warning: 36 71% 42%; --danger: 17 88% 40%;
+  --destructive: 17 88% 40%; --destructive-foreground: 0 0% 100%;
+  --info: 219 58% 27%; --chart-1: 219 58% 27%; --chart-2: 14 79% 57%;
+  --radius: 1rem;
+  --font-heading: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-body: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --sidebar-background: 0 0% 100%; --sidebar-border: 80 6% 90%;
+  --sidebar-accent: 219 44% 94%; --sidebar-accent-foreground: 219 58% 27%;
+}
+.platform-ui {font-size:14.5px;line-height:1.55}
+.platform-ui h1 {font-size:clamp(30px,3.2vw,44px);font-weight:700;line-height:1.08;letter-spacing:-.035em}
+.platform-ui h2,.platform-ui h3 {font-weight:600;letter-spacing:-.025em}
+.platform-mark {display:grid;grid-template-columns:repeat(2,7px);gap:3px;transform:rotate(-12deg)}
+.platform-mark i {width:7px;height:7px;border-radius:2px;background:#e8663d}
+.platform-mark i:nth-child(2),.platform-mark i:nth-child(3) {background:#1d3a6e}
+.platform-sidebar nav a {min-height:36px;border-radius:10px;font-size:14px;position:relative}
+.platform-nav-active::before {content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:#e8663d}
+.platform-sidebar nav>div>div:first-child {font-family:var(--font-mono)}
+.platform-ui button[class*="bg-primary"],.platform-ui button[class*="border-input"] {border-radius:999px;min-height:36px}
+.platform-ui input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),.platform-ui textarea,.platform-ui button[role="combobox"] {border-radius:12px;background:#fff}
+.platform-ui [role="tablist"] {border-radius:12px;padding:4px;height:auto}
+.platform-ui [role="tab"] {border-radius:9px;min-height:32px}
+.platform-main table {background:#fff;border-collapse:separate;border-spacing:0;border:1px solid hsl(var(--border));border-radius:16px;overflow:hidden}
+.platform-main table th {background:#f1f2ef;padding:12px 16px;text-transform:none;letter-spacing:0}
+.platform-main table td {padding:12px 16px}
+.platform-main table tbody tr:hover {background:#f9f9f7}
+.platform-main [class*="rounded-md"][class*="border"] {border-radius:14px}
+.platform-main .platform-panel {background:#fff;border:1px solid hsl(var(--border));border-radius:16px;padding:20px;min-width:0}
+.platform-eyebrow {display:flex;align-items:center;gap:8px;color:#cf5530;font:500 11.5px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.platform-eyebrow::before {content:'';width:6px;height:6px;border-radius:50%;background:#e8663d}
+.platform-kpis {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.platform-kpi {display:flex;flex-direction:column;gap:8px;text-align:left;background:#fff;border:1px solid hsl(var(--border));border-radius:16px;padding:20px;transition:transform .2s,border-color .2s}
+.platform-kpi:hover {transform:translateY(-2px);border-color:#cfd3d6}
+.platform-kpi small {color:#5e6778;font-size:13px;display:flex;gap:8px;align-items:center}
+.platform-kpi b {font-size:clamp(22px,2vw,28px);font-weight:700;letter-spacing:-.04em;overflow-wrap:anywhere}
+.platform-kpi span {font-size:12.5px;color:#5e6778}
+.platform-kpi.highlight {background:#0f1f3d;color:white;border-color:#0f1f3d}
+.platform-kpi.highlight small,.platform-kpi.highlight span {color:#aab6cc}
+.platform-kpi.highlight svg {color:#e8663d}
+.platform-dashboard-grid {display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+.platform-bar {height:8px;background:#f1f2ef;border-radius:99px;overflow:hidden}
+.platform-bar>div {height:100%;background:#1d3a6e;border-radius:99px}
+.platform-events {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.platform-event {text-align:left;background:white;border:1px solid hsl(var(--border));border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s}
+.platform-event:hover {transform:translateY(-2px);border-color:#cfd3d6}
+.platform-event-cover {height:110px;padding:16px;display:flex;align-items:flex-end;background:radial-gradient(circle at 75% 0,rgba(232,102,61,.55),transparent 60%),radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px) 0 0/16px 16px,#0f1f3d;color:white;font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.1em}
+.platform-event-body {padding:20px;display:flex;flex-direction:column;gap:16px}
+.platform-event-body h3 {font-size:20px}
+.platform-kanban {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.platform-kanban-column {background:#f1f2ef;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:200px}
+.platform-task-card {padding:14px;background:white;border:1px solid hsl(var(--border));border-radius:12px}
+.platform-schedule-item {position:relative;background:white;border:1px solid hsl(var(--border));border-radius:14px;padding:4px 16px;margin:0 0 12px 24px}
+.platform-schedule-item::before {content:'';position:absolute;left:-24px;top:24px;width:12px;height:12px;border:2px solid #cfd3d6;background:white;border-radius:50%}
+.platform-schedule-item::after {content:'';position:absolute;left:-19px;top:36px;width:2px;height:calc(100% - 12px);background:#e4e6e3}
+.platform-schedule-item:last-child::after {display:none}
+.platform-auth {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);min-height:100vh}
+.platform-auth-form {display:flex;flex-direction:column;padding:32px 48px}
+.platform-auth-form section {width:100%;max-width:400px;margin:auto;padding:48px 0}
+.platform-auth-visual {margin:12px;border-radius:28px;background:radial-gradient(circle at 100% 0,rgba(232,102,61,.35),transparent 60%),#0f1f3d;color:#eef2f8;display:flex;flex-direction:column;justify-content:flex-end;padding:48px;min-height:500px}
+.platform-auth-visual h2 {font-size:clamp(34px,3.4vw,52px);max-width:14ch;line-height:1.08}
+.platform-auth-visual p {color:#aab6cc;max-width:420px;margin-top:14px}
+@media(max-width:1100px){.platform-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.platform-dashboard-grid{grid-template-columns:1fr}}
+@media(max-width:767px){.platform-events,.platform-kanban{grid-template-columns:1fr}.platform-auth{grid-template-columns:1fr}.platform-auth-visual{display:none}.platform-auth-form{padding:24px}.platform-kpi{padding:16px}.platform-ui h1{font-size:30px}}
+@media(prefers-reduced-motion:reduce){.platform-ui *, .platform-ui *::before{animation-duration:.01ms!important;transition-duration:.01ms!important}}

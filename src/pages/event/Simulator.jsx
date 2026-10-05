@@ -53,7 +53,7 @@ export default function Simulator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Controls */}
-        <div className="space-y-6">
+        <div className="platform-panel space-y-6">
           <div>
             <div className="flex justify-between mb-2"><Label className="text-[13px]">Participantes</Label><span className="tnum text-[14px] font-medium">{participants}</span></div>
             <Slider value={[participants]} onValueChange={v => setParticipants(v[0])} min={0} max={ev.capacity || 400} step={1} />
@@ -78,7 +78,7 @@ export default function Simulator() {
         </div>
 
         {/* Result */}
-        <div className="border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-10">
+        <div className="platform-panel">
           <SectionLabel className="mb-4">Resultado instantâneo</SectionLabel>
           <div className="space-y-4">
             <div>

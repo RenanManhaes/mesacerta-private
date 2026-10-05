@@ -51,7 +51,7 @@ export default function Capacity() {
         <p className="text-[14px]">{msg}</p>
       </div>
 
-      <div className="space-y-3">
+      <div className="platform-panel space-y-3">
         {rows.map(r => (
           <div key={r.label}>
             <div className="flex justify-between text-[13px] mb-1"><span className="text-muted-foreground">{r.label}</span><span className="tnum font-medium">{r.value}</span></div>
@@ -61,7 +61,7 @@ export default function Capacity() {
         <div className="flex justify-between text-[13px] pt-2 border-t border-border"><span className="text-muted-foreground">Disponíveis</span><span className="tnum font-medium">{cap.available}</span></div>
       </div>
 
-      <div className="border-t border-border pt-6">
+      <div className="platform-panel">
         <h2 className="text-[13px] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-4">Ajustar</h2>
         <div className="flex flex-wrap gap-x-8 gap-y-4">
           <Field label="Capacidade do espaço" value={ev.capacity} onChange={set('capacity')} suffix="pessoas" />

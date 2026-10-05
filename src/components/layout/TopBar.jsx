@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { formatDateFull } from '@/lib/format';
 import { Search, Bell } from 'lucide-react';
@@ -15,6 +15,7 @@ export default function TopBar() {
   const { currentEvent } = useEvent();
   const navigate = useNavigate();
   const location = useLocation();
+  const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
   const [search, setSearch] = useState('');
   const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
 
@@ -25,12 +26,13 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="flex items-center gap-4 px-5 sm:px-8 lg:px-12 h-14 pl-14 lg:pl-12">
+      <div className="flex items-center gap-4 px-5 sm:px-8 lg:px-9 h-16 pl-14 lg:pl-9">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5 min-w-0">
+            <Link to="/eventos" className="hidden xl:inline text-[13px] text-muted-foreground">Eventos /</Link>
             <span className="truncate text-[14px] font-medium">{currentEvent?.name}</span>
             <span className="hidden sm:inline text-muted-foreground">·</span>
-            <span className="hidden sm:inline text-[13px] text-muted-foreground truncate">{currentEvent?.date && formatDateFull(currentEvent.date)}</span>
+            <span className="hidden sm:inline text-[13px] font-semibold truncate">{labels[location.pathname.split('/').pop()] || (currentEvent?.date && formatDateFull(currentEvent.date))}</span>
             {currentEvent && <StatusPill status={statusLabel[currentEvent.status] || currentEvent.status} className="hidden md:inline-flex" />}
           </div>
         </div>

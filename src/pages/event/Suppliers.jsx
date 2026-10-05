@@ -35,7 +35,7 @@ export default function Suppliers() {
         {ev.suppliers.map(sup => {
           const toPay = sup.contracted - sup.paid;
           return (
-            <div key={sup.id} className="bg-card p-5">
+            <div key={sup.id} className="platform-panel">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[15px] font-medium tracking-tight">{sup.name}</div>
