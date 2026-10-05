@@ -149,6 +149,42 @@ export function supplierSummary(ev) {
   return { count: list.length, contracted, paid, toPay, pendingPayments };
 }
 
+const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+
+// Per-supplier view for the Suppliers screen. Derived only from the existing
+// fields (contracted, paid, dueDate); the data model is unchanged.
+//  - quitado:   paid covers the whole contract
+//  - parcial:   something paid, balance remaining
+//  - orcamento: nothing paid yet (no payment commitment registered)
+// dueLabel is set when the balance falls due within the next 7 days
+// ("Vence sexta", "Vence hoje") or is already late ("Vencido").
+export function supplierView(sup, from = new Date()) {
+  const contracted = sup.contracted || 0;
+  const paid = sup.paid || 0;
+  const toPay = Math.max(0, contracted - paid);
+  const progress = contracted > 0 ? Math.min(1, paid / contracted) : 0;
+  const state = contracted > 0 && paid >= contracted ? 'quitado' : paid > 0 ? 'parcial' : 'orcamento';
+  let dueLabel = null;
+  if (toPay > 0 && sup.dueDate) {
+    const d = daysUntil(sup.dueDate, from);
+    if (d < 0) dueLabel = 'Vencido';
+    else if (d === 0) dueLabel = 'Vence hoje';
+    else if (d <= 7) dueLabel = `Vence ${WEEKDAYS[new Date(sup.dueDate + 'T00:00:00').getDay()]}`;
+  }
+  return { toPay, progress, state, dueLabel, dueThisWeek: dueLabel !== null && dueLabel !== 'Vencido' };
+}
+
+export function supplierOverview(ev, from = new Date()) {
+  const base = supplierSummary(ev);
+  const views = (ev.suppliers || []).map(s => supplierView(s, from));
+  return {
+    ...base,
+    budgetCount: views.filter(v => v.state === 'orcamento').length,
+    paidPercent: base.contracted > 0 ? Math.round((base.paid / base.contracted) * 100) : 0,
+    dueThisWeekCount: views.filter(v => v.dueThisWeek).length
+  };
+}
+
 export function alerts(ev) {
   const fin = financialSummary(ev);
   const cap = capacitySummary(ev);

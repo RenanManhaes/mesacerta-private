@@ -166,3 +166,31 @@ check('Eventos independentes: A receita=50000 despesa=22000; B receita=80000 des
   assert.equal(JSON.stringify(b), bBefore);
 });
 console.log(`${passed}/${passed} testes MCT-34 PASS`);
+
+// ---- MCT-49: Fornecedores ----
+import { supplierView, supplierOverview } from './selectors.js';
+{
+  const from = new Date('2026-11-02T10:00:00'); // segunda
+  const sups = [
+    { id: 'a', contracted: 1000, paid: 1000, dueDate: null },
+    { id: 'b', contracted: 1000, paid: 400, dueDate: '2026-11-06' }, // sexta
+    { id: 'c', contracted: 500, paid: 0, dueDate: '2026-12-30' },
+    { id: 'd', contracted: 500, paid: 100, dueDate: '2026-10-20' }
+  ];
+  const ev = { suppliers: sups };
+  assert.equal(supplierView(sups[0], from).state, 'quitado');
+  assert.equal(supplierView(sups[1], from).state, 'parcial');
+  assert.equal(supplierView(sups[1], from).progress, 0.4);
+  assert.equal(supplierView(sups[1], from).dueLabel, 'Vence sexta');
+  assert.equal(supplierView(sups[2], from).state, 'orcamento');
+  assert.equal(supplierView(sups[2], from).dueLabel, null);
+  assert.equal(supplierView(sups[3], from).dueLabel, 'Vencido');
+  const o = supplierOverview(ev, from);
+  assert.equal(o.count, 4);
+  assert.equal(o.budgetCount, 1);
+  assert.equal(o.paid, 1500);
+  assert.equal(o.paidPercent, 50);
+  assert.equal(o.toPay, 1500);
+  assert.equal(o.dueThisWeekCount, 1);
+  console.log('PASS MCT-49: resumo, selo Parcial/Orçamento/Quitado e vencimento na semana');
+}

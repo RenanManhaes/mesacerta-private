@@ -1,63 +1,98 @@
 import React from 'react';
 import { useEvent } from '@/context/EventContext';
-import { supplierSummary, updateSupplierPayment } from '@/lib/selectors';
+import { supplierOverview, supplierView, updateSupplierPayment } from '@/lib/selectors';
 import { formatBRL, formatDateShort } from '@/lib/format';
-import { StatusPill } from '@/components/common/Primitives';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Info } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+
+const STATE_BADGE = {
+  quitado: { label: 'Quitado', cls: 'bg-emerald-50 text-emerald-700' },
+  parcial: { label: 'Parcial', cls: 'bg-amber-50 text-amber-700' },
+  orcamento: { label: 'Orçamento', cls: 'bg-slate-100 text-slate-600' }
+};
+
+const initials = (name = '') =>
+  name.split(/\s+/).filter(w => /\p{L}/u.test(w)).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
+
+/** @param {{label: string, value: React.ReactNode, hint: string, dark?: boolean}} props */
+function SummaryCard({ label, value, hint, dark = false }) {
+  return (
+    <div className={`rounded-2xl border p-5 min-w-0 ${dark ? 'border-[#101828] bg-[#101828] text-white' : 'border-border bg-card'}`}>
+      <div className={`text-[11px] uppercase tracking-[0.1em] ${dark ? 'text-white/60' : 'text-muted-foreground'}`}>{label}</div>
+      <div className="tnum mt-1.5 text-[26px] font-semibold tracking-tight leading-none">{value}</div>
+      <div className={`mt-2 text-[13px] ${dark ? 'text-white/70' : 'text-muted-foreground'}`}>{hint}</div>
+    </div>
+  );
+}
 
 export default function Suppliers() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const { toast } = useToast();
-  const s = supplierSummary(ev);
+  const o = supplierOverview(ev);
 
-  const setPaid = (id,value) => updateCurrent(e=>updateSupplierPayment(e,id,value));
+  const setPaid = (id, value) => updateCurrent(e => updateSupplierPayment(e, id, value));
   const registerFull = id => {
-    updateCurrent(e=>updateSupplierPayment(e,id,e.suppliers.find(s=>s.id===id)?.contracted || 0));
+    updateCurrent(e => updateSupplierPayment(e, id, e.suppliers.find(s => s.id === id)?.contracted || 0));
     toast({ title: 'Pagamento registrado', duration: 1800 });
   };
+  const addSupplier = () => window.dispatchEvent(new CustomEvent('mesacerta:add', { detail: 'fornecedor' }));
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="font-display text-[26px] tracking-tight">Fornecedores</h1>
-        <p className="mt-1 text-[14px] text-muted-foreground">{s.count} contratados · {formatBRL(s.toPay)} a pagar · {s.pendingPayments} pagamentos pendentes</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-[26px] tracking-tight">Fornecedores</h1>
+          <p className="mt-1 text-[14px] text-muted-foreground">Contratos, valores e vencimentos.</p>
+        </div>
+        <Button onClick={addSupplier} className="shrink-0 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Plus className="h-4 w-4" /> Novo fornecedor
+        </Button>
       </div>
 
-      <div className="flex items-start gap-2.5 rounded-md border border-border bg-card px-4 py-3">
-        <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-        <p className="text-[13px] text-muted-foreground">Cada fornecedor alimenta automaticamente as despesas. Você não precisa digitar o mesmo valor duas vezes.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <SummaryCard label="Contratados" value={o.count} hint={`${o.budgetCount} em orçamento`} />
+        <SummaryCard label="Pago" value={formatBRL(o.paid)} hint={`${o.paidPercent}% do total`} />
+        <SummaryCard dark label="A pagar" value={formatBRL(o.toPay)} hint={`${o.dueThisWeekCount} vence${o.dueThisWeekCount === 1 ? '' : 'm'} na semana`} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {ev.suppliers.map(sup => {
-          const toPay = sup.contracted - sup.paid;
+          const v = supplierView(sup);
+          const badge = STATE_BADGE[v.state];
           return (
-            <div key={sup.id} className="platform-panel">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[15px] font-medium tracking-tight">{sup.name}</div>
-                  <div className="text-[12px] text-muted-foreground">{sup.service} · {sup.contact}</div>
+            <div key={sup.id} data-testid="supplier-card" className="rounded-2xl border border-border bg-card p-5 min-w-0">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-[14px] font-semibold text-accent-foreground">{initials(sup.name)}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[15px] font-medium tracking-tight">{sup.name}</div>
+                  <div className="truncate text-[12px] text-muted-foreground">{sup.service}</div>
                 </div>
-                <StatusPill status={sup.status} />
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <div><div className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Contrato</div><div className="tnum text-[14px] mt-0.5">{formatBRL(sup.contracted)}</div></div>
-                <div><div className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Pago</div><div className="tnum text-[14px] mt-0.5 text-positive">{formatBRL(sup.paid)}</div></div>
-                <div><div className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">A pagar</div><div className="tnum text-[14px] mt-0.5">{formatBRL(toPay)}</div></div>
+              <div className="mt-4 flex items-end justify-between gap-2">
+                <div className="tnum text-[22px] font-semibold tracking-tight leading-none">{formatBRL(sup.contracted)}</div>
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {v.dueLabel && <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-700">{v.dueLabel}</span>}
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${badge.cls}`}>{badge.label}</span>
+                </div>
               </div>
 
-              <div className="mt-3 text-[12px] text-muted-foreground">
-                {sup.dueDate ? <>Vencimento {formatDateShort(sup.dueDate)}</> : 'Sem vencimento'} · {sup.paymentData}
+              <div
+                className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted"
+                role="progressbar" aria-label={`Pagamento de ${sup.name}`}
+                aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v.progress * 100)}
+              >
+                <div className="h-full rounded-full bg-primary" style={{ width: `${v.progress * 100}%` }} />
               </div>
-              {sup.notes && <div className="mt-1 text-[12px] text-muted-foreground/80">{sup.notes}</div>}
+              <div className="mt-2 text-[12px] text-muted-foreground">
+                {formatBRL(sup.paid)} pagos{sup.dueDate && v.toPay > 0 ? <> · vencimento {formatDateShort(sup.dueDate)}</> : null}
+              </div>
 
-              {toPay > 0 && (
-                <div className="mt-4 flex items-center gap-2">
-                  <Input type="number" placeholder="Valor pago" className="h-8 text-[13px] w-32" onChange={() => {}} onBlur={e => e.target.value && setPaid(sup.id, e.target.value)} />
+              {v.toPay > 0 && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Input type="number" aria-label={`Valor pago a ${sup.name}`} placeholder="Valor pago" className="h-8 text-[13px] w-32" onBlur={e => e.target.value && setPaid(sup.id, e.target.value)} />
                   <Button size="sm" variant="outline" className="h-8 text-[13px] gap-1.5" onClick={() => registerFull(sup.id)}><Check className="h-3.5 w-3.5" /> Quitar</Button>
                 </div>
               )}
