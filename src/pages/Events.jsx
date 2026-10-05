@@ -54,11 +54,11 @@ function Group({ title, hint, events }) {
 }
 
 export default function Events() {
-  const { events } = useEvent();
+  const { events, updateEventById } = useEvent();
   const navigate = useNavigate();
-  const planning = events.filter(e => ['planejamento', 'confirmado'].includes(e.status));
-  const upcoming = events.filter(e => e.status === 'andamento');
-  const finished = events.filter(e => e.status === 'finalizado');
+  const planning = events.filter(e => !e.archived && ['planejamento', 'confirmado'].includes(e.status));
+  const upcoming = events.filter(e => !e.archived && e.status === 'andamento');
+  const finished = events.filter(e => !e.archived && e.status === 'finalizado');
 
   return (
     <div className="platform-ui min-h-screen bg-background">
@@ -87,6 +87,7 @@ export default function Events() {
         <Group title="Em planejamento" hint={`${planning.length} evento${planning.length !== 1 ? 's' : ''}`} events={planning} />
         <Group title="Próximos" hint={`${upcoming.length} evento${upcoming.length !== 1 ? 's' : ''}`} events={upcoming} />
         <Group title="Finalizados" hint={`${finished.length} evento${finished.length !== 1 ? 's' : ''}`} events={finished} />
+        {events.some(e=>e.archived) && <details className="platform-panel"><summary className="cursor-pointer">Eventos arquivados</summary>{events.filter(e=>e.archived).map(e=><div key={e.id} className="flex justify-between items-center gap-4 py-3"><span>{e.name}</span><Button variant="outline" onClick={()=>updateEventById(e.id,x=>({...x,archived:false}))}>Restaurar</Button></div>)}</details>}
       </main>
     </div>
   );

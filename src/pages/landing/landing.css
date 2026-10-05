@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap');
 /* Landing Mesa Certa — escopada em .mc-landing (paleta Azul) */
 .mc-landing *,.mc-landing{box-sizing:border-box;margin:0;padding:0}
 .mc-landing{--bg:#fafaf8;--bg2:#f2f4f1;--card:#fff;--ink:#0f1c1d;--ink2:#2b393a;--mut:#5d6a6b;--line:#e3e7e3;--line2:#cfd6d2;--acc:#17705f;--acc2:#0f5a4c;--accs:#e4f2ee;--dark:#0e2925;--glow:rgba(64,180,150,.35);--ctap:#a9c4bd;--pos:#1f8a5b;--warn:#b7791f;--ease:cubic-bezier(.22,1,.36,1);--r:20px}
@@ -9,7 +9,7 @@
 .mc-landing button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .mc-landing ::selection{background:var(--accs)}
 .mc-landing :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-.mc-landing .mono{font-family:"Geist Mono",monospace}
+.mc-landing .mono{font-family:"Schibsted Grotesk",sans-serif}
 .mc-landing .mut{color:var(--mut)}
 .mc-landing .wrap{max-width:1200px;margin:auto;padding:0 28px}
 .mc-landing .eyebrow{display:inline-flex;align-items:center;gap:8px;font:500 13px/1 "Schibsted Grotesk",sans-serif;color:var(--acc);background:var(--accs);padding:8px 14px;border-radius:999px}
@@ -59,13 +59,13 @@
 .mc-landing .fr-bar{display:flex;align-items:center;gap:12px;height:42px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg2)}
 .mc-landing .dots{display:flex;gap:6px}
 .mc-landing .dots i{width:10px;height:10px;border-radius:50%;background:var(--line2)}
-.mc-landing .url{flex:1;max-width:420px;margin:0 auto;height:26px;border-radius:8px;background:var(--card);border:1px solid var(--line);font:500 12px/24px "Geist Mono",monospace;color:var(--mut);text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 10px}
+.mc-landing .url{flex:1;max-width:420px;margin:0 auto;height:26px;border-radius:8px;background:var(--card);border:1px solid var(--line);font:500 12px/24px "Schibsted Grotesk",sans-serif;color:var(--mut);text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 10px}
 .mc-landing .app{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:520px;text-align:left}
 .mc-landing .side{border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px;font-size:13px;background:var(--card)}
 .mc-landing .side .ev{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
 .mc-landing .side .ev b{display:block;font-size:13px}
 .mc-landing .side .ev small{font-size:11.5px;color:var(--mut)}
-.mc-landing .side .g{font:500 10px "Geist Mono",monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:12px 10px 4px}
+.mc-landing .side .g{font:500 10px "Schibsted Grotesk",sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:12px 10px 4px}
 .mc-landing .side .it{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:8px;color:var(--mut)}
 .mc-landing .side .it svg{width:15px;height:15px}
 .mc-landing .side .it.on{background:var(--accs);color:var(--acc);font-weight:600}
@@ -97,7 +97,7 @@
 .mc-landing .al i.cr{background:#c2410c}
 .mc-landing .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;padding:22px 0;margin-top:96px;background:var(--card)}
 .mc-landing .strip-t{display:flex;width:max-content;animation:mc-mq 40s linear infinite}
-.mc-landing .strip-t span{font:500 14px "Geist Mono",monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--mut);padding:0 28px;display:flex;align-items:center;gap:56px;white-space:nowrap}
+.mc-landing .strip-t span{font:500 14px "Schibsted Grotesk",sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--mut);padding:0 28px;display:flex;align-items:center;gap:56px;white-space:nowrap}
 .mc-landing .strip-t span::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--acc)}
 @keyframes mc-mq{to{transform:translateX(-50%)}}
 .mc-landing .cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:56px}
@@ -140,16 +140,16 @@
 .mc-landing .k3>div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
 .mc-landing .k3 b{display:block;font-size:28px;letter-spacing:-.04em;line-height:1}
 .mc-landing .k3 small{font-size:12px;color:var(--mut)}
-.mc-landing .av{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;background:var(--accs);color:var(--acc);font:600 10px "Geist Mono",monospace;margin-right:10px}
+.mc-landing .av{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;background:var(--accs);color:var(--acc);font:600 10px "Schibsted Grotesk",sans-serif;margin-right:10px}
 .mc-landing .prog{height:6px;border-radius:9px;background:var(--line)}
 .mc-landing .prog i{display:block;height:100%;border-radius:9px;background:var(--acc);width:var(--w);transform:scaleX(0);transform-origin:left;transition:transform 1.1s var(--ease) .2s}
 .mc-landing .pn.on .prog i{transform:scaleX(1)}
 .mc-landing .plan-mini{position:relative;flex:1;border-radius:12px;border:1px solid var(--line);background:radial-gradient(var(--line2) 1px,transparent 1px) 0 0/18px 18px,var(--card)}
 .mc-landing .tb{position:absolute;border-radius:12px;border:1.5px solid var(--line2);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
-.mc-landing .tb small{font:500 9px "Geist Mono",monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--mut)}
+.mc-landing .tb small{font:500 9px "Schibsted Grotesk",sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--mut)}
 .mc-landing .tb b{font-size:12px}
 .mc-landing .tb.hi{border-color:var(--acc);background:var(--accs)}
-.mc-landing .gc{position:absolute;border-radius:999px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line2);font:600 9px "Geist Mono",monospace;transition:transform .9s var(--ease)}
+.mc-landing .gc{position:absolute;border-radius:999px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line2);font:600 9px "Schibsted Grotesk",sans-serif;transition:transform .9s var(--ease)}
 .mc-landing .gc.me{background:var(--acc);border-color:var(--acc);color:#fff}
 .mc-landing .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:56px;counter-reset:s}
 .mc-landing .step{padding:32px 0 0;border-top:2px solid var(--line);position:relative}
@@ -233,7 +233,7 @@
 .mc-landing .rd-stage{position:relative;border-radius:22px;border:1px solid var(--rl);background:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px) 0 0/22px 22px,rgba(255,255,255,.02);padding:18px;display:flex;flex-direction:column;gap:14px}
 .mc-landing .rd-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .mc-landing .rd-rounds{display:flex;gap:4px;background:rgba(255,255,255,.06);border-radius:999px;padding:4px}
-.mc-landing .rd-rounds button{height:30px;min-width:44px;padding:0 10px;border-radius:999px;font:600 12px "Geist Mono",monospace;color:var(--rm);transition:background-color .3s,color .3s}
+.mc-landing .rd-rounds button{height:30px;min-width:44px;padding:0 10px;border-radius:999px;font:600 12px "Schibsted Grotesk",sans-serif;color:var(--rm);transition:background-color .3s,color .3s}
 .mc-landing .rd-rounds button:hover{color:#fff}
 .mc-landing .rd-rounds button.on{background:#fff;color:var(--dark)}
 .mc-landing .rd-ctrl{display:flex;gap:6px}
@@ -241,13 +241,13 @@
 .mc-landing .rd-ctrl button:hover{background:rgba(255,255,255,.1)}
 .mc-landing .rd-ctrl svg{width:15px;height:15px}
 .mc-landing .rd-area{position:relative;height:clamp(380px,46vw,520px)}
-.mc-landing .rd-status{font:500 13px "Geist Mono",monospace;color:var(--rm);text-transform:uppercase;letter-spacing:.12em;transition:opacity .4s;pointer-events:none;text-align:center;line-height:1.5;flex:none}
+.mc-landing .rd-status{font:500 13px "Schibsted Grotesk",sans-serif;color:var(--rm);text-transform:uppercase;letter-spacing:.12em;transition:opacity .4s;pointer-events:none;text-align:center;line-height:1.5;flex:none}
 .mc-landing .rd .tb{position:absolute;border-radius:14px;border:1.5px solid var(--rl2);background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;opacity:0;transform:scale(.9);transition:opacity .6s var(--ease),transform .6s var(--ease),border-color .4s,background-color .4s,box-shadow .4s}
 .mc-landing .rd .tb.show{opacity:1;transform:none}
-.mc-landing .rd .tb small{font:500 9px "Geist Mono",monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--rm)}
+.mc-landing .rd .tb small{font:500 9px "Schibsted Grotesk",sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--rm)}
 .mc-landing .rd .tb b{font-size:clamp(10px,1vw,13px);font-weight:600;color:#fff}
 .mc-landing .rd .tb.hi{border-color:var(--hl);background:color-mix(in oklab,var(--hl) 14%,transparent);box-shadow:0 0 0 4px color-mix(in oklab,var(--hl) 14%,transparent),0 0 40px color-mix(in oklab,var(--hl) 25%,transparent)}
-.mc-landing .rd .gc{position:absolute;left:0;top:0;border-radius:999px;display:grid;place-items:center;background:#24304a;background:color-mix(in oklab,var(--dark) 70%,#fff 14%);border:1px solid var(--rl2);color:#e6ebf2;font:600 9.5px "Geist Mono",monospace;will-change:transform;transition:transform 1.1s var(--ease),background-color .4s,border-color .4s,color .4s,opacity .5s,box-shadow .4s;z-index:1}
+.mc-landing .rd .gc{position:absolute;left:0;top:0;border-radius:999px;display:grid;place-items:center;background:#24304a;background:color-mix(in oklab,var(--dark) 70%,#fff 14%);border:1px solid var(--rl2);color:#e6ebf2;font:600 9.5px "Schibsted Grotesk",sans-serif;will-change:transform;transition:transform 1.1s var(--ease),background-color .4s,border-color .4s,color .4s,opacity .5s,box-shadow .4s;z-index:1}
 .mc-landing .rd .gc.meet{border-color:var(--hl);color:#fff;box-shadow:0 0 0 3px color-mix(in oklab,var(--hl) 22%,transparent)}
 .mc-landing .rd .gc.me{background:var(--hl);border-color:var(--hl);color:var(--dark);z-index:3;box-shadow:0 0 0 5px color-mix(in oklab,var(--hl) 25%,transparent),0 0 24px var(--hl)}
 .mc-landing .rd .gc.me::after{content:"";position:absolute;inset:-6px;border-radius:inherit;border:1.5px solid var(--hl);animation:mc-ping 1.8s var(--ease) infinite}
@@ -265,7 +265,7 @@
 .mc-landing .rd-who .av{width:44px;height:44px;margin:0;font-size:12px;background:var(--acc);color:#fff}
 .mc-landing .rd-who b{display:block;font-size:16px;letter-spacing:-.02em}
 .mc-landing .rd-who small{font-size:12.5px;color:var(--mut)}
-.mc-landing .rd-who .pdf{margin-left:auto;font:600 10.5px "Geist Mono",monospace;padding:5px 9px;border-radius:999px;background:var(--accs);color:var(--acc);opacity:0;transition:opacity .4s}
+.mc-landing .rd-who .pdf{margin-left:auto;font:600 10.5px "Schibsted Grotesk",sans-serif;padding:5px 9px;border-radius:999px;background:var(--accs);color:var(--acc);opacity:0;transition:opacity .4s}
 .mc-landing .rd-who .pdf.on{opacity:1}
 .mc-landing .rd-it{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .mc-landing .rd-it>div{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:10px 6px;border-bottom:1px solid var(--line);font-size:13px;opacity:.28;transition:opacity .5s,background-color .4s;border-radius:8px}

@@ -18,7 +18,7 @@ export default function AnimatedValue({ value, format = number => Math.round(num
     let frame;
     const start = performance.now();
     const tick = now => {
-      const progress = Math.min(1, (now - start) / 900);
+      const progress = Math.max(0, Math.min(1, (now - start) / 900));
       setDisplay(value * (1 - Math.pow(1 - progress, 3)));
       if (progress < 1) frame = requestAnimationFrame(tick);
     };

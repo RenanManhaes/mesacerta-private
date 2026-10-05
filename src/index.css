@@ -19,7 +19,7 @@
   --font-heading: 'Schibsted Grotesk', system-ui, sans-serif;
   --font-body: 'Schibsted Grotesk', system-ui, sans-serif;
   --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
+  --font-mono: 'Schibsted Grotesk', system-ui, sans-serif;
   --sidebar-background: 0 0% 100%; --sidebar-border: 80 6% 90%;
   --sidebar-accent: 219 44% 94%; --sidebar-accent-foreground: 219 58% 27%;
   --positive-foreground: 0 0% 100%; --warning-foreground: 0 0% 100%; --info-foreground: 0 0% 100%; --danger-foreground: 0 0% 100%;

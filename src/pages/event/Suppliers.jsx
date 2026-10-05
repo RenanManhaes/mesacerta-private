@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEvent } from '@/context/EventContext';
-import { supplierSummary } from '@/lib/selectors';
+import { supplierSummary, updateSupplierPayment } from '@/lib/selectors';
 import { formatBRL, formatDateShort } from '@/lib/format';
 import { StatusPill } from '@/components/common/Primitives';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,9 @@ export default function Suppliers() {
   const { toast } = useToast();
   const s = supplierSummary(ev);
 
-  const setPaid = (id, value) => updateCurrent(e => ({ ...e, suppliers: e.suppliers.map(sup => sup.id === id ? { ...sup, paid: Number(value) || 0, status: (Number(value) || 0) >= sup.contracted && sup.contracted > 0 ? 'pago' : 'pendente' } : sup) }));
-  const registerFull = (id) => {
-    updateCurrent(e => ({ ...e, suppliers: e.suppliers.map(sup => sup.id === id ? { ...sup, paid: sup.contracted, status: 'pago' } : sup) }));
+  const setPaid = (id,value) => updateCurrent(e=>updateSupplierPayment(e,id,value));
+  const registerFull = id => {
+    updateCurrent(e=>updateSupplierPayment(e,id,e.suppliers.find(s=>s.id===id)?.contracted || 0));
     toast({ title: 'Pagamento registrado', duration: 1800 });
   };
 

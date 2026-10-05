@@ -36,3 +36,6 @@ dist-ssr
 .vite
 base44/.app.jsonc
 .vercel
+
+review-evidence/
+supabase/.temp/
