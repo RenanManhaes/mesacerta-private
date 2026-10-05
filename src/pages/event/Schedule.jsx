@@ -3,14 +3,16 @@ import { useEvent } from '@/context/EventContext';
 import { scheduleSummary } from '@/lib/selectors';
 import { uid, minutesToTime, timeToMinutes } from '@/lib/format';
 import { colorOf, insertActivity, moveActivity, sortSchedule, findConflicts } from '@/lib/schedule';
-import ActivityDialog, { ACTIVITY_TYPES, ColorPicker } from '@/components/schedule/ActivityDialog';
+import ActivityDialog, { ColorPicker } from '@/components/schedule/ActivityDialog';
+import ActivityTypesDialog from '@/components/schedule/ActivityTypesDialog';
+import { useActivityTypes } from '@/hooks/useActivityTypes';
 import Timeline from '@/components/schedule/Timeline';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2, Plus, AlertCircle } from 'lucide-react';
+import { Copy, Trash2, Plus, AlertCircle, Tags } from 'lucide-react';
 
-function Row({ item, onEdit, onDuplicate, onDelete }) {
+function Row({ item, typeNames, onEdit, onDuplicate, onDelete }) {
   const [open, setOpen] = useState(false);
   const color = colorOf(item);
   return (
@@ -39,7 +41,7 @@ function Row({ item, onEdit, onDuplicate, onDelete }) {
           <div><label className="text-[11px] text-muted-foreground">Tipo</label>
             <Select value={item.type} onValueChange={v => onEdit(item.id, { type: v })}>
               <SelectTrigger className="h-8 text-[13px] mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>{[...new Set([...ACTIVITY_TYPES, item.type].filter(Boolean))].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              <SelectContent>{[...new Set([...typeNames, item.type].filter(Boolean))].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div><label className="text-[11px] text-muted-foreground">Responsável</label><Input className="h-8 text-[13px] mt-1" value={item.speaker || ''} onChange={e => onEdit(item.id, { speaker: e.target.value })} /></div>
@@ -53,8 +55,10 @@ function Row({ item, onEdit, onDuplicate, onDelete }) {
 }
 
 export default function Schedule() {
-  const { currentEvent: ev, updateCurrent } = useEvent();
+  const { currentEvent: ev, updateCurrent, orgId } = useEvent();
+  const { types } = useActivityTypes(orgId);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [typesOpen, setTypesOpen] = useState(false);
   const sch = scheduleSummary(ev);
   const conflicts = findConflicts(sch.computed);
 
@@ -76,7 +80,10 @@ export default function Schedule() {
           <h1 className="font-display text-[26px] tracking-tight">Programação</h1>
           <p className="mt-1 text-[14px] text-muted-foreground">{sch.count} atividades · {sch.durationText} previstos · início {sch.start} · término {sch.end}</p>
         </div>
-        <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5" /> Nova atividade</Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="h-8 gap-1.5 text-[13px]" onClick={() => setTypesOpen(true)}><Tags className="h-3.5 w-3.5" /> Tipos de atividade</Button>
+          <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5" /> Nova atividade</Button>
+        </div>
       </div>
 
       {sch.overMinutes > 0 && (
@@ -104,7 +111,7 @@ export default function Schedule() {
               <div className="hidden sm:block col-span-2 text-right">Ações</div>
             </div>
             {sch.computed.map((it) => (
-              <Row key={it.id} item={it} onEdit={edit} onDuplicate={duplicate} onDelete={remove} />
+              <Row key={it.id} item={it} typeNames={types.map(t => t.name)} onEdit={edit} onDuplicate={duplicate} onDelete={remove} />
             ))}
           </div>
           <section aria-label="Cronograma" className="lg:sticky lg:top-4">
@@ -114,6 +121,7 @@ export default function Schedule() {
         </div>
       )}
 
+      <ActivityTypesDialog open={typesOpen} onOpenChange={setTypesOpen} />
       <ActivityDialog open={dialogOpen} onOpenChange={setDialogOpen} event={ev} onConfirm={addActivity} />
     </div>
   );

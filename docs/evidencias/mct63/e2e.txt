@@ -1,0 +1,22 @@
+PASS Lista inicial: 8 tipos nas sugestoes :: Almoço | Apresentação | Credenciamento | Encerramento | Intervalo | Painel | Palestra | Rodada de negócio
+PASS Digitando "ro": aparecem so os que casam (+ opcao de criar) :: Rodada de negócio | Criar tipo “ro”
+PASS Busca sem acento: "negocio" acha "Rodada de negócio" :: Rodada de negócio | Criar tipo “negocio”
+PASS Busca sem diferenciar maiusculas: "PA" acha Palestra e Painel :: Painel | Palestra | Criar tipo “PA”
+PASS Tipo inexistente: aparece "Criar tipo ..." :: Criar tipo “Oficina de vinhos”
+PASS Tipo novo criado no banco da organizacao :: [["insert","Oficina de vinhos"]]
+PASS Atividade salva com o tipo novo
+PASS Tipo novo passa a aparecer nas sugestoes
+PASS Cancelar o modal nao criou tipos extras
+PASS Outro evento da mesma organizacao: tipos criados antes estao la :: Almoço | Apresentação | Credenciamento | Encerramento | Intervalo | Oficina de vinhos | Painel | Palestra | Rodada de negócio
+PASS Renomear: banco de tipos atualizado
+PASS Renomear: atividades que usavam o tipo acompanham (evento A)
+PASS Renomear para nome ja existente e recusado
+PASS Excluir tipo em uso: avisa quantas atividades usam antes de confirmar :: Este tipo está em uso por 3 atividades em 2 eventos. Elas continuam com o nome “Palestra”, mas o tipo deixa de aparecer nas sugestões.
+PASS Antes de confirmar o tipo continua no banco
+PASS Cancelar a exclusao mantem o tipo
+PASS Confirmar exclusao remove o tipo do banco
+PASS Atividades que usavam o tipo continuam com o nome
+PASS Tipo sem uso: aviso diz que nao esta em uso
+PASS Sem erros de console/pagina
+
+20/20 checks passed

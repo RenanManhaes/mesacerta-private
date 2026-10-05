@@ -1,0 +1,29 @@
+$ npm run lint
+
+> base44-app@0.0.0 lint
+> eslint . --quiet
+
+$ npm run typecheck
+
+> base44-app@0.0.0 typecheck
+> tsc -p ./jsconfig.json
+
+$ npm run build
+[32m✓ built in 11.10s[39m
+$ node src/lib/networking/engine.test.mjs
+
+Motor portado preserva as garantias do cenario real.
+$ npm test
+ℹ tests 19
+ℹ pass 19
+ℹ fail 0
+$ node src/lib/activityTypes.test.mjs
+PASS lista inicial tem os 8 tipos pedidos
+PASS digitando, aparecem os tipos que casam (sem acento nem maiúscula)
+PASS quem começa com o texto vem primeiro
+PASS findType reconhece o mesmo nome ignorando caixa, acento e espaços
+PASS normalizeTypeName / typeKey
+PASS countUsage soma atividades e eventos da organização
+PASS renameInEvent troca só as atividades do tipo e preserva as demais
+
+7 verificacoes passaram
