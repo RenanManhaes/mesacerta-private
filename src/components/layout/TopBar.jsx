@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { formatDateFull } from '@/lib/format';
-import { Search, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import AddMenu from './AddMenu';
+import HeaderSearch from './HeaderSearch';
 import LogoutButton from '@/components/LogoutButton';
 import { alerts as alertsFn } from '@/lib/selectors';
 
@@ -15,13 +15,7 @@ export default function TopBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
-  const [search, setSearch] = useState('');
   const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
-
-  const onSearch = (e) => {
-    e.preventDefault();
-    if (search.trim()) navigate(`/event/${currentEvent.id}/participantes?q=${encodeURIComponent(search)}`);
-  };
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -36,12 +30,7 @@ export default function TopBar() {
           </div>
         </div>
 
-        <form onSubmit={onSearch} className="hidden sm:block w-44 lg:w-56">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar no evento" className="h-8 pl-8 text-[13px] bg-card" />
-          </div>
-        </form>
+        <HeaderSearch />
 
         <Button variant="ghost" size="icon" className="h-8 w-8 relative" aria-label="Notificações" onClick={() => navigate(`/event/${currentEvent.id}/dashboard`)}>
           <Bell className="h-4 w-4" />
