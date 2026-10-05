@@ -70,10 +70,16 @@ export function Progress({ value, total = 100, tone = 'blue' }) {
     </div>
   );
 }
+// Rotulo curto (ex.: "75%") cabe no miolo do anel. Valores longos (ex.:
+// "R$ 1.234.567,89") ficam abaixo do desenho, com espaco proprio, para nunca
+// cobrir o traco do grafico (MCT-50).
+const RING_INNER_LABEL_MAX = 5;
 export function Ring({ value, total, label, sub, segments = null }) {
   const pieces = segments || [{ value, color: '#e8663d' }];
   let offset = 0;
+  const outside = String(label ?? '').length > RING_INNER_LABEL_MAX;
   return (
+    <div className="reference-ring-wrap">
     <div className="reference-ring">
       <svg viewBox="0 0 160 160" aria-hidden="true">
         <circle
@@ -107,9 +113,11 @@ export function Ring({ value, total, label, sub, segments = null }) {
         })}
       </svg>
       <div>
-        <b>{label}</b>
+        {!outside && <b>{label}</b>}
         <small>{sub}</small>
       </div>
+    </div>
+    {outside && <b className="reference-ring-value">{label}</b>}
     </div>
   );
 }
