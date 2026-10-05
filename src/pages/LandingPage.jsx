@@ -1,1220 +1,174 @@
-import React, { useEffect, useRef, useState } from 'react';
+// @ts-nocheck -- landing visual usa propriedades CSS customizadas em estilos inline.
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  AnimatePresence,
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from 'framer-motion';
-import {
-  ArrowDownRight,
-  ArrowRight,
-  Check,
-  ChevronDown,
-  CircleDollarSign,
-  Clock3,
-  Menu,
-  Users,
-  X,
-} from 'lucide-react';
+import { Armchair, ArrowRight, Briefcase, CalendarDays, Check, ClipboardCheck, FileText, Handshake, LayoutDashboard, ListChecks, Minus, Network, Shuffle, Truck, Users, Wallet, X } from 'lucide-react';
+import './landing/landing.css';
+import { initLanding } from './landing/landingEffects';
 
-const chapters = [
-  {
-    id: 'financeiro',
-    eyebrow: '01 · Financeiro',
-    title: 'Você não deveria descobrir se o evento deu certo depois que ele acabou.',
-    body: 'Receitas, despesas, compromissos e resultado ficam dentro do contexto do evento. A leitura financeira existe para responder uma pergunta simples: como esse projeto está agora?',
-  },
-  {
-    id: 'pessoas',
-    eyebrow: '02 · Pessoas',
-    title: 'Cada confirmação muda a operação. Então ela precisa estar visível.',
-    body: 'Participantes, presença e capacidade deixam de ser contagens soltas e passam a fazer parte da mesma leitura operacional.',
-  },
-  {
-    id: 'fornecedores',
-    eyebrow: '03 · Fornecedores',
-    title: 'Fornecedor não é só um contato. É prazo, custo e responsabilidade.',
-    body: 'O que foi combinado, quanto custa e o que ainda depende de ação ficam próximos o suficiente para você não depender da memória.',
-  },
-  {
-    id: 'planejamento',
-    eyebrow: '04 · Planejamento',
-    title: 'A programação deveria mostrar o que está prestes a dar errado.',
-    body: 'Horários, tarefas e responsáveis ajudam a antecipar atrasos, lacunas e decisões antes que elas virem improviso no dia do evento.',
-  },
-  {
-    id: 'networking',
-    eyebrow: '05 · Networking',
-    title: 'Quando a experiência acontece ao redor de uma mesa, a interface também precisa pensar no espaço.',
-    body: 'Mesas, cadeiras, anfitriões, rotas e conflitos ganham representação espacial — porque uma rodada de negócios não é uma planilha.',
-  },
-];
-
-const faq = [
-  {
-    question: 'Minha planilha já funciona. Por que eu mudaria?',
-    answer: 'Se ela resolve sua operação inteira, talvez você não precise mudar. O Mesa Certa faz sentido quando financeiro, participantes, fornecedores, tarefas e programação começam a viver em lugares diferentes e você precisa reconstruir o contexto toda vez que abre um evento.',
-  },
-  {
-    question: 'Serve para um evento sem networking?',
-    answer: 'Sim. Networking é opcional. O núcleo do Mesa Certa é planejamento e operação do evento, com o financeiro separado por projeto.',
-  },
-  {
-    question: 'Posso organizar vários eventos ao mesmo tempo?',
-    answer: 'Sim. Cada evento mantém seus próprios dados, números e pendências. A oferta comercial inicial considera até três eventos ativos simultaneamente.',
-  },
-  {
-    question: 'O Mesa Certa vende ingressos?',
-    answer: 'A proposta atual é planejamento e operação. Bilheteria e processamento de pagamentos não fazem parte da promessa comercial desta versão.',
-  },
-];
-
-const chaosItems = [
-  { label: 'Orçamento_final_v7.xlsx', x: '-34vw', y: '-20vh', r: -7, finalX: '-18vw', finalY: '-4vh' },
-  { label: 'Fornecedor — buffet', x: '31vw', y: '-26vh', r: 6, finalX: '17vw', finalY: '-7vh' },
-  { label: 'Confirmar audiovisual', x: '-36vw', y: '5vh', r: 4, finalX: '-19vw', finalY: '8vh' },
-  { label: 'Lista convidados FINAL', x: '33vw', y: '7vh', r: -5, finalX: '18vw', finalY: '7vh' },
-  { label: 'Cronograma', x: '-28vw', y: '27vh', r: -3, finalX: '-13vw', finalY: '18vh' },
-  { label: 'R$ 6.500 pendente', x: '29vw', y: '29vh', r: 8, finalX: '14vw', finalY: '18vh' },
-];
-
-const networkingRounds = [
-  [
-    { name: 'Ana', left: '19%', top: '14%' },
-    { name: 'João', left: '81%', top: '14%' },
-    { name: 'Maria', left: '9%', top: '49%' },
-    { name: 'Lucas', left: '91%', top: '49%' },
-    { name: 'Renan', left: '31%', top: '85%' },
-    { name: 'Pedro', left: '69%', top: '85%' },
-  ],
-  [
-    { name: 'Ana', left: '31%', top: '85%' },
-    { name: 'João', left: '19%', top: '14%' },
-    { name: 'Maria', left: '81%', top: '14%' },
-    { name: 'Lucas', left: '9%', top: '49%' },
-    { name: 'Renan', left: '69%', top: '85%' },
-    { name: 'Pedro', left: '91%', top: '49%' },
-  ],
-  [
-    { name: 'Ana', left: '91%', top: '49%' },
-    { name: 'João', left: '31%', top: '85%' },
-    { name: 'Maria', left: '19%', top: '14%' },
-    { name: 'Lucas', left: '69%', top: '85%' },
-    { name: 'Renan', left: '81%', top: '14%' },
-    { name: 'Pedro', left: '9%', top: '49%' },
-  ],
-];
-
-let activeScrollFrame = null;
-
-function easeInOutQuint(t) {
-  return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
-}
-
-function scrollToSection(id, reduceMotion) {
-  const target = document.getElementById(id);
-  if (!target) return;
-
-  const offset = 72;
-  const from = window.scrollY;
-  const to = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
-
-  if (activeScrollFrame) {
-    window.cancelAnimationFrame(activeScrollFrame);
-    activeScrollFrame = null;
-  }
-
-  if (reduceMotion) {
-    window.scrollTo(0, to);
-    return;
-  }
-
-  const distance = to - from;
-  const duration = Math.min(1400, Math.max(850, Math.abs(distance) * 0.5));
-  let startedAt = null;
-
-  const frame = (time) => {
-    if (startedAt === null) startedAt = time;
-    const elapsed = time - startedAt;
-    const progress = Math.min(1, elapsed / duration);
-    window.scrollTo(0, from + distance * easeInOutQuint(progress));
-    if (progress < 1) {
-      activeScrollFrame = window.requestAnimationFrame(frame);
-    } else {
-      activeScrollFrame = null;
-    }
-  };
-
-  activeScrollFrame = window.requestAnimationFrame(frame);
-}
-
-function NavButton({ target, children, reduceMotion, className = '' }) {
+export default function LandingPage() {
+  const rootRef = useRef(null);
+  useEffect(() => initLanding(rootRef.current), []);
   return (
-    <button
-      type="button"
-      onClick={() => scrollToSection(target, reduceMotion)}
-      className={'landing-nav-link ' + className}
-    >
-      {children}
-    </button>
-  );
-}
+    <div className="mc-landing" ref={rootRef}>
+<header className="nav"><div className="wrap">
+<a href="#top" className="logo" data-scroll="top"><b><span></span><span></span><span></span><span></span></b>Mesa Certa</a>
+<nav className="nav-l"><button data-scroll="rodadas">Rodadas de negócio</button><button data-scroll="para-quem">Para quem</button><button data-scroll="modulos">Módulos</button><button data-scroll="como">Como funciona</button><button data-scroll="planos">Planos</button><button data-scroll="duvidas">Dúvidas</button></nav>
+<div className="nav-r"><Link className="lnk" to="/login">Entrar</Link><a className="btn btn-p btn-s" href="#planos" data-scroll="planos">Começar agora</a></div>
+</div></header>
 
-function BrandMark({ light = false }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className={'relative grid h-9 w-9 place-items-center border ' + (light ? 'border-[#88aaa3] text-[#f6f1e7]' : 'border-primary text-primary')}>
-        <span className="absolute left-1/2 top-[-4px] h-2 w-px -translate-x-1/2 bg-current" />
-        <span className="absolute bottom-[-4px] left-1/2 h-2 w-px -translate-x-1/2 bg-current" />
-        <span className="absolute left-[-4px] top-1/2 h-px w-2 -translate-y-1/2 bg-current" />
-        <span className="absolute right-[-4px] top-1/2 h-px w-2 -translate-y-1/2 bg-current" />
-        <span className="h-3.5 w-3.5 border border-current" />
-      </span>
-      <span className="font-display text-[21px] tracking-[-0.02em]">Mesa Certa</span>
+<section className="hero" id="top" data-screen-label="01 Hero"><div className="wrap">
+<div className="hero-t">
+<span className="eyebrow" data-reveal>Sistema de gestão de eventos</span>
+<h1 data-reveal style={{ '--d': '1' }}>Seu evento inteiro, <em>num lugar só.</em></h1>
+<p className="lead" data-reveal style={{ '--d': '2' }}>Financeiro, participantes, fornecedores, tarefas, programação e as mesas das rodadas de negócio. Sem planilha solta, sem grupo de WhatsApp.</p>
+<div className="cta-row" data-reveal style={{ '--d': '3' }}><a className="btn btn-p" href="#planos" data-scroll="planos">Começar agora<ArrowRight aria-hidden="true" /></a><button className="btn" data-scroll="rodadas">Ver as rodadas em ação</button></div>
+<div className="trust" data-reveal style={{ '--d': '4' }}><span><Check aria-hidden="true" />Funciona no navegador</span><span><Check aria-hidden="true" />Vários eventos ao mesmo tempo</span><span><Check aria-hidden="true" />Feito para quem produz evento</span></div>
+</div>
+<div className="shot-w"><div className="shot">
+<div className="frame">
+<div className="fr-bar"><span className="dots"><i></i><i></i><i></i></span><span className="url">app.mesacerta.com.br/seu-evento</span><span style={{ width: '46px' }}></span></div>
+<div className="app">
+<aside className="side">
+<div className="ev"><b>Encontro de Negócios</b><small>18 nov · 120 inscritos</small></div>
+<span className="it on"><LayoutDashboard aria-hidden="true" />Visão geral</span>
+<span className="g">Planejamento</span>
+<span className="it"><CalendarDays aria-hidden="true" />Programação</span>
+<span className="it"><ListChecks aria-hidden="true" />Tarefas</span>
+<span className="it"><Users aria-hidden="true" />Participantes</span>
+<span className="it"><Truck aria-hidden="true" />Fornecedores</span>
+<span className="g">Financeiro</span>
+<span className="it"><Wallet aria-hidden="true" />Financeiro</span>
+<span className="g">Operação</span>
+<span className="it"><Network aria-hidden="true" />Networking</span>
+</aside>
+<div className="main">
+<div className="mh"><div><small>Boa tarde. Veja como está o seu evento.</small><h4>Encontro de Negócios</h4></div><div className="days"><b data-count="47">0</b><small className="mut">dias para o evento</small></div></div>
+<div className="kpis">
+<div className="kpi"><small>Faturamento previsto</small><b data-count="74800" data-pre="R$ ">R$ 0</b><span className="d">62% recebido</span></div>
+<div className="kpi"><small>Despesas previstas</small><b data-count="43200" data-pre="R$ ">R$ 0</b><span className="d" style={{ color: 'var(--mut)' }}>R$ 11.500 a pagar</span></div>
+<div className="kpi"><small>Resultado previsto</small><b data-count="31600" data-pre="R$ ">R$ 0</b><span className="d">Margem de 42%</span></div>
+<div className="kpi"><small>Confirmados</small><b data-count="98">0</b><span className="d" style={{ color: 'var(--mut)' }}>de 120 inscritos</span></div>
+</div>
+<div className="m2">
+<div className="box"><h5>Entradas e saídas <span>próximas 8 semanas</span></h5><div className="bars"><div><i style={{ '--h': '30%', '--d': '0' }}></i><i className="x" style={{ '--h': '55%', '--d': '0' }}></i></div><div><i style={{ '--h': '45%', '--d': '1' }}></i><i className="x" style={{ '--h': '28%', '--d': '1' }}></i></div><div><i style={{ '--h': '68%', '--d': '2' }}></i><i className="x" style={{ '--h': '18%', '--d': '2' }}></i></div><div><i style={{ '--h': '50%', '--d': '3' }}></i><i className="x" style={{ '--h': '60%', '--d': '3' }}></i></div><div><i style={{ '--h': '80%', '--d': '4' }}></i><i className="x" style={{ '--h': '36%', '--d': '4' }}></i></div><div><i style={{ '--h': '100%', '--d': '5' }}></i><i className="x" style={{ '--h': '48%', '--d': '5' }}></i></div><div><i style={{ '--h': '82%', '--d': '6' }}></i><i className="x" style={{ '--h': '32%', '--d': '6' }}></i></div><div><i style={{ '--h': '62%', '--d': '7' }}></i><i className="x" style={{ '--h': '76%', '--d': '7' }}></i></div></div></div>
+<div className="box"><h5>Precisa da sua atenção</h5>
+<div className="al"><i className="cr"></i>Parcela do audiovisual vence sexta</div>
+<div className="al"><i></i>22 inscritos sem confirmação</div>
+<div className="al"><i></i>Programação passa 25 min do horário</div>
+<div className="al"><i className="ok"></i>Mesas das 7 rodadas montadas</div></div>
+</div>
+</div>
+</div>
+</div>
+</div></div>
+</div>
+<div className="strip" aria-hidden="true"><div className="strip-t"><span>Financeiro</span><span>Participantes</span><span>Fornecedores</span><span>Tarefas</span><span>Programação</span><span>Patrocínios</span><span>Rodadas de negócio</span><span>Roteiros</span><span>Financeiro</span><span>Participantes</span><span>Fornecedores</span><span>Tarefas</span><span>Programação</span><span>Patrocínios</span><span>Rodadas de negócio</span><span>Roteiros</span></div></div>
+</section>
+
+<section className="sec rd" id="rodadas" data-screen-label="02 Rodadas de negócio"><div className="wrap">
+<div className="sec-head c"><span className="eyebrow" data-reveal>O nosso diferencial</span><h2 data-reveal style={{ '--d': '1' }}>Rodadas de negócio montadas sozinhas.</h2><p data-reveal style={{ '--d': '2' }}>Você importa os convidados. O Mesa Certa distribui as mesas, troca as pessoas a cada rodada sem repetir nenhum encontro e entrega o roteiro de cada um.</p></div>
+<div className="rd-grid">
+<div className="rd-stage" data-reveal>
+<div className="rd-top"><div className="rd-rounds" role="group" aria-label="Rodadas"><button>R1</button><button>R2</button><button>R3</button><button>R4</button><button>R5</button></div><div className="rd-ctrl"><button id="rd-restart" aria-label="Recomeçar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button><button id="rd-play"></button></div></div>
+<div className="rd-area" id="rd-area"><span className="rd-status" id="rd-status">42 convidados importados</span></div>
+<div className="rd-stats"><div><b id="rd-round">—</b><small>rodada</small></div><div><b id="rd-meet">0</b><small>encontros únicos</small></div><div><b>0</b><small>encontros repetidos</small></div></div>
+</div>
+<div className="rd-side">
+<div className="rd-card" data-reveal style={{ '--d': '1' }}><div className="rd-who"><span className="av">MC</span><div><b>Marina Costa</b><small>Roteiro individual</small></div><span className="pdf">PDF pronto</span></div><div className="rd-it" id="rd-it"></div></div>
+<ul className="rd-pts" data-reveal style={{ '--d': '2' }}><li><Shuffle aria-hidden="true" /><span><b>Sem repetição.</b> Cada pessoa conhece gente nova em todas as rodadas.</span></li><li><Armchair aria-hidden="true" /><span><b>Anfitriões fixos.</b> Patrocinadores ficam na sua mesa e recebem os convidados.</span></li><li><FileText aria-hidden="true" /><span><b>Roteiro pronto.</b> Cada convidado recebe para onde ir em cada rodada.</span></li></ul>
+</div>
+</div>
+</div></section>
+
+<section className="sec" id="para-quem" data-screen-label="02 Para quem"><div className="wrap">
+<div className="sec-head"><span className="eyebrow" data-reveal>Para quem é</span><h2 data-reveal style={{ '--d': '1' }}>Para quem produz evento e responde pelo resultado.</h2></div>
+<div className="cards3">
+<div className="c3" data-reveal><span className="n"><Briefcase aria-hidden="true" /></span><h3>Produtoras</h3><p>Vários eventos ao mesmo tempo, cada um com seus números, equipe e pendências separados.</p></div>
+<div className="c3" data-reveal style={{ '--d': '1' }}><span className="n"><ClipboardCheck aria-hidden="true" /></span><h3>Organizadores</h3><p>Uma tela com o que precisa de decisão hoje, no lugar de cinco planilhas e três grupos.</p></div>
+<div className="c3" data-reveal style={{ '--d': '2' }}><span className="n"><Handshake aria-hidden="true" /></span><h3>Eventos de networking</h3><p>Mesas por empresa, anfitriões e rodadas que entregam ao patrocinador os encontros prometidos.</p></div>
+</div>
+</div></section>
+
+<section className="sec" id="modulos" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }} data-screen-label="03 Módulos"><div className="wrap">
+<div className="sec-head"><span className="eyebrow" data-reveal>Módulos</span><h2 data-reveal style={{ '--d': '1' }}>Cada parte do evento tem o seu lugar.</h2></div>
+<div className="mods">
+<div className="tabs" role="tablist">
+<button className="tab" role="tab"><h3><Wallet aria-hidden="true" />Financeiro</h3><p><span>Receitas, despesas, patrocínios e meta. Você sabe o resultado antes do evento acabar.</span></p><span className="bar"><i></i></span></button>
+<button className="tab" role="tab"><h3><Users aria-hidden="true" />Participantes</h3><p><span>Importe a planilha, remova duplicados e acompanhe cada confirmação.</span></p><span className="bar"><i></i></span></button>
+<button className="tab" role="tab"><h3><Truck aria-hidden="true" />Fornecedores</h3><p><span>Contrato, valor, parcelas e vencimentos de cada fornecedor num só lugar.</span></p><span className="bar"><i></i></span></button>
+<button className="tab" role="tab"><h3><CalendarDays aria-hidden="true" />Programação e tarefas</h3><p><span>A grade do dia e o checklist da equipe, com aviso do que vai atrasar.</span></p><span className="bar"><i></i></span></button>
+<button className="tab" role="tab"><h3><Network aria-hidden="true" />Rodadas de negócio</h3><p><span>Mesas montadas sem repetir encontro e o roteiro de cada convidado pronto.</span></p><span className="bar"><i></i></span></button>
+</div>
+<div className="stage" data-reveal><div className="frame">
+<div className="fr-bar"><span className="dots"><i></i><i></i><i></i></span><span className="url" id="mod-url">app.mesacerta.com.br/seu-evento/financeiro</span><span style={{ width: '46px' }}></span></div>
+<div className="pnw">
+<div className="pn"><div className="pn-h"><b>Resultado previsto</b><span className="pill pos">Margem 42%</span></div><div className="big" data-count="31600" data-pre="R$ ">R$ 31.600</div>
+<div className="bars" style={{ height: '110px' }}><div><i style={{ '--h': '40%', '--d': '0' }}></i><i className="x" style={{ '--h': '62%', '--d': '0' }}></i></div><div><i style={{ '--h': '55%', '--d': '1' }}></i><i className="x" style={{ '--h': '30%', '--d': '1' }}></i></div><div><i style={{ '--h': '72%', '--d': '2' }}></i><i className="x" style={{ '--h': '48%', '--d': '2' }}></i></div><div><i style={{ '--h': '60%', '--d': '3' }}></i><i className="x" style={{ '--h': '70%', '--d': '3' }}></i></div><div><i style={{ '--h': '88%', '--d': '4' }}></i><i className="x" style={{ '--h': '52%', '--d': '4' }}></i></div><div><i style={{ '--h': '100%', '--d': '5' }}></i><i className="x" style={{ '--h': '80%', '--d': '5' }}></i></div></div>
+<div className="rows"><div><span>Faturamento previsto</span><b>R$ 74.800</b></div><div><span>Despesas previstas</span><b>R$ 43.200</b></div></div></div>
+<div className="pn"><div className="pn-h"><b>Participantes</b><span className="pill">Capacidade 140</span></div>
+<div className="k3"><div><b data-count="120">120</b><small>inscritos</small></div><div><b data-count="98">98</b><small>confirmados</small></div><div><b data-count="22">22</b><small>pendentes</small></div></div>
+<div className="rows"><div><span style={{ color: 'var(--ink)' }}><span className="av">AP</span>Ana Prado</span><span className="pill pos">Confirmado</span></div><div><span style={{ color: 'var(--ink)' }}><span className="av">JM</span>João Moreira</span><span className="pill pos">Confirmado</span></div><div><span style={{ color: 'var(--ink)' }}><span className="av">ML</span>Maria Lima</span><span className="pill warn">Aguardando</span></div><div><span style={{ color: 'var(--ink)' }}><span className="av">LT</span>Lucas Teixeira</span><span className="pill">Cortesia</span></div></div></div>
+<div className="pn"><div className="pn-h"><b>Fornecedores</b><span className="pill warn">1 vence esta semana</span></div>
+<div className="rows"><div><span style={{ color: 'var(--ink)' }}>Buffet</span><b>R$ 13.500</b><span className="pill">Parcial</span></div><div><span style={{ color: 'var(--ink)' }}>Audiovisual</span><b>R$ 7.500</b><span className="pill warn">Vence sexta</span></div><div><span style={{ color: 'var(--ink)' }}>Espaço</span><b>R$ 11.000</b><span className="pill pos">Quitado</span></div><div><span style={{ color: 'var(--ink)' }}>Equipe de apoio</span><b>R$ 3.200</b><span className="pill pos">Quitado</span></div></div>
+<div className="rows"><div><span>Total a pagar</span><b data-count="11500" data-pre="R$ ">R$ 11.500</b></div></div></div>
+<div className="pn"><div className="pn-h"><b>Programação do dia</b><span className="pill warn">+25 min</span></div>
+<div className="rows"><div><span className="mono">08:00</span><span style={{ flex: '1' }}>Credenciamento</span><span className="pill pos">Concluído</span></div><div><span className="mono">09:10</span><span style={{ flex: '1' }}>Rodadas de negócio</span><span className="pill warn">Agora</span></div><div><span className="mono">12:10</span><span style={{ flex: '1' }}>Almoço</span><span className="pill">Próximo</span></div><div><span className="mono">14:00</span><span style={{ flex: '1' }}>Painel principal</span><span className="pill">Programado</span></div></div>
+<div><div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13.5px', marginBottom: '8px' }}><span className="mut">Tarefas concluídas</span><b>23 de 31</b></div><div className="prog"><i style={{ '--w': '74%' }}></i></div></div></div>
+<div className="pn"><div className="pn-h"><b>Rodada 1 de 7</b><span className="pill pos">Nenhum encontro repetido</span></div>
+<div className="plan-mini" id="plan-mini"></div>
+<div className="rows"><div><span>Roteiro de Marina Costa</span><b>Mesa 1 → 5 → 2</b></div></div></div>
+</div></div></div>
+</div>
+</div></section>
+
+<section className="sec" id="como" data-screen-label="04 Como funciona"><div className="wrap">
+<div className="sec-head"><span className="eyebrow" data-reveal>Como funciona</span><h2 data-reveal style={{ '--d': '1' }}>Três passos para sair da planilha.</h2></div>
+<div className="steps">
+<div className="step"><span className="mono">01</span><h3>Crie o evento</h3><p>Nome, data, público e formato. Ligue só os módulos de que precisa.</p></div>
+<div className="step" style={{ '--d': '1' }}><span className="mono">02</span><h3>Traga a operação</h3><p>Importe participantes e cadastre fornecedores, tarefas e receitas.</p></div>
+<div className="step" style={{ '--d': '2' }}><span className="mono">03</span><h3>Acompanhe e decida</h3><p>A visão geral mostra o resultado e o que precisa de você hoje.</p></div>
+</div>
+</div></section>
+
+<section className="sec" style={{ paddingTop: '0' }} data-screen-label="05 Comparativo"><div className="wrap">
+<div className="sec-head"><span className="eyebrow" data-reveal>Por que Mesa Certa</span><h2 data-reveal style={{ '--d': '1' }}>Planilha e WhatsApp não foram feitos para evento.</h2></div>
+<div className="cmp" data-reveal><table>
+<thead><tr><th>O que a sua operação precisa</th><th>Planilha</th><th>WhatsApp</th><th>Mesa Certa</th></tr></thead>
+<tbody>
+<tr><td>Tudo do evento no mesmo lugar</td><td><span className="n"><Minus aria-hidden="true" />Vários arquivos</span></td><td><span className="n"><Minus aria-hidden="true" />Se perde</span></td><td><span className="y"><Check aria-hidden="true" />Sim</span></td></tr>
+<tr><td>Resultado financeiro do evento</td><td><span className="n"><Minus aria-hidden="true" />Manual</span></td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="y"><Check aria-hidden="true" />Automático</span></td></tr>
+<tr><td>Aviso de vencimento e atraso</td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="y"><Check aria-hidden="true" />Sim</span></td></tr>
+<tr><td>Mesas sem repetir encontro</td><td><span className="n"><Minus aria-hidden="true" />Na mão</span></td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="y"><Check aria-hidden="true" />Automático</span></td></tr>
+<tr><td>Roteiro individual do convidado</td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="n"><X aria-hidden="true" />Não</span></td><td><span className="y"><Check aria-hidden="true" />PDF pronto</span></td></tr>
+</tbody></table></div>
+</div></section>
+
+<section className="sec" id="planos" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }} data-screen-label="06 Planos"><div className="wrap">
+<div className="sec-head c"><span className="eyebrow" data-reveal>Planos</span><h2 data-reveal style={{ '--d': '1' }}>Todos os módulos. Escolha como pagar.</h2></div>
+<div className="plans">
+<div className="plan" data-reveal><h3>Mensal</h3><div className="pr">R$ 97<small> /mês</small></div><p className="mut">Para começar sem compromisso.</p><ul><li><Check aria-hidden="true" />Até 3 eventos ativos</li><li><Check aria-hidden="true" />1 responsável</li><li><Check aria-hidden="true" />Todos os módulos</li></ul><Link className="btn" to="/register">Assinar mensal</Link></div>
+<div className="plan hl" data-reveal style={{ '--d': '1' }}><span className="tag">Economize R$ 367</span><h3>Anual</h3><div className="pr">R$ 797<small> /ano</small></div><p className="mut">Pagamento único, sem renovação automática.</p><ul><li><Check aria-hidden="true" />Até 3 eventos ativos</li><li><Check aria-hidden="true" />1 responsável</li><li><Check aria-hidden="true" />Todos os módulos</li></ul><Link className="btn btn-p" to="/register">Assinar anual</Link></div>
+</div>
+</div></section>
+
+<section className="sec" id="duvidas" data-screen-label="07 Dúvidas"><div className="wrap">
+<div className="sec-head c"><span className="eyebrow" data-reveal>Dúvidas</span><h2 data-reveal style={{ '--d': '1' }}>Perguntas frequentes</h2></div>
+<div className="faq" data-reveal>
+<div className="fq open"><button aria-expanded="true">Minha planilha já funciona. Por que mudar?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Se ela resolve tudo, talvez você não precise. O Mesa Certa faz sentido quando financeiro, participantes, fornecedores e tarefas começam a viver em lugares diferentes.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">Serve para evento sem networking?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. As rodadas de negócio são um módulo opcional. O núcleo é planejamento e operação, com o financeiro separado por evento.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">Posso cuidar de vários eventos ao mesmo tempo?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. Cada evento tem seus próprios dados, números e pendências. Os planos incluem até três eventos ativos.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">Preciso instalar alguma coisa?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não. O Mesa Certa funciona direto no navegador, no computador ou no celular.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">O Mesa Certa vende ingressos?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não nesta versão. Você registra lotes e receitas para acompanhar o resultado; a venda continua na plataforma que você já usa.</p></div></div></div>
+</div>
+</div></section>
+
+<section className="cta" data-screen-label="08 CTA">
+<h2 data-reveal>Pronto para sair do improviso?</h2>
+<p data-reveal style={{ '--d': '1' }}>Abra o próximo evento no Mesa Certa e tenha tudo num lugar só.</p>
+<div className="cta-row" data-reveal style={{ '--d': '2' }}><Link className="btn" to="/register">Criar minha conta<ArrowRight aria-hidden="true" /></Link><button className="btn gh" data-scroll="duvidas">Tirar uma dúvida</button></div>
+<small>Criar conta não inicia cobrança.</small>
+</section>
+<footer className="foot"><div className="wrap"><a href="#top" className="logo" data-scroll="top"><b><span></span><span></span><span></span><span></span></b>Mesa Certa</a><nav><button data-scroll="modulos">Módulos</button><button data-scroll="planos">Planos</button><button data-scroll="duvidas">Dúvidas</button><Link to="/login">Entrar</Link></nav><span>© 2026 Mesa Certa</span></div></footer>
     </div>
   );
 }
-
-function SectionKicker({ number, children, light = false }) {
-  return (
-    <div className={'mb-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.22em] ' + (light ? 'text-[#9fb8b2]' : 'text-muted-foreground')}>
-      <span className={'tnum ' + (light ? 'text-[#dce9e5]' : 'text-primary')}>{number}</span>
-      <span className={'h-px w-9 ' + (light ? 'bg-[#4d746c]' : 'bg-border')} />
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function HeroLines({ reduceMotion }) {
-  const lineMotion = reduceMotion
-    ? { initial: false, animate: { pathLength: 1 } }
-    : { initial: { pathLength: 0 }, animate: { pathLength: 1 } };
-
-  return (
-    <svg viewBox="0 0 1000 820" className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden="true">
-      <motion.path {...lineMotion} transition={{ duration: 1.25, delay: 0.05, ease: [0.22, 1, 0.36, 1] }} d="M80 710 H920 V110 H245 V535 H760" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#d8d1c5]" />
-      <motion.path {...lineMotion} transition={{ duration: 1.1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }} d="M0 265 H410 V0 M710 820 V450 H1000" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#e4ded3]" />
-      <motion.path {...lineMotion} transition={{ duration: 1.15, delay: 0.34, ease: [0.22, 1, 0.36, 1] }} d="M150 0 V125 H860 V820" fill="none" stroke="currentColor" strokeWidth="1" className="text-[#ede7dd]" />
-      <motion.circle initial={reduceMotion ? false : { opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.9 }} cx="245" cy="535" r="5" fill="currentColor" className="text-primary" />
-      <motion.circle initial={reduceMotion ? false : { opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.05 }} cx="760" cy="535" r="5" fill="currentColor" className="text-primary" />
-    </svg>
-  );
-}
-
-function HeroProduct() {
-  const [event, setEvent] = useState(0);
-  const reduceMotion = useReducedMotion();
-  const events = [
-    {
-      name: 'Get Connected Sorocaba',
-      date: '25 SET 2026',
-      revenue: 'R$ 31.206',
-      expense: 'R$ 29.719',
-      margin: '4,8%',
-      attention: '3',
-    },
-    {
-      name: 'Summit Conecta 2026',
-      date: '18 NOV 2026',
-      revenue: 'R$ 74.800',
-      expense: 'R$ 43.200',
-      margin: '42,2%',
-      attention: '5',
-    },
-  ];
-
-  useEffect(() => {
-    if (reduceMotion) return undefined;
-    const timer = window.setInterval(() => setEvent((current) => (current + 1) % events.length), 5000);
-    return () => window.clearInterval(timer);
-  }, [reduceMotion, events.length]);
-
-  const current = events[event];
-
-  return (
-    <div className="relative">
-      <div className="absolute -left-8 top-16 hidden text-[9px] uppercase tracking-[0.2em] text-muted-foreground xl:block [writing-mode:vertical-rl]">
-        VISÃO DO EVENTO
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 34, rotate: -1.2 }}
-        animate={{ opacity: 1, y: 0, rotate: 0 }}
-        transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="relative border border-[#bcb4a6] bg-[#fffdf9] shadow-[18px_24px_0_rgba(31,77,70,0.08)]"
-      >
-        <div className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-5">
-          <div className="flex items-center gap-3">
-            <span className="h-2 w-2 bg-primary" />
-            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Evento atual</span>
-          </div>
-          <div className="flex gap-1.5">
-            {events.map((item, index) => (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => setEvent(index)}
-                className={'h-[2px] w-8 transition-colors duration-500 ' + (index === event ? 'bg-primary' : 'bg-border')}
-                aria-label={'Ver ' + item.name}
-                aria-pressed={index === event}
-              />
-            ))}
-          </div>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={current.name}
-            initial={{ opacity: 0, y: 9 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -7 }}
-            transition={{ duration: 0.35 }}
-          >
-            <div className="grid lg:grid-cols-[1fr_190px]">
-              <div className="p-5 sm:p-7">
-                <div className="border-b border-border pb-6">
-                  <div className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">{current.date}</div>
-                  <div className="mt-2 font-display text-[30px] leading-[1.05] sm:text-[36px]">{current.name}</div>
-                </div>
-
-                <div className="grid grid-cols-2 border-b border-border">
-                  <div className="border-r border-border py-5 pr-4">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Faturamento</div>
-                    <div className="tnum mt-2 text-[19px]">{current.revenue}</div>
-                  </div>
-                  <div className="py-5 pl-4">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Despesas</div>
-                    <div className="tnum mt-2 text-[19px]">{current.expense}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2">
-                  <div className="border-r border-border py-5 pr-4">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Margem</div>
-                    <div className="tnum mt-2 text-[19px]">{current.margin}</div>
-                  </div>
-                  <div className="py-5 pl-4">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Precisa de atenção</div>
-                    <div className="mt-2 flex items-center gap-2 text-[13px] font-medium">
-                      <span className="h-2 w-2 bg-warning" />
-                      {current.attention} pontos
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-border p-5 lg:border-l lg:border-t-0">
-                <div className="flex items-center justify-between">
-                  <div className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Rodada 04</div>
-                  <div className="tnum text-[9px] text-muted-foreground">06 / 07</div>
-                </div>
-
-                <div className="relative mx-auto mt-5 h-[210px] max-w-[160px]">
-                  <div className="absolute left-1/2 top-1/2 flex h-24 w-[86px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-primary/45">
-                    <span className="text-[8px] uppercase tracking-[0.14em] text-muted-foreground">Mesa 04</span>
-                    <strong className="mt-1 text-[10px] font-medium">NETTOP</strong>
-                  </div>
-                  {[
-                    ['Ana', '50%', '8px'],
-                    ['João', '4%', '58px'],
-                    ['Pedro', '96%', '58px'],
-                    ['Maria', '4%', '145px'],
-                    ['Lucas', '96%', '145px'],
-                    ['Renan', '50%', '191px'],
-                  ].map(([name, left, top], index) => (
-                    <motion.div
-                      key={name}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.55 + index * 0.05 }}
-                      className={'absolute flex h-8 w-[56px] -translate-x-1/2 items-center justify-center bg-[#fffdf9] text-[8px] ' + (index === 5 ? 'border-2 border-primary' : 'border border-border')}
-                      style={{ left, top }}
-                    >
-                      {name}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.65, delay: 1 }}
-        className="absolute -bottom-6 right-5 hidden border border-primary bg-primary px-4 py-3 text-primary-foreground sm:block"
-      >
-        <div className="text-[8px] uppercase tracking-[0.17em] text-[#b8d0cb]">Hoje</div>
-        <div className="mt-1 text-[11px]">Pagamento do buffet vence amanhã</div>
-      </motion.div>
-    </div>
-  );
-}
-
-function ChaosFragment({ item, progress, index }) {
-  const x = useTransform(progress, [0.05, 0.58, 0.82], [item.x, item.finalX, '0vw']);
-  const y = useTransform(progress, [0.05, 0.58, 0.82], [item.y, item.finalY, '0vh']);
-  const rotate = useTransform(progress, [0.05, 0.72], [item.r, 0]);
-  const opacity = useTransform(progress, [0, 0.1, 0.76, 0.9], [0, 1, 1, 0]);
-
-  return (
-    <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
-      <motion.div
-        style={{ x, y, rotate, opacity }}
-        className="whitespace-nowrap border border-[#c9c1b4] bg-[#fffdf9] px-4 py-3 text-[11px] shadow-[6px_7px_0_rgba(31,77,70,0.04)] sm:text-[12px]"
-      >
-        <span className="mr-2 tnum text-[8px] text-muted-foreground">0{index + 1}</span>
-        {item.label}
-      </motion.div>
-    </div>
-  );
-}
-
-function ChaosToContext() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
-  });
-  const centralOpacity = useTransform(scrollYProgress, [0.58, 0.76, 0.98], [0, 1, 1]);
-  const centralScale = useTransform(scrollYProgress, [0.58, 0.82], [0.82, 1]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.16, 0.63, 0.78], [0, 1, 1, 0]);
-  const resolvedOpacity = useTransform(scrollYProgress, [0.68, 0.86], [0, 1]);
-
-  return (
-    <section ref={ref} className="relative h-[240vh] border-b border-border bg-[#f4efe6]">
-      <div className="sticky top-[72px] flex h-[calc(100vh-72px)] items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <svg className="h-full w-full text-[#ded7cb]" viewBox="0 0 1400 900" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 155 H1400 M0 745 H1400 M245 0 V900 M1155 0 V900" fill="none" stroke="currentColor" strokeWidth="1" />
-          </svg>
-        </div>
-
-        <motion.div style={{ opacity: titleOpacity }} className="absolute left-5 top-24 z-30 max-w-[620px] sm:left-8 lg:left-[8vw] lg:top-[16vh]">
-          <SectionKicker number="02">O problema não é falta de informação</SectionKicker>
-          <h2 className="font-display text-[42px] leading-[0.98] tracking-[-0.025em] sm:text-[58px] lg:text-[72px]">
-            É ela estar em todo lugar ao mesmo tempo.
-          </h2>
-        </motion.div>
-
-        <div className="absolute inset-0">
-          {chaosItems.map((item, index) => (
-            <ChaosFragment key={item.label} item={item} progress={scrollYProgress} index={index} />
-          ))}
-        </div>
-
-        <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
-          <motion.div
-            style={{ opacity: centralOpacity, scale: centralScale }}
-            className="w-[86vw] max-w-[760px] border-2 border-primary bg-background px-5 py-6 sm:px-8 sm:py-8"
-          >
-          <div className="flex items-center justify-between border-b border-border pb-4">
-            <div>
-              <div className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Evento</div>
-              <div className="mt-1 font-display text-[28px] sm:text-[34px]">Get Connected Sorocaba</div>
-            </div>
-            <span className="hidden text-[9px] uppercase tracking-[0.16em] text-primary sm:block">25.09.2026</span>
-          </div>
-          <div className="grid grid-cols-2 gap-x-6 py-5 text-[11px] sm:grid-cols-4">
-            <div><span className="text-muted-foreground">Financeiro</span><strong className="mt-1 block font-medium">No contexto</strong></div>
-            <div><span className="text-muted-foreground">Pessoas</span><strong className="mt-1 block font-medium">No contexto</strong></div>
-            <div className="mt-4 sm:mt-0"><span className="text-muted-foreground">Tarefas</span><strong className="mt-1 block font-medium">No contexto</strong></div>
-            <div className="mt-4 sm:mt-0"><span className="text-muted-foreground">Fornecedores</span><strong className="mt-1 block font-medium">No contexto</strong></div>
-          </div>
-          <div className="border-t border-border pt-4 text-[12px] text-muted-foreground">
-            Você para de procurar a informação. Passa a abrir o evento.
-          </div>
-          </motion.div>
-        </div>
-
-        <motion.div style={{ opacity: resolvedOpacity }} className="absolute bottom-[8vh] left-1/2 z-30 w-full max-w-[780px] -translate-x-1/2 px-5 text-center">
-          <div className="font-display text-[30px] leading-tight sm:text-[42px]">Um evento. Um contexto. Uma operação que faz sentido.</div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-function FinanceVisual() {
-  return (
-    <div className="h-full bg-[#fffdf9] p-5 sm:p-8">
-      <div className="flex items-end justify-between border-b border-border pb-6">
-        <div>
-          <div className="text-[9px] uppercase tracking-[0.17em] text-muted-foreground">Resultado previsto</div>
-          <div className="tnum mt-2 font-display text-[42px] sm:text-[56px]">R$ 1.487</div>
-        </div>
-        <div className="text-right">
-          <div className="text-[9px] uppercase tracking-[0.17em] text-muted-foreground">Margem</div>
-          <div className="tnum mt-2 text-[20px]">4,8%</div>
-        </div>
-      </div>
-      {[
-        ['Faturamento previsto', 'R$ 31.206'],
-        ['Despesas previstas', 'R$ 29.719'],
-        ['Ponto de equilíbrio', '18 ingressos'],
-      ].map(([label, value]) => (
-        <div key={label} className="grid grid-cols-[1fr_auto] border-b border-border py-4 text-[12px]">
-          <span className="text-muted-foreground">{label}</span>
-          <span className="tnum">{value}</span>
-        </div>
-      ))}
-      <div className="mt-7 grid grid-cols-[auto_1fr] gap-4 border-l-2 border-warning pl-4">
-        <CircleDollarSign className="mt-0.5 h-4 w-4 text-warning" />
-        <div>
-          <div className="text-[11px] font-medium">Pagamento do buffet vence amanhã</div>
-          <div className="mt-1 text-[10px] text-muted-foreground">R$ 6.500 ainda pendentes</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PeopleVisual() {
-  return (
-    <div className="relative h-full overflow-hidden bg-[#fffdf9] p-6 sm:p-8">
-      <div className="flex items-end justify-between border-b border-border pb-5">
-        <div>
-          <div className="text-[9px] uppercase tracking-[0.17em] text-muted-foreground">Participantes</div>
-          <div className="tnum mt-2 font-display text-[48px]">76</div>
-        </div>
-        <Users className="h-7 w-7 text-primary" />
-      </div>
-      <div className="mt-6 space-y-5">
-        {[
-          ['Confirmados', 76, 100],
-          ['Check-ins', 68, 89],
-          ['Cortesias', 48, 63],
-        ].map(([label, value, width]) => (
-          <div key={label}>
-            <div className="flex justify-between text-[11px]"><span>{label}</span><span className="tnum">{value}</span></div>
-            <div className="mt-2 h-1 bg-muted"><motion.div initial={{ width: 0 }} animate={{ width: width + '%' }} transition={{ duration: 0.8 }} className="h-full bg-primary" /></div>
-          </div>
-        ))}
-      </div>
-      <div className="absolute bottom-6 right-6 border border-border px-3 py-2 text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Capacidade 98</div>
-    </div>
-  );
-}
-
-function SupplierVisual() {
-  return (
-    <div className="h-full bg-[#fffdf9]">
-      <div className="grid grid-cols-[1.4fr_.7fr_.8fr] border-b border-border px-5 py-3 text-[8px] uppercase tracking-[0.14em] text-muted-foreground sm:px-8">
-        <span>Fornecedor</span><span>Valor</span><span>Status</span>
-      </div>
-      {[
-        ['Buffet Sabor', 'R$ 13.500', 'Pagamento amanhã'],
-        ['Audio Pro', 'R$ 7.500', '50% pago'],
-        ['Espaço Franclei', 'R$ 11.000', 'Confirmado'],
-        ['Equipe apoio', 'R$ 3.800', 'Aguardando NF'],
-      ].map(([name, value, status], index) => (
-        <motion.div
-          key={name}
-          initial={{ opacity: 0, x: 18 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.08 }}
-          className="grid grid-cols-[1.4fr_.7fr_.8fr] items-center border-b border-border px-5 py-5 text-[11px] sm:px-8"
-        >
-          <span className="font-medium">{name}</span>
-          <span className="tnum">{value}</span>
-          <span className={index === 0 ? 'text-warning' : 'text-muted-foreground'}>{status}</span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function PlanningVisual() {
-  return (
-    <div className="h-full bg-[#fffdf9] p-5 sm:p-8">
-      <div className="border-l border-border pl-6">
-        {[
-          ['08:00', 'Credenciamento', 'Concluído'],
-          ['09:10', 'Rodadas de networking', 'Em andamento'],
-          ['12:10', 'Almoço', 'Próximo'],
-          ['14:00', 'Palestra principal', 'Programado'],
-        ].map(([time, label, status], index) => (
-          <motion.div
-            key={label}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.08 }}
-            className="relative grid grid-cols-[55px_1fr] gap-4 border-b border-border py-5"
-          >
-            <span className={'absolute -left-[29px] top-[25px] h-[7px] w-[7px] -translate-y-1/2 ' + (index <= 1 ? 'bg-primary' : 'border border-border bg-[#fffdf9]')} />
-            <span className="tnum text-[10px] text-muted-foreground">{time}</span>
-            <div>
-              <div className="text-[12px] font-medium">{label}</div>
-              <div className="mt-1 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">{status}</div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="mt-6 flex items-center gap-3 border-l-2 border-warning pl-4 text-[11px]">
-        <Clock3 className="h-4 w-4 text-warning" />
-        A programação ultrapassa o horário previsto em 25 min.
-      </div>
-    </div>
-  );
-}
-
-function NetworkingMiniVisual() {
-  return (
-    <div className="relative h-full min-h-[390px] bg-[#163b35] text-[#edf5f2]">
-      <div className="absolute inset-x-5 top-5 flex justify-between border-b border-[#42665f] pb-4 text-[9px] uppercase tracking-[0.14em] text-[#9db9b2] sm:inset-x-8">
-        <span>Rodada 04</span><span>Mesa 04</span>
-      </div>
-      <div className="absolute left-1/2 top-1/2 flex h-32 w-36 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-[#80a99f]">
-        <span className="text-[9px] uppercase tracking-[0.15em] text-[#9db9b2]">Mesa 04</span>
-        <strong className="mt-2 font-display text-[22px] font-normal">NETTOP</strong>
-      </div>
-      {networkingRounds[1].map((person, index) => (
-        <motion.div
-          key={person.name}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.07 }}
-          className={'absolute flex h-10 w-[74px] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-[#163b35] text-[9px] ' + (person.name === 'Renan' ? 'border-2 border-[#b5d2cb]' : 'border border-[#4d746c]')}
-          style={{ left: person.left, top: person.top }}
-        >
-          {person.name}
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function ChapterVisual({ id }) {
-  if (id === 'financeiro') return <FinanceVisual />;
-  if (id === 'pessoas') return <PeopleVisual />;
-  if (id === 'fornecedores') return <SupplierVisual />;
-  if (id === 'planejamento') return <PlanningVisual />;
-  return <NetworkingMiniVisual />;
-}
-
-function ProductStory() {
-  const ref = useRef(null);
-  const [active, setActive] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
-  });
-
-  useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      const next = Math.min(chapters.length - 1, Math.floor(value * chapters.length));
-      setActive(next);
-    }
-  });
-
-  const progress = useSpring(scrollYProgress, { stiffness: 85, damping: 24, mass: 0.3 });
-
-  return (
-    <section id="produto" ref={ref} className="relative bg-background lg:h-[470vh]">
-      <div className="px-5 py-24 sm:px-8 lg:hidden">
-        <SectionKicker number="03">Por dentro do Mesa Certa</SectionKicker>
-        <div className="space-y-20">
-          {chapters.map((item, index) => (
-            <motion.article
-              key={item.id}
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.16 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="text-[9px] uppercase tracking-[0.18em] text-primary">{item.eyebrow}</div>
-              <h2 className="mt-4 font-display text-[37px] leading-[1.02] tracking-[-0.02em] sm:text-[46px]">{item.title}</h2>
-              <p className="mt-5 text-[13px] leading-6 text-muted-foreground">{item.body}</p>
-              <div className="relative mt-7 min-h-[390px] overflow-hidden border border-[#bcb4a6] bg-[#fffdf9]">
-                <div className="absolute inset-x-0 top-0 z-10 flex h-10 items-center justify-between border-b border-border bg-[#fffdf9] px-4 text-[8px] uppercase tracking-[0.14em] text-muted-foreground">
-                  <span>0{index + 1}</span>
-                  <span>Get Connected Sorocaba</span>
-                </div>
-                <div className="absolute inset-x-0 bottom-0 top-10">
-                  <ChapterVisual id={item.id} />
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </div>
-
-      <div className="hidden lg:sticky lg:top-[72px] lg:flex lg:h-[calc(100vh-72px)] lg:items-center lg:overflow-hidden">
-        <motion.div style={{ scaleX: progress }} className="absolute left-0 top-0 h-[2px] w-full origin-left bg-primary" />
-
-        <div className="mx-auto grid w-full max-w-[1240px] gap-16 px-8 lg:grid-cols-[.8fr_1.2fr]">
-          <div className="self-center">
-            <SectionKicker number="03">Por dentro do Mesa Certa</SectionKicker>
-
-            <div className="border-t border-border">
-              {chapters.map((item, index) => (
-                <div key={item.id} className={'grid grid-cols-[42px_1fr] border-b border-border py-3.5 text-[11px] transition-colors duration-500 ' + (index === active ? 'text-primary' : 'text-muted-foreground')}>
-                  <span className="tnum">0{index + 1}</span>
-                  <span>{item.eyebrow.split(' · ')[1]}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-10 min-h-[290px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={chapters[active].id}
-                  initial={{ opacity: 0, y: 22 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -18 }}
-                  transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <div className="text-[9px] uppercase tracking-[0.18em] text-primary">{chapters[active].eyebrow}</div>
-                  <h2 className="mt-4 max-w-[590px] font-display text-[54px] leading-[1.02] tracking-[-0.02em]">
-                    {chapters[active].title}
-                  </h2>
-                  <p className="mt-5 max-w-[500px] text-[14px] leading-7 text-muted-foreground">{chapters[active].body}</p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="self-center">
-            <div className="relative min-h-[500px] border border-[#bcb4a6] bg-[#fffdf9] shadow-[18px_24px_0_rgba(31,77,70,0.06)]">
-              <div className="absolute inset-x-0 top-0 z-10 flex h-11 items-center justify-between border-b border-border bg-[#fffdf9] px-6 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">
-                <span>{chapters[active].eyebrow}</span>
-                <span>Evento · Get Connected Sorocaba</span>
-              </div>
-              <div className="absolute inset-x-0 bottom-0 top-11">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={chapters[active].id}
-                    initial={{ opacity: 0, scale: 0.985, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 1.01, y: -8 }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full"
-                  >
-                    <ChapterVisual id={chapters[active].id} />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
-              <span>Role para explorar</span>
-              <span className="tnum">0{active + 1} / 05</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function NetworkingStory() {
-  const ref = useRef(null);
-  const [round, setRound] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
-  });
-
-  useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      setRound(Math.min(2, Math.floor(value * 3)));
-    }
-  });
-
-  const TableStage = ({ compact = false }) => (
-    <div className={'relative border border-[#42665f] bg-[#12322d] ' + (compact ? 'min-h-[410px]' : 'min-h-[520px]')}>
-      <div className="absolute inset-x-5 top-5 z-20 flex items-center justify-between border-b border-[#42665f] pb-4 text-[9px] uppercase tracking-[0.16em] text-[#9db9b2] sm:inset-x-7">
-        <span>Rodada 0{round + 1}</span>
-        <span>Mesa 04 · NETTOP</span>
-      </div>
-
-      <div className="absolute left-1/2 top-1/2 flex h-36 w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center border-2 border-[#80a99f] sm:h-40 sm:w-44">
-        <span className="text-[9px] uppercase tracking-[0.16em] text-[#9db9b2]">Mesa 04</span>
-        <strong className="mt-2 font-display text-[24px] font-normal">NETTOP</strong>
-        <span className="mt-3 text-[8px] uppercase tracking-[0.12em] text-[#71938b]">6 / 7 lugares</span>
-      </div>
-
-      {networkingRounds[round].map((person) => (
-        <motion.div
-          key={person.name}
-          animate={{ left: person.left, top: person.top }}
-          transition={{ type: 'spring', stiffness: 85, damping: 18, mass: 0.65 }}
-          className={'absolute z-10 flex h-11 w-[78px] -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-[#12322d] text-[9px] sm:w-[100px] ' + (person.name === 'Renan' ? 'border-2 border-[#b5d2cb]' : 'border border-[#4d746c]')}
-        >
-          {person.name}
-        </motion.div>
-      ))}
-
-      <div className="absolute bottom-5 left-5 right-5 flex gap-2">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className={'h-[2px] flex-1 transition-colors duration-500 ' + (index <= round ? 'bg-[#a9c9c1]' : 'bg-[#315a52]')} />
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <section id="networking" ref={ref} className="relative bg-[#163b35] text-[#edf5f2] lg:h-[260vh]">
-      <div className="relative px-5 py-24 sm:px-8 lg:hidden">
-        <SectionKicker number="04" light>Networking que existe no espaço</SectionKicker>
-        <h2 className="font-display text-[43px] leading-[0.98] tracking-[-0.025em] sm:text-[56px]">
-          Você vê a rodada mudar. Não só uma lista atualizar.
-        </h2>
-        <p className="mt-6 text-[13px] leading-6 text-[#bad0ca]">
-          Mesa, assento, anfitrião e movimento fazem parte da operação. Por isso a interface não transforma uma rodada de negócios em uma lista abstrata.
-        </p>
-
-        <div className="mt-7 flex gap-2">
-          {[0, 1, 2].map((index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setRound(index)}
-              className={'flex-1 border px-3 py-2 text-[9px] uppercase tracking-[0.13em] transition-colors ' + (round === index ? 'border-[#b5d2cb] bg-[#204b44] text-white' : 'border-[#42665f] text-[#9db9b2]')}
-            >
-              Rodada 0{index + 1}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-5">
-          <TableStage compact />
-        </div>
-
-        <div className="mt-8 grid grid-cols-3 border-y border-[#42665f] py-5">
-          {[['76', 'convidados'], ['14', 'mesas'], ['14', 'rodadas']].map(([value, label]) => (
-            <div key={label}>
-              <div className="tnum text-[23px]">{value}</div>
-              <div className="mt-1 text-[8px] uppercase tracking-[0.13em] text-[#9db9b2]">{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="hidden lg:sticky lg:top-[72px] lg:flex lg:h-[calc(100vh-72px)] lg:items-center lg:overflow-hidden">
-        <svg className="absolute inset-0 h-full w-full text-[#264e47]" viewBox="0 0 1400 900" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 190 H1400 M0 710 H1400 M235 0 V900 M1165 0 V900" fill="none" stroke="currentColor" strokeWidth="1" />
-        </svg>
-
-        <div className="relative z-10 mx-auto grid w-full max-w-[1240px] grid-cols-[.72fr_1.28fr] items-center gap-20 px-8">
-          <div>
-            <SectionKicker number="04" light>Networking que existe no espaço</SectionKicker>
-            <h2 className="font-display text-[66px] leading-[0.98] tracking-[-0.025em]">
-              Você vê a rodada mudar. Não só uma lista atualizar.
-            </h2>
-            <p className="mt-6 max-w-[500px] text-[14px] leading-7 text-[#bad0ca]">
-              O módulo nasceu de uma operação real de networking. Por isso a interface trata mesa, assento, anfitrião e movimento como parte do problema — não como detalhe decorativo.
-            </p>
-
-            <div className="mt-8 grid grid-cols-3 border-y border-[#42665f] py-5">
-              {[['76', 'convidados'], ['14', 'mesas'], ['14', 'rodadas']].map(([value, label]) => (
-                <div key={label}>
-                  <div className="tnum text-[24px]">{value}</div>
-                  <div className="mt-1 text-[8px] uppercase tracking-[0.14em] text-[#9db9b2]">{label}</div>
-                </div>
-              ))}
-            </div>
-
-            <p className="mt-4 max-w-[500px] text-[9px] leading-5 text-[#88a69f]">
-              O motor que deu origem ao módulo foi usado no Get Connected Sorocaba 2026. Esse histórico se refere ao motor original, não ao uso da plataforma completa em produção.
-            </p>
-          </div>
-
-          <div>
-            <TableStage />
-            <div className="mt-4 flex justify-between text-[8px] uppercase tracking-[0.15em] text-[#73928b]">
-              <span>Continue rolando</span>
-              <span>A composição muda com a rodada</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PlanSection() {
-  return (
-    <section id="planos" className="relative overflow-hidden border-b border-border bg-[#f2ede4]">
-      <div className="absolute right-[7vw] top-0 h-full w-px bg-[#ded7ca]" />
-      <div className="absolute left-[7vw] top-0 h-full w-px bg-[#ded7ca]" />
-
-      <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
-        <div className="grid gap-12 lg:grid-cols-[.72fr_1.28fr] lg:gap-20">
-          <div>
-            <SectionKicker number="06">Oferta proposta</SectionKicker>
-            <h2 className="font-display text-[42px] leading-[0.98] tracking-[-0.025em] sm:text-[58px]">
-              Escolha como você quer entrar. Não o que você pode usar.
-            </h2>
-            <p className="mt-6 max-w-[460px] text-[13px] leading-6 text-muted-foreground">
-              A proposta inicial mantém os mesmos recursos nos dois formatos. O que muda é somente a forma de contratação.
-            </p>
-            <div className="mt-8 border-l-2 border-primary pl-4 text-[11px] leading-5 text-muted-foreground">
-              A venda ainda depende da liberação operacional. Esta página não simula escassez, checkout disponível ou benefício que ainda não foi comprovado.
-            </div>
-          </div>
-
-          <div>
-            <div className="grid border-t-2 border-primary sm:grid-cols-2">
-              <div className="border-b border-border py-7 pr-0 sm:border-r sm:pr-8">
-                <div className="text-[9px] uppercase tracking-[0.17em] text-muted-foreground">Mensal</div>
-                <div className="mt-6 flex items-end gap-2">
-                  <span className="font-display text-[52px] leading-none">R$ 97</span>
-                  <span className="pb-1 text-[11px] text-muted-foreground">/ mês</span>
-                </div>
-                <p className="mt-4 max-w-[320px] text-[12px] leading-5 text-muted-foreground">Cobrança recorrente mensal. Menor compromisso inicial.</p>
-                <div className="mt-7 space-y-2 border-t border-border pt-5 text-[11px]">
-                  {['1 organização', '1 responsável', 'Até 3 eventos ativos', 'Mesmos módulos liberados'].map((item) => (
-                    <div key={item} className="flex gap-2"><Check className="h-3.5 w-3.5 text-primary" />{item}</div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-b border-border py-7 sm:pl-8">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="text-[9px] uppercase tracking-[0.17em] text-primary">12 meses</div>
-                  <div className="tnum text-[9px] text-muted-foreground">− R$ 367</div>
-                </div>
-                <div className="mt-6 font-display text-[52px] leading-none">R$ 797</div>
-                <p className="mt-4 max-w-[320px] text-[12px] leading-5 text-muted-foreground">Pagamento único. Doze meses de acesso, sem renovação automática.</p>
-                <div className="mt-7 border-t border-border pt-5 text-[11px]">
-                  <div className="flex justify-between py-1.5"><span className="text-muted-foreground">12 mensalidades</span><span className="tnum">R$ 1.164</span></div>
-                  <div className="flex justify-between py-1.5"><span className="text-muted-foreground">12 meses</span><span className="tnum">R$ 797</span></div>
-                  <div className="mt-2 flex justify-between border-t border-border pt-3 font-medium"><span>Diferença</span><span className="tnum text-positive">R$ 367</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              <span>Sem “mais vendido” inventado</span>
-              <span>Sem bônus fictício</span>
-              <span>Sem contagem regressiva</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function LandingPage() {
-  const reduceMotion = useReducedMotion();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [faqOpen, setFaqOpen] = useState(0);
-  const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 28, mass: 0.3 });
-
-  return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <motion.div style={{ scaleX: smoothProgress }} className="fixed left-0 top-0 z-[80] h-[2px] w-full origin-left bg-primary" />
-
-      <header className="fixed inset-x-0 top-0 z-[70] border-b border-border bg-background/95">
-        <div className="mx-auto flex h-[72px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
-          <button type="button" onClick={() => scrollToSection('top', reduceMotion)} className="focus-ring">
-            <BrandMark />
-          </button>
-
-          <nav className="hidden items-center gap-7 text-[11px] text-muted-foreground lg:flex">
-            <NavButton target="produto" reduceMotion={reduceMotion}>Produto</NavButton>
-            <NavButton target="networking" reduceMotion={reduceMotion}>Networking</NavButton>
-            <NavButton target="como-funciona" reduceMotion={reduceMotion}>Como funciona</NavButton>
-            <NavButton target="planos" reduceMotion={reduceMotion}>Planos</NavButton>
-            <NavButton target="duvidas" reduceMotion={reduceMotion}>Dúvidas</NavButton>
-          </nav>
-
-          <div className="hidden items-center gap-3 lg:flex">
-            <Link to="/login" className="px-3 py-2 text-[11px] text-muted-foreground transition-colors hover:text-foreground">Entrar</Link>
-            <NavButton target="produto" reduceMotion={reduceMotion} className="border border-primary bg-primary px-4 py-2.5 text-primary-foreground hover:bg-primary/90">
-              Conhecer por dentro
-            </NavButton>
-          </div>
-
-          <button type="button" className="p-2 lg:hidden" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen}>
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden border-t border-border bg-background lg:hidden"
-            >
-              <div className="grid gap-1 px-5 py-5 text-[13px]">
-                {[
-                  ['produto', 'Produto'],
-                  ['networking', 'Networking'],
-                  ['como-funciona', 'Como funciona'],
-                  ['planos', 'Planos'],
-                  ['duvidas', 'Dúvidas'],
-                ].map(([target, label]) => (
-                  <button
-                    key={target}
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      window.setTimeout(() => scrollToSection(target, reduceMotion), 120);
-                    }}
-                    className="border-b border-border py-3 text-left"
-                  >
-                    {label}
-                  </button>
-                ))}
-                <Link to="/login" className="mt-2 py-3 text-primary">Entrar na plataforma</Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-
-      <main id="top">
-        <section className="relative min-h-screen overflow-hidden border-b border-border pt-[72px]">
-          <HeroLines reduceMotion={reduceMotion} />
-
-          <div className="relative z-10 mx-auto grid min-h-[calc(100vh-72px)] max-w-[1240px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:gap-14">
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.1 }}
-                className="text-[9px] font-medium uppercase tracking-[0.24em] text-muted-foreground"
-              >
-                Planejamento e operação de eventos
-              </motion.div>
-
-              <div className="landing-mask mt-6">
-                <motion.h1
-                  initial={{ y: '110%' }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.95, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
-                  className="max-w-[700px] font-display text-[49px] leading-[0.94] tracking-[-0.035em] sm:text-[67px] lg:text-[76px]"
-                >
-                  Você não precisa organizar o próximo evento do zero.
-                </motion.h1>
-              </div>
-
-              <motion.p
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.65, delay: 0.55 }}
-                className="mt-7 max-w-[610px] text-[14px] leading-7 text-muted-foreground sm:text-[16px]"
-              >
-                Abra o evento e encontre financeiro, participantes, fornecedores, tarefas e programação no contexto certo. Quando houver rodadas de negócio, o networking também entra na operação.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.65, delay: 0.72 }}
-                className="mt-8 flex flex-wrap items-center gap-5"
-              >
-                <NavButton target="produto" reduceMotion={reduceMotion} className="group inline-flex items-center gap-3 border border-primary bg-primary px-5 py-3 text-[12px] font-medium text-primary-foreground">
-                  Ver a plataforma por dentro
-                  <ArrowDownRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1" />
-                </NavButton>
-                <NavButton target="como-funciona" reduceMotion={reduceMotion} className="inline-flex items-center gap-2 border-b border-foreground py-2 text-[12px]">
-                  Entender a lógica
-                </NavButton>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="mt-10 flex items-center gap-4 text-[9px] uppercase tracking-[0.15em] text-muted-foreground"
-              >
-                <span className="h-px w-9 bg-border" />
-                Role. A página se organiza com você.
-              </motion.div>
-            </div>
-
-            <HeroProduct />
-          </div>
-
-          <div className="relative z-20 border-t border-border bg-background/80 py-3">
-            <motion.div
-              animate={reduceMotion ? {} : { x: ['0%', '-50%'] }}
-              transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
-              className="flex w-max whitespace-nowrap text-[9px] uppercase tracking-[0.18em] text-muted-foreground"
-            >
-              {Array.from({ length: 2 }).map((_, loopIndex) => (
-                <div key={loopIndex} className="flex">
-                  {['Financeiro', 'Participantes', 'Fornecedores', 'Tarefas', 'Programação', 'Capacidade', 'Networking', 'Financeiro', 'Participantes', 'Fornecedores', 'Tarefas', 'Programação', 'Capacidade', 'Networking'].map((item, index) => (
-                    <span key={loopIndex + '-' + index} className="flex items-center">
-                      <span className="px-6">{item}</span>
-                      <span className="h-1 w-1 bg-primary" />
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        <ChaosToContext />
-
-        <ProductStory />
-
-        <section id="como-funciona" className="relative border-y border-border bg-[#fffdf9]">
-          <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
-            <SectionKicker number="05">A lógica é simples</SectionKicker>
-            <div className="grid gap-12 lg:grid-cols-[.72fr_1.28fr] lg:gap-20">
-              <div>
-                <h2 className="font-display text-[42px] leading-[0.98] tracking-[-0.025em] sm:text-[58px]">
-                  O software não deveria pedir para você aprender a pensar como ele.
-                </h2>
-                <p className="mt-6 max-w-[470px] text-[13px] leading-6 text-muted-foreground sm:text-[14px] sm:leading-7">
-                  A estrutura segue a forma como o organizador já raciocina: primeiro o evento, depois tudo o que pertence a ele.
-                </p>
-              </div>
-
-              <div className="border-t-2 border-primary">
-                {[
-                  ['01', 'Crie o evento', 'Nome, data, público e formato. Você liga apenas o que precisa.'],
-                  ['02', 'Coloque a operação dentro dele', 'Pessoas, fornecedores, tarefas, programação e financeiro deixam de viver separados.'],
-                  ['03', 'Abra e veja o que pede decisão', 'O objetivo não é mostrar mais dados. É tornar o próximo passo mais óbvio.'],
-                ].map(([number, title, body], index) => (
-                  <motion.div
-                    key={number}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.55 }}
-                    transition={{ duration: 0.5, delay: index * 0.06 }}
-                    className="grid gap-4 border-b border-border py-7 sm:grid-cols-[52px_220px_1fr] sm:gap-8"
-                  >
-                    <div className="tnum text-[10px] text-primary">{number}</div>
-                    <div className="font-display text-[26px]">{title}</div>
-                    <div className="max-w-[500px] text-[12px] leading-6 text-muted-foreground">{body}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <NetworkingStory />
-
-        <section className="border-b border-border">
-          <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
-            <SectionKicker number="05.1">Origem prática</SectionKicker>
-            <div className="grid gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
-              <div>
-                <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Get Connected Sorocaba 2026</div>
-                <div className="mt-4 font-display text-[44px] leading-none sm:text-[62px]">76 · 14 · 14</div>
-                <div className="mt-3 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">convidados · mesas · rodadas</div>
-              </div>
-              <div className="max-w-[690px]">
-                <h2 className="font-display text-[35px] leading-[1.05] sm:text-[46px]">
-                  Antes de ser um módulo, parte dessa lógica precisou funcionar com pessoas de verdade esperando a próxima rodada.
-                </h2>
-                <p className="mt-5 text-[13px] leading-7 text-muted-foreground">
-                  O motor original que inspirou o módulo foi usado na operação do Get Connected Sorocaba 2026. É dessa experiência que vem a obsessão com assentos visíveis, rotas compreensíveis e conflitos que não podem ser escondidos.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <PlanSection />
-
-        <section id="duvidas" className="border-b border-border bg-background">
-          <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
-            <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr] lg:gap-20">
-              <div>
-                <SectionKicker number="07">Antes de mudar sua rotina</SectionKicker>
-                <h2 className="font-display text-[42px] leading-[0.98] tracking-[-0.025em] sm:text-[58px]">As perguntas que deveriam vir antes da compra.</h2>
-              </div>
-
-              <div className="border-t-2 border-primary">
-                {faq.map((item, index) => (
-                  <div key={item.question} className="border-b border-border">
-                    <button
-                      type="button"
-                      onClick={() => setFaqOpen(faqOpen === index ? -1 : index)}
-                      className="flex w-full items-center justify-between gap-8 py-5 text-left text-[13px] font-medium"
-                      aria-expanded={faqOpen === index}
-                    >
-                      <span>{item.question}</span>
-                      <ChevronDown className={'h-4 w-4 shrink-0 transition-transform duration-300 ' + (faqOpen === index ? 'rotate-180' : '')} />
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {faqOpen === index && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
-                        >
-                          <p className="max-w-[720px] pb-6 text-[12px] leading-6 text-muted-foreground sm:text-[13px]">{item.answer}</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden bg-[#111918] text-[#edf3f0]">
-          <svg className="absolute inset-0 h-full w-full text-[#20312e]" viewBox="0 0 1400 700" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M70 590 H1330 V110 H340 V460 H1030" fill="none" stroke="currentColor" strokeWidth="1" />
-            <circle cx="340" cy="460" r="5" fill="#7fa69d" />
-            <circle cx="1030" cy="460" r="5" fill="#7fa69d" />
-          </svg>
-
-          <div className="relative z-10 mx-auto max-w-[1240px] px-5 py-28 sm:px-8 sm:py-36">
-            <div className="max-w-[980px]">
-              <div className="text-[9px] uppercase tracking-[0.22em] text-[#8fa7a1]">Mesa Certa</div>
-              <h2 className="mt-6 font-display text-[48px] leading-[0.95] tracking-[-0.03em] sm:text-[70px] lg:text-[84px]">
-                Talvez o que faltava no seu evento não fosse mais uma ferramenta.
-              </h2>
-              <p className="mt-5 max-w-[690px] font-display text-[28px] leading-tight text-[#a9bdb7] sm:text-[36px]">
-                Era um lugar em que tudo finalmente fizesse sentido junto.
-              </p>
-
-              <div className="mt-10 flex flex-wrap items-center gap-4">
-                <Link to="/register" className="group inline-flex items-center gap-3 border border-[#86a9a0] bg-[#edf3f0] px-5 py-3 text-[12px] text-[#111918] transition-colors hover:bg-white">
-                  Criar conta para explorar
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-                <Link to="/login" className="px-3 py-3 text-[11px] text-[#a9bdb7] transition-colors hover:text-white">
-                  Já tenho conta
-                </Link>
-                <button type="button" onClick={() => scrollToSection('top', reduceMotion)} className="px-3 py-3 text-[11px] text-[#8fa7a1]">
-                  Voltar ao início
-                </button>
-              </div>
-              <p className="mt-4 text-[9px] uppercase tracking-[0.14em] text-[#66817a]">Criar cadastro não inicia cobrança.</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-[#283936] bg-[#111918] text-[#849994]">
-        <div className="mx-auto grid max-w-[1240px] gap-8 px-5 py-10 sm:px-8 md:grid-cols-[1fr_auto] md:items-end">
-          <div>
-            <BrandMark light />
-            <p className="mt-4 max-w-[460px] text-[10px] leading-5">Planejamento e operação de eventos, com financeiro por evento e networking opcional.</p>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-3 text-[10px]">
-            <NavButton target="produto" reduceMotion={reduceMotion} className="text-[#849994] hover:text-[#edf3f0]">Produto</NavButton>
-            <NavButton target="networking" reduceMotion={reduceMotion} className="text-[#849994] hover:text-[#edf3f0]">Networking</NavButton>
-            <NavButton target="planos" reduceMotion={reduceMotion} className="text-[#849994] hover:text-[#edf3f0]">Planos</NavButton>
-            <Link to="/login" className="hover:text-[#edf3f0]">Entrar</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-export default LandingPage;
