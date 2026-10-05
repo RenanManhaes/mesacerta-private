@@ -67,18 +67,16 @@ export function SidebarContent({ onNavigate }) {
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex items-center gap-2 px-5 h-14 border-b border-border">
-        <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-primary text-primary-foreground">
-          <span className="text-[11px] font-semibold">M</span>
-        </div>
-        <span className="font-display text-[17px] leading-none tracking-tight">Mesa Certa</span>
+      <div className="flex items-center gap-2.5 px-5 h-16">
+        <span className="platform-mark" aria-hidden="true"><i /><i /><i /><i /></span>
+        <span className="font-display font-bold text-[18px] leading-none tracking-tight">Mesa Certa</span>
       </div>
 
       {/* Event selector */}
       <div className="px-3 pt-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-left hover:bg-secondary transition-colors focus-ring">
+            <button className="w-full rounded-[14px] border border-border bg-card px-3 py-3 text-left hover:bg-secondary transition-colors focus-ring">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="truncate text-[13px] font-medium">{currentEvent?.name || 'Selecione um evento'}</div>
@@ -115,7 +113,7 @@ export function SidebarContent({ onNavigate }) {
                 return (
                   <NavLink key={it.to} to={full} onClick={onNavigate} className={cn(
                     'flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors',
-                    active ? 'bg-secondary text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                    active ? 'platform-nav-active bg-accent text-accent-foreground font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                   )}>
                     <it.icon className={iconCls} />
                     {it.label}

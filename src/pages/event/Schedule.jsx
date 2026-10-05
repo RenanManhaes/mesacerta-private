@@ -12,7 +12,7 @@ const TYPES = ['Credenciamento','Abertura','Palestra','Painel','Workshop','Inter
 function Row({ item, idx, total, onEdit, onMove, onDuplicate, onDelete }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-border">
+    <div className="platform-schedule-item border-b border-border">
       <div className="grid grid-cols-12 gap-3 items-center py-3 px-1">
         <div className="col-span-2 sm:col-span-1 tnum text-[13px] text-muted-foreground">{item.computedStart}</div>
         <div className="hidden sm:block col-span-1 tnum text-[12px] text-muted-foreground/70">{item.computedEnd}</div>

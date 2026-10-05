@@ -24,7 +24,7 @@ function Resumo() {
   const fin = financialSummary(ev);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div>
+      <div className="platform-panel">
         <SectionLabel className="mb-3">Receitas</SectionLabel>
         <div className="border-t border-border">
           <Line label="Faturamento previsto" value={formatBRL(fin.faturamentoPrevisto)} strong />
@@ -38,7 +38,7 @@ function Resumo() {
         </div>
       </div>
 
-      <div>
+      <div className="platform-panel">
         <SectionLabel className="mb-3">Despesas</SectionLabel>
         <div className="border-t border-border">
           <Line label="Despesas previstas" value={formatBRL(fin.despesasPrevistas)} strong />
@@ -52,7 +52,7 @@ function Resumo() {
         </div>
       </div>
 
-      <div>
+      <div className="platform-panel">
         <SectionLabel className="mb-3">Resultado</SectionLabel>
         <div className="border-t border-border">
           <Line label="Resultado previsto" value={formatBRL(fin.resultadoPrevisto)} strong tone={fin.resultadoPrevisto >= 0 ? 'pos' : 'neg'} />

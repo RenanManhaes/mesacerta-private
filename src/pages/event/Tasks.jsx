@@ -28,7 +28,6 @@ export default function Tasks() {
   else if (filter === 'atrasadas') list = list.filter(t => t.status !== 'Concluído' && t.date && daysUntil(t.date) < 0);
   else if (filter === 'semana') list = list.filter(t => t.date && daysUntil(t.date) >= 0 && daysUntil(t.date) <= 7);
   else if (filter === 'concluidas') list = list.filter(t => t.status === 'Concluído');
-  else list = list.filter(t => t.status !== 'Concluído');
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -49,12 +48,15 @@ export default function Tasks() {
       {list.length === 0 ? (
         <EmptyState title="Nenhuma tarefa aqui" hint="Use o botão Adicionar no topo para criar uma tarefa." />
       ) : (
-        <div className="border-t border-border">
-          {list.map(t => {
+        <div className="platform-kanban">
+          {['A fazer', 'Em andamento', 'Concluído'].map(status => (
+          <section key={status} className="platform-kanban-column">
+          <h2 className="flex justify-between text-sm px-1 py-1">{status}<span className="text-muted-foreground">{list.filter(t => t.status === status).length}</span></h2>
+          {list.filter(t => t.status === status).map(t => {
             const overdue = t.status !== 'Concluído' && t.date && daysUntil(t.date) < 0;
             return (
-              <div key={t.id} className="grid grid-cols-12 gap-3 items-center py-3 border-b border-border">
-                <div className="col-span-12 sm:col-span-6 min-w-0">
+              <div key={t.id} className="platform-task-card grid grid-cols-12 gap-3 items-center">
+                <div className="col-span-12 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={cn('text-[14px] font-medium', t.status === 'Concluído' && 'line-through text-muted-foreground')}>{t.name}</span>
                     {t.priority === 'Crítica' && <span className="text-[10px] uppercase tracking-wide text-danger font-medium">crítica</span>}
@@ -62,18 +64,20 @@ export default function Tasks() {
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">{t.category} · {t.date ? formatDateShort(t.date) : 'sem data'} {overdue && <span className="text-danger">· atrasada</span>}</div>
                 </div>
-                <div className="col-span-6 sm:col-span-3">
-                  <Input value={t.owner || ''} placeholder="Responsável" onChange={e => setOwner(t.id, e.target.value)} className="h-8 text-[12px]" />
+                <div className="col-span-12">
+                  <Input aria-label={`Responsável por ${t.name}`} value={t.owner || ''} placeholder="Responsável" onChange={e => setOwner(t.id, e.target.value)} className="h-8 text-[12px]" />
                 </div>
-                <div className="col-span-6 sm:col-span-3 flex justify-end">
+                <div className="col-span-12 flex justify-end">
                   <Select value={t.status} onValueChange={v => setStatus(t.id, v)}>
-                    <SelectTrigger className="h-8 text-[12px] w-40"><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-label={`Status de ${t.name}`} className="h-8 text-[12px] w-40"><SelectValue /></SelectTrigger>
                     <SelectContent>{['A fazer','Em andamento','Concluído'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
             );
           })}
+          </section>
+          ))}
         </div>
       )}
     </div>
