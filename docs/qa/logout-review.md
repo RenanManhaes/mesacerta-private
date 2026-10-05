@@ -3,7 +3,7 @@
 ## Implementação e review
 
 - Botão compartilhado `LogoutButton` na lista de eventos, criação de evento, organização, topo interno, menu lateral e landing quando há sessão.
-- A ação aguarda `supabase.auth.signOut({ scope: 'local' })`. Erros não são ignorados e não apagam o estado de autenticação artificialmente.
+- A ação aguarda `supabase.auth.signOut({ scope: 'local' })`. Se há erro, consulta a sessão: só informa falha quando a sessão ainda existe ou não pode ser verificada. O SDK atual pode remover a sessão local mesmo quando a revogação remota falha.
 - Enquanto a ação está pendente, o botão fica desativado e mostra “Saindo…”. Erro permite nova tentativa e informa o usuário.
 - Sucesso substitui a página pela landing pública, descartando dados privados em memória. Não exclui eventos nem dados de negócio.
 - A saída afeta a sessão atual; não desconecta outros dispositivos.
@@ -17,6 +17,7 @@ Foi usada uma fixture local temporária com `AuthProvider`, `EventProvider` e p�
 - Falha controlada: permanece na tela, mostra “Não foi possível sair / Tente novamente” e reabilita o botão.
 - Em 320px, logout visível em `/eventos`, `/novo`, dashboard e landing autenticada, sem expansão horizontal do cabeçalho.
 - Acesso a `/eventos` sem sessão redireciona a `/login`.
+- Teste do SDK instalado com armazenamento e HTTP controlados confirma remoção da sessão persistida em sucesso e também após erro HTTP 500; a API retorna o erro remoto neste segundo caso. Nenhuma credencial real foi utilizada.
 
 Não foi usada uma conta de usuário para testar revogação remota em produção. A verificação de UI não substitui essa verificação. O código usa o método oficial do Supabase e mantém a proteção de rotas.
 
