@@ -147,7 +147,11 @@ export function EventProvider({ children }) {
       return flush();
     }
     const snapshot = JSON.stringify(latest.current);
-    if (snapshot === acknowledged.current) return;
+    if (snapshot === acknowledged.current) {
+      setSaveStatus("saved");
+      setSaveError("");
+      return;
+    }
     const startedScope = identity.current;
     setSaveStatus('saving');
     setSaveError('');
@@ -262,6 +266,18 @@ export function EventProvider({ children }) {
     });
   }, []);
 
+  // Aplica a mudança e grava na hora; rejeita se a gravação falhar (o chamador pode desfazer).
+  const commitCurrent = async (updater) => {
+    updateCurrent(updater);
+    const idx = latest.current.findIndex((e) => e.id === state.currentEventId);
+    if (idx >= 0) {
+      const next = [...latest.current];
+      next[idx] = typeof updater === 'function' ? updater(next[idx]) : { ...next[idx], ...updater };
+      latest.current = next;
+    }
+    return flush();
+  };
+
   const updateEventById = useCallback((id, updater) => {
     setState((s) => {
       const idx = s.events.findIndex((e) => e.id === id);
@@ -304,6 +320,7 @@ export function EventProvider({ children }) {
     currentEventId,
     setCurrentEventId,
     updateCurrent,
+    commitCurrent,
     updateEventById,
     addEvent,
     resetDemo,

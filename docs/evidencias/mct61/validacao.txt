@@ -1,0 +1,22 @@
+$ npm run lint
+
+> base44-app@0.0.0 lint
+> eslint . --quiet
+
+$ npm run typecheck
+
+> base44-app@0.0.0 typecheck
+> tsc -p ./jsconfig.json
+
+$ npm run build
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 2.98s[39m
+$ node src/lib/networking/engine.test.mjs
+  reencontros:               346
+  contatos por pessoa:       53.5
+
+Motor portado preserva as garantias do cenario real.
