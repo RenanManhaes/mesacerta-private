@@ -155,3 +155,11 @@
 @media(max-width:1150px){.reference-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.reference-grid-21,.reference-grid-12{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.reference-header{flex-wrap:wrap}.reference-ring-row{gap:12px}.reference-ring{width:135px;height:135px}}
 @media(max-width:760px){.reference-grid-2,.reference-grid-3,.reference-grid-21,.reference-grid-12{grid-template-columns:minmax(0,1fr)}.reference-header{gap:16px}.reference-toolbar{flex-wrap:wrap}.reference-rounds{max-width:100%;width:100%}.reference-chart{gap:6px}.reference-sponsor{gap:12px}.reference-sponsor b{font-size:14px}.reference-sponsor>.reference-avatar{width:40px;height:40px}.reference-header h1{font-size:34px}.reference-ring-row{flex-wrap:nowrap}.reference-route-list{max-height:300px}.reference-list-row strong{font-size:12px}.reference-actions{flex-shrink:1}}
 @media(prefers-reduced-motion:reduce){.reference-net-seat,.reference-gauge path,.reference-chart-bars>div{transition:none}}
+
+/* Programação: cronograma e blocos coloridos (MCT-62) */
+.platform-timeline{position:relative;background:white;border:1px solid hsl(var(--border));border-radius:14px;overflow:hidden;user-select:none}
+.platform-timeline-hour{position:absolute;left:0;right:0;border-top:1px solid #eceeea;font-size:11px;color:#8b93a1;padding:1px 0 0 8px;pointer-events:none}
+.platform-timeline-block{position:absolute;box-sizing:border-box;border-left:4px solid;border-radius:8px;padding:3px 8px;overflow:hidden;cursor:grab;touch-action:none;transition:box-shadow .15s ease,top .15s ease}
+.platform-timeline-block:focus-visible{outline:2px solid #0f1f3d;outline-offset:1px}
+.platform-timeline-block.has-conflict{outline:2px dashed #dc2626;outline-offset:-2px}
+.platform-timeline-block.is-dragging{cursor:grabbing;transition:none;z-index:5;box-shadow:0 12px 24px -10px rgba(16,24,40,.4)}
