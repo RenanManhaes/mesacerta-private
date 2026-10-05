@@ -210,6 +210,6 @@ export const emptyEventTemplate = (data) => ({
   modules: data.modules || { tickets: false, sponsors: false, suppliers: false, schedule: false, networking: false },
   expenseCategories: [...expenseCategories],
   revenueCategories: [...revenueCategories],
-  tickets: [], sponsors: [], sponsorPlans: [], suppliers: [], expenses: [], revenues: [], participants: [], tasks: [], schedule: [],
+  tickets: [], sponsors: [], sponsorPlans: [], suppliers: [], expenses: [], revenues: [], participants: [], tasks: [], staffMembers: [], schedule: [],
   networking: { enabled: false, tables: 0, rounds: 0, capacityPerTable: 8, fixedHosts: 0, rotatingHosts: 0, rotatingParticipants: 0, desiredEnd: '18:00' }
 });
