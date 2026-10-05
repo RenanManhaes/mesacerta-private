@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import AuthLayout from "@/components/AuthLayout";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
+import LogoutButton from '@/components/LogoutButton';
 
 // Shown when an authenticated user has zero rows in `memberships`. RLS scopes
 // every domain table through is_org_member(organization_id), so a user with
@@ -16,7 +17,7 @@ import { useAuth } from "@/lib/AuthContext";
 // "Vulnerabilidade crítica corrigida" in that doc) — do not try to work
 // around it with a direct insert.
 export default function CreateOrganization() {
-  const { refreshMemberships, signOut } = useAuth();
+  const { refreshMemberships } = useAuth();
   const [nome, setNome] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,9 +46,7 @@ export default function CreateOrganization() {
       title="Crie sua organização"
       subtitle="Antes de continuar, dê um nome para o espaço onde seus eventos vão viver"
       footer={
-        <button type="button" onClick={() => signOut()} className="text-primary font-medium hover:underline">
-          Sair
-        </button>
+        <LogoutButton />
       }
     >
       {error && (

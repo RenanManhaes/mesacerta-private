@@ -1,4 +1,5 @@
 import React from 'react';
+import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { Button } from '@/components/ui/button';
@@ -62,14 +63,17 @@ export default function Events() {
   return (
     <div className="platform-ui min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="max-w-[1100px] mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
+        <div className="max-w-[1100px] mx-auto px-5 sm:px-8 min-h-14 py-3 flex flex-wrap gap-3 items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="platform-mark" aria-hidden="true"><i /><i /><i /><i /></span>
             <span className="font-display font-bold text-[18px] tracking-tight">Mesa Certa</span>
           </div>
+          <div className="flex items-center gap-2">
           <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
             <Plus className="h-3.5 w-3.5" /> Criar evento
           </Button>
+          <LogoutButton className="h-8 gap-1.5 text-[13px]" />
+          </div>
         </div>
       </header>
 
