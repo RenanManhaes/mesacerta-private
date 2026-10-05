@@ -74,16 +74,32 @@ export default function Networking() {
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
   const cfg = ev.networking || {};
+  const shownEventId = useRef(ev.id);
   useEffect(() => {
     clearTimeout(pendingGeneration.current);
     setGenerating(false);
     setPlaying(false);
-    setResult(restoreNetworking(input, ev.networkingDistribution));
+    // A saved grid for the current numbers wins. Otherwise keep the grid on
+    // screen (flagged as outdated) instead of discarding it when the
+    // organizer edits tables, rounds or people; only a different event resets.
+    const sameEvent = shownEventId.current === ev.id;
+    shownEventId.current = ev.id;
+    setResult((prev) => {
+      const restored = restoreNetworking(input, ev.networkingDistribution);
+      if (restored) return restored;
+      return sameEvent ? prev : null;
+    });
     setSelectedPerson(null);
     setSelectedTable(null);
     setError('');
     return () => clearTimeout(pendingGeneration.current);
   }, [ev.id, ev.participants, ev.networking]);
+  // The grid on screen was built from `result.input`; it is outdated when the
+  // current numbers (tables, rounds, capacities, people) no longer match it.
+  const stale =
+    !!result &&
+    !input.errors.length &&
+    networkingSignature(result.input) !== networkingSignature(input);
   const setCfg = (patch) =>
     updateCurrent((event) => ({
       ...event,
@@ -193,7 +209,7 @@ export default function Networking() {
               {generating
                 ? 'Gerando…'
                 : result
-                  ? 'Gerar novamente'
+                  ? 'Recalcular e substituir grade'
                   : 'Gerar distribuição'}
             </Button>
             <Button
@@ -251,6 +267,29 @@ export default function Networking() {
         <p role="alert" className="text-danger">
           {error}
         </p>
+      )}
+      {result && stale && (
+        <div
+          role="status"
+          data-testid="stale-grid-notice"
+          className="platform-panel flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <p>
+            <b className="text-warning">Grade desatualizada.</b> Os números
+            mudaram (mesas, rodadas, capacidades ou pessoas) e a grade abaixo
+            ainda reflete a configuração anterior. Recalcular substitui esta
+            grade; o cadastro de pessoas, patrocinadores e anfitriões não
+            muda.
+          </p>
+          <Button
+            variant="outline"
+            disabled={generating || input.errors.length > 0}
+            onClick={generate}
+          >
+            <RefreshCw size={16} />
+            Recalcular e substituir grade
+          </Button>
+        </div>
       )}
       {result ? (
         <>
