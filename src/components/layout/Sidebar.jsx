@@ -1,11 +1,11 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import { useAuth } from '@/lib/AuthContext';
+import LogoutButton from '@/components/LogoutButton';
 import { formatDateFull, daysUntil } from '@/lib/format';
 import {
   LayoutDashboard, CalendarDays, ListChecks, Users, Truck,
-  Wallet, Ticket, Sparkles, Gauge, Network, Settings, ChevronDown, LogOut
+  Wallet, Ticket, Sparkles, Gauge, Network, Settings, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -47,7 +47,6 @@ const sections = [
 
 export function SidebarContent({ onNavigate }) {
   const { events, currentEvent, setCurrentEventId } = useEvent();
-  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const navRef = useRef(null);
@@ -68,12 +67,6 @@ export function SidebarContent({ onNavigate }) {
     observer.observe(nav);
     return () => observer.disconnect();
   }, [location.pathname, currentEvent?.modules]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    onNavigate?.();
-    navigate('/login', { replace: true });
-  };
 
   const switchEvent = (id) => {
     setCurrentEventId(id);
@@ -149,14 +142,7 @@ export function SidebarContent({ onNavigate }) {
         )}
       </div>
       <div className="border-t border-border px-3 py-2.5">
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors focus-ring"
-        >
-          <LogOut className={iconCls} />
-          Sair
-        </button>
+        <LogoutButton className="w-full justify-start gap-2.5 text-[13px]" />
       </div>
     </div>
   );

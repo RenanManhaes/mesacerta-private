@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusPill } from '@/components/common/Primitives';
 import AddMenu from './AddMenu';
+import LogoutButton from '@/components/LogoutButton';
 import { alerts as alertsFn } from '@/lib/selectors';
 
 const statusLabel = { planejamento: 'Planejamento', confirmado: 'Confirmado', andamento: 'Em andamento', finalizado: 'Finalizado' };
@@ -26,7 +27,7 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="flex items-center gap-4 px-5 sm:px-8 lg:px-9 h-16 pl-14 lg:pl-9">
+      <div className="flex items-center gap-2 sm:gap-4 px-5 sm:px-8 lg:px-9 h-16 pl-14 lg:pl-9">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5 min-w-0">
             <Link to="/eventos" className="hidden xl:inline text-[13px] text-muted-foreground">Eventos /</Link>
@@ -50,6 +51,7 @@ export default function TopBar() {
         </Button>
 
         <AddMenu />
+        <LogoutButton className="h-8 gap-1.5 text-[13px] shrink-0" />
       </div>
     </header>
   );

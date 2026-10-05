@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,7 @@ export default function CreateEvent() {
           </Button>
           <span className="text-[14px] font-medium">Criar evento</span>
           <span className="ml-auto text-[12px] text-muted-foreground">{step + 1} de {STEPS.length}</span>
+          <LogoutButton className="h-8 gap-1.5 text-[13px]" />
         </div>
       </header>
 
