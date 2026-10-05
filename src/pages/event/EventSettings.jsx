@@ -32,7 +32,7 @@ export default function EventSettings() {
         <p className="mt-1 text-[14px] text-muted-foreground">Ajuste as informações e os módulos do evento.</p>
       </div>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Informações</SectionLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
           <div><Label className="text-[13px]">Nome</Label><Input className="mt-1.5 h-9 text-[13px]" value={ev.name} onChange={set('name')} /></div>
@@ -49,7 +49,7 @@ export default function EventSettings() {
         </div>
       </section>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Público e capacidade</SectionLabel>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-border pt-4">
           <div><Label className="text-[13px]">Público previsto</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.expectedAudience} onChange={set('expectedAudience')} /></div>
@@ -59,7 +59,7 @@ export default function EventSettings() {
         </div>
       </section>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Financeiro</SectionLabel>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-border pt-4">
           <div><Label className="text-[13px]">Meta de faturamento (R$)</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.goalRevenue} onChange={set('goalRevenue')} /></div>
@@ -68,7 +68,7 @@ export default function EventSettings() {
         </div>
       </section>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Módulos</SectionLabel>
         <div className="border-t border-border">
           {MODULES.map(m => (

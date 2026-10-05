@@ -5,7 +5,7 @@ import { formatBRL } from '@/lib/format';
 /** @param {{children: React.ReactNode, className?: string}} props */
 export function SectionLabel({ children, className }) {
   return (
-    <div className={cn('text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground', className)}>
+    <div className={cn('platform-section-label text-base font-semibold text-foreground', className)}>
       {children}
     </div>
   );
@@ -50,7 +50,7 @@ export function StatusPill({ status, className }) {
   };
   const cls = map[status] || 'text-muted-foreground';
   return (
-    <span className={cn('inline-flex items-center gap-1.5 text-xs font-medium', cls, className)}>
+    <span className={cn('platform-status-pill inline-flex items-center gap-1.5 text-xs font-medium', cls, className)}>
       <span className={cn('h-1.5 w-1.5 rounded-full bg-current')} />
       {status}
     </span>

@@ -34,7 +34,7 @@ export default function Expenses() {
         </Button>
       </div>
 
-      <div className="border-t border-border">
+      <div className="platform-data-table">
         <div className="grid grid-cols-12 gap-3 px-2 py-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
           <div className="col-span-12 sm:col-span-4">Descrição</div>
           <div className="hidden sm:block col-span-2">Categoria</div>
@@ -82,7 +82,7 @@ export default function Expenses() {
       </div>
 
       {Object.keys(byCat).length > 0 && (
-        <section>
+        <section className="platform-panel">
           <SectionLabel className="mb-2">Por categoria</SectionLabel>
           <div className="border-t border-border max-w-xl">
             {Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([cat, v]) => (

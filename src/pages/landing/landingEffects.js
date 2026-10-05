@@ -84,14 +84,18 @@ export function initLanding(root) {
   };
 
   /* smooth scroll + FAQ */
+  let scrollToken = 0;
   const smoothTo = id => {
+    const token = ++scrollToken;
     const el = root.querySelector('#' + id); if (!el) return;
     const to = el.getBoundingClientRect().top + window.scrollY - 80, from = window.scrollY, d = to - from;
     if (RM) { window.scrollTo(0, to); return; }
     const dur = Math.min(1200, Math.max(600, Math.abs(d) * .3)); let s;
-    const f = n => { s ??= n; const k = clamp((n - s) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; window.scrollTo(0, from + d * e); if (k < 1) raf(f); };
+    const f = n => { if (token !== scrollToken) return; s ??= n; const k = clamp((n - s) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; window.scrollTo(0, from + d * e); if (k < 1) raf(f); };
     raf(f);
   };
+  on(window, 'wheel', () => { scrollToken++; }, { passive: true });
+  on(window, 'touchstart', () => { scrollToken++; }, { passive: true });
   on(root, 'click', e => {
     const b = e.target.closest('[data-scroll]'); if (b) { e.preventDefault(); smoothTo(b.dataset.scroll); }
     const q = e.target.closest('.fq button');
@@ -126,10 +130,12 @@ export function initLanding(root) {
   };
   const posOf = (g, r) => r < 0 ? L.pool[g] : L.tables[tableOf(g, r)].seats[g % 6];
   const countTo = (el, to) => {
+    el._tok = (el._tok || 0) + 1;
+    const token = el._tok;
     const from = +el.dataset.v || 0; el.dataset.v = to;
     if (RM || from === to) { el.textContent = to.toLocaleString('pt-BR'); return; }
     const s = performance.now();
-    const f = n => { const t = Math.min(1, (n - s) / 900); el.textContent = Math.round(from + (to - from) * eo(t)).toLocaleString('pt-BR'); if (t < 1) raf(f); };
+    const f = n => { if (token !== el._tok) return; const t = Math.min(1, (n - s) / 900); el.textContent = Math.round(from + (to - from) * eo(t)).toLocaleString('pt-BR'); if (t < 1) raf(f); };
     raf(f);
   };
   const drawRoute = (r, instant) => {

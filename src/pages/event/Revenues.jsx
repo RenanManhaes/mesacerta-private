@@ -82,14 +82,14 @@ export default function Revenues() {
         <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Ingresso</Button>
       </div>
 
-      <section>
+      <section className="platform-panel">
         <div className="flex items-center gap-1.5 mb-3"><SectionLabel>Ingressos</SectionLabel><InfoTip text="Cada ingresso pode ter vários lotes com preços e datas diferentes." /></div>
         <div className="space-y-3">
           {ev.tickets.map(t => <TicketCard key={t.id} t={t} ev={ev} onUpdate={updateCurrent} />)}
         </div>
       </section>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Outras receitas</SectionLabel>
         <div className="border-t border-border">
           {ev.revenues.map(r => (

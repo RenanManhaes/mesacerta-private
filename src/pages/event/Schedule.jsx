@@ -17,17 +17,17 @@ function Row({ item, idx, total, onEdit, onMove, onDuplicate, onDelete }) {
         <div className="col-span-2 sm:col-span-1 tnum text-[13px] text-muted-foreground">{item.computedStart}</div>
         <div className="hidden sm:block col-span-1 tnum text-[12px] text-muted-foreground/70">{item.computedEnd}</div>
         <div className="col-span-7 sm:col-span-6 min-w-0">
-          <button onClick={() => setOpen(o => !o)} className="text-left w-full">
+          <button aria-expanded={open} onClick={() => setOpen(o => !o)} className="text-left w-full">
             <div className="text-[14px] font-medium truncate">{item.title}</div>
             <div className="text-[11px] text-muted-foreground">{item.type}{item.speaker ? ` · ${item.speaker}` : ''}{item.room ? ` · ${item.room}` : ''}</div>
           </button>
         </div>
         <div className="col-span-3 sm:col-span-2 text-right tnum text-[13px]">{item.duration} min</div>
         <div className="col-span-12 sm:col-span-2 flex justify-end gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === 0} onClick={() => onMove(idx, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={idx === total - 1} onClick={() => onMove(idx, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(idx)}><Copy className="h-3.5 w-3.5" /></Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-danger" onClick={() => onDelete(idx)}><Trash2 className="h-3.5 w-3.5" /></Button>
+          <Button aria-label={`Mover ${item.title} para cima`} variant="ghost" size="icon" className="h-7 w-7" disabled={idx === 0} onClick={() => onMove(idx, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
+          <Button aria-label={`Mover ${item.title} para baixo`} variant="ghost" size="icon" className="h-7 w-7" disabled={idx === total - 1} onClick={() => onMove(idx, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
+          <Button aria-label={`Duplicar ${item.title}`} variant="ghost" size="icon" className="h-7 w-7" onClick={() => onDuplicate(idx)}><Copy className="h-3.5 w-3.5" /></Button>
+          <Button aria-label={`Excluir ${item.title}`} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-danger" onClick={() => onDelete(idx)}><Trash2 className="h-3.5 w-3.5" /></Button>
         </div>
       </div>
       {open && (

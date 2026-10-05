@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { uid } from '@/lib/format';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -81,6 +81,7 @@ export default function AddMenu() {
         <DialogContent className="sm:max-w-[440px]">
           <DialogHeader>
             <DialogTitle className="text-[15px]">Adicionar {type && TYPES.find(t => t.key === type).label.toLowerCase()}</DialogTitle>
+            <DialogDescription className="sr-only">Preencha os dados e salve para adicionar ao evento atual.</DialogDescription>
           </DialogHeader>
 
           {type === 'participante' && (

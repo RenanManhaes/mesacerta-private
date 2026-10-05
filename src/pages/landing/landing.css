@@ -220,7 +220,7 @@
 .mc-landing .wrap{padding:0 20px}
 .mc-landing .cta{margin:0 12px}
 }
-@media (prefers-reduced-motion:reduce){.mc-landing *,.mc-landing,.mc-landing *::before,.mc-landing,.mc-landing *::after,.mc-landing{transition-duration:.01ms!important;animation-duration:.01ms!important}
+@media (prefers-reduced-motion:reduce){.mc-landing *,.mc-landing,.mc-landing *::before,.mc-landing,.mc-landing *::after,.mc-landing{transition:none!important;animation:none!important}
 .mc-landing [data-reveal]{opacity:1;transform:none}
 }
 .mc-landing .rd{margin:0 28px;border-radius:32px;background:var(--dark);color:#eef2f6;position:relative;overflow:hidden;--hl:color-mix(in oklab,var(--acc) 45%,#fff);--rl:rgba(255,255,255,.12);--rl2:rgba(255,255,255,.22);--rm:rgba(238,242,246,.66)}

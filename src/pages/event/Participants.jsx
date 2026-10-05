@@ -68,7 +68,7 @@ export default function Participants() {
       {filtered.length === 0 ? (
         <EmptyState title="Nenhum participante encontrado" hint="Ajuste os filtros ou use o botão Adicionar no topo." />
       ) : (
-        <div>
+        <div className="platform-data-table">
           <div className="grid grid-cols-12 gap-3 px-2 pb-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
             <div className="col-span-4">Nome</div><div className="col-span-3 hidden sm:block">Empresa</div>
             <div className="col-span-2">Tipo</div><div className="col-span-3 sm:col-span-2 text-right">Status</div>

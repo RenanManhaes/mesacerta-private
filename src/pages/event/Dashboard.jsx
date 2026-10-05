@@ -4,6 +4,8 @@ import { useEvent } from '@/context/EventContext';
 import { financialSummary, scheduleSummary, taskSummary, supplierSummary, alerts, upcomingActions, relativeLabel } from '@/lib/selectors';
 import { formatBRL, formatPercent, formatDateFull, daysUntil, formatDateShort } from '@/lib/format';
 import { StatusPill } from '@/components/common/Primitives';
+import AnimatedValue from '@/components/common/AnimatedValue';
+import SummaryChart from '@/components/financial/SummaryChart';
 import { Wallet, Users, TrendingUp, ArrowDownRight, AlertTriangle, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 
 const alertStyle = { critico: { icon: AlertTriangle, color: 'text-danger' }, atencao: { icon: AlertCircle, color: 'text-warning' }, ok: { icon: CheckCircle2, color: 'text-positive' } };
@@ -17,9 +19,9 @@ export default function Dashboard() {
   const go = to => navigate(`/event/${ev.id}/${to}`);
   const hour = new Date().getHours();
   const summary = [
-    { label: 'Faturamento previsto', value: formatBRL(fin.faturamentoPrevisto), sub: `${formatBRL(fin.recebido)} recebido`, icon: Wallet, to: 'financeiro' },
-    { label: 'Despesas previstas', value: formatBRL(fin.despesasPrevistas), sub: `${formatBRL(fin.aPagar)} a pagar`, icon: ArrowDownRight, to: 'despesas' },
-    { label: 'Resultado previsto', value: formatBRL(fin.resultadoPrevisto), sub: `Margem de ${formatPercent(fin.margem)}`, icon: TrendingUp, to: 'financeiro', highlight: true },
+    { label: 'Faturamento previsto', value: fin.faturamentoPrevisto, format: formatBRL, sub: `${formatBRL(fin.recebido)} recebido`, icon: Wallet, to: 'financeiro' },
+    { label: 'Despesas previstas', value: fin.despesasPrevistas, format: formatBRL, sub: `${formatBRL(fin.aPagar)} a pagar`, icon: ArrowDownRight, to: 'despesas' },
+    { label: 'Resultado previsto', value: fin.resultadoPrevisto, format: formatBRL, sub: `Margem de ${formatPercent(fin.margem)}`, icon: TrendingUp, to: 'financeiro', highlight: true },
     { label: 'Confirmados', value: ev.confirmed || 0, sub: `de ${ev.expectedAudience || 0} esperados`, icon: Users, to: 'participantes' }
   ];
   const operational = [
@@ -38,11 +40,12 @@ export default function Dashboard() {
         <p className="text-muted-foreground mt-1 text-[13px]">{formatDateFull(ev.date)} · {ev.location || ev.city}{ev.date && <> · {daysUntil(ev.date)} dias para o evento</>}</p>
       </div>
       <div className="platform-kpis">
-        {summary.map(({ label, value, sub, icon: Icon, to, highlight }) => <button key={label} onClick={() => go(to)} className={`platform-kpi ${highlight ? 'highlight' : ''}`}><small><Icon className="w-4 h-4" />{label}</small><b>{value}</b><span>{sub}</span></button>)}
+        {summary.map(({ label, value, format, sub, icon: Icon, to, highlight }) => <button key={label} onClick={() => go(to)} className={`platform-kpi ${highlight ? 'highlight' : ''}`}><small><Icon className="w-4 h-4" />{label}</small><b><AnimatedValue value={value} format={format} /></b><span>{sub}</span></button>)}
       </div>
       <div className="platform-dashboard-grid">
         <section className="platform-panel">
           <div className="flex items-center justify-between mb-5"><h2>Resumo financeiro</h2><button className="text-sm text-info" onClick={() => go('financeiro')}>Ver financeiro →</button></div>
+          <SummaryChart summary={fin} />
           <dl className="grid sm:grid-cols-2 gap-5">
             {[
               ['Recebido', fin.recebido], ['A receber', fin.aReceber], ['Já pago', fin.pago], ['A pagar', fin.aPagar], ['Patrocínios previstos', fin.sponsorExpected], ['Patrocínios recebidos', fin.sponsorReceived]
@@ -51,7 +54,7 @@ export default function Dashboard() {
           <div className="mt-6 pt-5 border-t border-border">
             <div className="flex justify-between gap-3 text-sm mb-3"><span>Meta de faturamento</span><strong>{formatBRL(fin.meta)}</strong></div>
             <div className="platform-bar"><div style={{ width: `${Math.max(0, Math.min(100, fin.metaPct))}%` }} /></div>
-            <p className="text-muted-foreground text-sm mt-3">{formatPercent(fin.metaPct)} da meta · {fin.faltaMeta > 0 ? `Faltam ${formatBRL(fin.faltaMeta)}` : 'Meta atingida'}</p>
+            <p className="text-muted-foreground text-sm mt-3">{fin.meta > 0 ? <>{formatPercent(fin.metaPct)} da meta · {fin.faltaMeta > 0 ? `Faltam ${formatBRL(fin.faltaMeta)}` : 'Meta atingida'}</> : 'Defina sua meta em Configurações.'}</p>
           </div>
         </section>
         <section className="platform-panel">

@@ -1,5 +1,12 @@
 # Branding e direção visual — Mesa Certa
 
+> Atualização de 5 de outubro de 2026: a direção visual abaixo é histórica.
+> O arquivo `atualização da plataforma.zip`, enviado e aprovado pelo usuário,
+> passa a ser a referência visual: azul `#1d3a6e`, coral `#e8663d`,
+> Schibsted Grotesk e Geist Mono, painéis arredondados e mesas animadas no login.
+> Os tokens vigentes estão em `src/index.css` e a integração em
+> `src/components/layout/platform.css`. As regras de dados e cálculos permanecem.
+
 Referência: `../PRD_Mesa_Certa_v1.1.md`. Toda decisão abaixo está ligada a uma seção
 específica do PRD, não a gosto pessoal. Onde a justificativa é "§43", é restrição
 direta de produto, não sugestão de estilo.

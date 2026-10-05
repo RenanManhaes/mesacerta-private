@@ -49,7 +49,7 @@ export function initHeroApp(root) {
   let cur = 0;
   function go(i, keepScroll) {
     cur = i;
-    items.forEach((it, k) => it.classList.toggle('on', k === i));
+    items.forEach((it, k) => { it.classList.toggle('on', k === i); it.setAttribute('aria-pressed', String(k === i)); });
     url.textContent = 'app.mesacerta.com.br/seu-evento' + (SLUG[i] ? '/' + SLUG[i] : '');
     main.innerHTML = V[i]();
     if (i === 0) { main.querySelectorAll('[data-count]').forEach(el => (el.textContent = (el.dataset.pre || '') + (+el.dataset.count).toLocaleString('pt-BR'))); wireHome(); }
@@ -62,10 +62,12 @@ export function initHeroApp(root) {
     const ALERT = [4, 3, 1, 6];
     main.querySelectorAll('.al').forEach((a, k) => { a.classList.add('ha-link'); a.dataset.go = ALERT[k]; });
     main.querySelectorAll('.kpi').forEach((k, i) => { k.classList.add('ha-link'); k.dataset.go = [5, 4, 5, 3][i]; });
+    main.querySelectorAll('[data-go]').forEach(element => { element.setAttribute('role', 'button'); element.tabIndex = 0; });
     const IN = [3.7, 5.6, 8.4, 6.2, 9.9, 12.4, 10.2, 7.7], OUT = [6.8, 3.5, 2.2, 7.4, 4.5, 6, 4, 9.4];
     main.querySelectorAll('.bars>div').forEach((b, k) => { b.classList.add('ha-bargrp'); b.dataset.k = k; b.dataset.tip = `Semana ${k + 1} · Entradas R$ ${IN[k].toLocaleString('pt-BR')} mil · Saídas R$ ${OUT[k].toLocaleString('pt-BR')} mil`; });
   }
-  items.forEach((it, i) => { it.setAttribute('role', 'button'); it.tabIndex = 0; on(it, 'click', () => go(i)); on(it, 'keydown', e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), go(i))); });
+  items.forEach((it, i) => { it.setAttribute('role', 'button'); it.setAttribute('aria-pressed', String(i === 0)); it.tabIndex = 0; on(it, 'click', () => go(i)); on(it, 'keydown', e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), go(i))); });
+  on(main, 'keydown', e => { const target = e.target.closest('[data-go]'); if (target && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(+target.dataset.go); } });
   on(main, 'click', e => {
     const t = e.target;
     const g = t.closest('[data-go]'); if (g) return go(+g.dataset.go);
