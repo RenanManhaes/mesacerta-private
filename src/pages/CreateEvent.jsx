@@ -58,7 +58,7 @@ export default function CreateEvent() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="max-w-[640px] mx-auto px-5 sm:px-8 h-14 flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => step === 0 ? navigate('/') : setStep(s => s - 1)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => step === 0 ? navigate('/eventos') : setStep(s => s - 1)}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <span className="text-[14px] font-medium">Criar evento</span>
@@ -132,7 +132,7 @@ export default function CreateEvent() {
         )}
 
         <div className="mt-10 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => step === 0 ? navigate('/') : setStep(s => s - 1)} className="text-[13px]">Voltar</Button>
+          <Button variant="ghost" onClick={() => step === 0 ? navigate('/eventos') : setStep(s => s - 1)} className="text-[13px]">Voltar</Button>
           {step < STEPS.length - 1 ? (
             <Button disabled={!canNext} onClick={() => setStep(s => s + 1)} className="gap-1.5 text-[13px]">Continuar <ArrowRight className="h-3.5 w-3.5" /></Button>
           ) : (
