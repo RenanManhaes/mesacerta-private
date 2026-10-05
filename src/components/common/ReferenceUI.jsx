@@ -2,6 +2,7 @@ import React, { useId } from 'react';
 import AnimatedValue from './AnimatedValue';
 import { formatBRL, formatDateShort } from '@/lib/format';
 import { cashFlow } from '@/lib/selectors';
+import { chartPalette } from '@/lib/chartPalette';
 
 export function PageHeader({ eyebrow, title, subtitle, actions = null }) {
   return (
@@ -71,7 +72,7 @@ export function Progress({ value, total = 100, tone = 'blue' }) {
   );
 }
 export function Ring({ value, total, label, sub, segments = null }) {
-  const pieces = segments || [{ value, color: '#e8663d' }];
+  const pieces = segments || [{ value, color: chartPalette.base }];
   let offset = 0;
   return (
     <div className="reference-ring">
@@ -81,7 +82,7 @@ export function Ring({ value, total, label, sub, segments = null }) {
           cy="80"
           r="66"
           fill="none"
-          stroke="#f1f2ef"
+          stroke={chartPalette.track}
           strokeWidth="18"
         />
         {pieces.map((s, i) => {

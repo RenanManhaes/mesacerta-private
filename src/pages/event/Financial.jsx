@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary, financialEntries } from '@/lib/selectors';
+import { chartPalette } from '@/lib/chartPalette';
 import { formatBRL, formatPercent, formatDateShort } from '@/lib/format';
 import {
   PageHeader,
@@ -33,17 +34,17 @@ export default function Financial() {
     {
       label: 'Ingressos',
       value: realized ? fin.ticketReceived : fin.ticketExpected,
-      color: '#1d3a6e',
+      color: chartPalette.tones[0],
     },
     {
       label: 'Patrocínios',
       value: realized ? fin.sponsorReceived : fin.sponsorExpected,
-      color: '#e8663d',
+      color: chartPalette.tones[1],
     },
     {
       label: 'Outras receitas',
       value: realized ? fin.otherReceived : fin.otherExpected,
-      color: '#cfd3d6',
+      color: chartPalette.tones[2],
     },
   ];
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { capacitySummary } from '@/lib/selectors';
 import { uid } from '@/lib/format';
+import { chartPalette } from '@/lib/chartPalette';
 import {
   PageHeader,
   Panel,
@@ -64,14 +65,14 @@ export default function Capacity() {
               <path
                 d="M20 140 A110 110 0 0 1 240 140"
                 fill="none"
-                stroke="#f1f2ef"
+                stroke={chartPalette.track}
                 strokeWidth="20"
                 strokeLinecap="round"
               />
               <path
                 d="M20 140 A110 110 0 0 1 240 140"
                 fill="none"
-                stroke="#e8663d"
+                stroke={chartPalette.base}
                 strokeWidth="20"
                 strokeLinecap="round"
                 pathLength="100"

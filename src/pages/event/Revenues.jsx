@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary } from '@/lib/selectors';
 import { formatBRL, uid } from '@/lib/format';
+import { chartPalette } from '@/lib/chartPalette';
 import {
   PageHeader,
   Kpi,
@@ -162,7 +163,7 @@ export default function Revenues() {
                   .map((v, i) => `${(i / 29) * 298 + 1},${58 - (v / max) * 55}`)
                   .join(' ')}
                 fill="none"
-                stroke="#e8663d"
+                stroke={chartPalette.base}
                 strokeWidth="2"
               />
             </svg>

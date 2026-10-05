@@ -1,0 +1,17 @@
+/*
+ * PALETA CENTRAL DOS GRAFICOS (MCT-47)
+ *
+ * Regra: um grafico = uma cor base. Para separar valores no mesmo grafico,
+ * use apenas os tons abaixo (a mesma cor, mais clara). Nunca uma segunda cor
+ * de marca.
+ *
+ * Para trocar a cor de todos os graficos, mude somente --chart-base.
+ * CSS usa var(--chart-tone-N); JS/SVG importa de '@/lib/chartPalette'.
+ */
+:root {
+  --chart-base: #1d3a6e;
+  --chart-tone-1: var(--chart-base);
+  --chart-tone-2: color-mix(in srgb, var(--chart-base) 62%, white);
+  --chart-tone-3: color-mix(in srgb, var(--chart-base) 34%, white);
+  --chart-track: color-mix(in srgb, var(--chart-base) 9%, white);
+}
