@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { uid } from '@/lib/format';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,13 @@ export default function AddMenu() {
 
   const openFor = (t) => { setType(t); setForm({}); setOpen(true); };
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Pages can open the add dialog directly: window.dispatchEvent(new CustomEvent('mesacerta:add', { detail: 'fornecedor' }))
+  useEffect(() => {
+    const onAdd = (e) => { if (TYPES.some(t => t.key === e.detail)) openFor(e.detail); };
+    window.addEventListener('mesacerta:add', onAdd);
+    return () => window.removeEventListener('mesacerta:add', onAdd);
+  }, []);
 
   const submit = () => {
     if (!type || !currentEvent) return;
