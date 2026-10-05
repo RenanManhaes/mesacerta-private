@@ -70,7 +70,8 @@ export default function LandingPage() {
 <div className="rd-grid">
 <div className="rd-stage" data-reveal>
 <div className="rd-top"><div className="rd-rounds" role="group" aria-label="Rodadas"><button>R1</button><button>R2</button><button>R3</button><button>R4</button><button>R5</button></div><div className="rd-ctrl"><button id="rd-restart" aria-label="Recomeçar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg></button><button id="rd-play"></button></div></div>
-<div className="rd-area" id="rd-area"><span className="rd-status" id="rd-status">42 convidados importados</span></div>
+<div className="rd-status" id="rd-status">42 convidados importados</div>
+<div className="rd-area" id="rd-area"></div>
 <div className="rd-stats"><div><b id="rd-round">—</b><small>rodada</small></div><div><b id="rd-meet">0</b><small>encontros únicos</small></div><div><b>0</b><small>encontros repetidos</small></div></div>
 </div>
 <div className="rd-side">
