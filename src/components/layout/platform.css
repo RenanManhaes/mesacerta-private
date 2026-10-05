@@ -1,37 +1,23 @@
-/* Visual da Plataforma.html do pacote do usuário, adaptado aos componentes reais. */
+/* Visual da Plataforma.html do pacote do usuÃ¡rio, adaptado aos componentes reais. */
 @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap');
-:root {
-  --background: 60 14% 97%; --foreground: 220 43% 11%;
-  --card: 0 0% 100%; --card-foreground: 220 43% 11%;
-  --popover: 0 0% 100%; --popover-foreground: 220 43% 11%;
-  --primary: 14 79% 57%; --primary-foreground: 0 0% 100%;
-  --secondary: 80 10% 94%; --secondary-foreground: 220 27% 22%;
-  --muted: 80 10% 94%; --muted-foreground: 219 12% 42%;
-  --accent: 219 44% 94%; --accent-foreground: 219 58% 27%;
-  --border: 80 6% 90%; --input: 214 8% 83%; --ring: 219 58% 27%;
-  --positive: 154 63% 33%; --warning: 36 71% 42%; --danger: 17 88% 40%;
-  --destructive: 17 88% 40%; --destructive-foreground: 0 0% 100%;
-  --info: 219 58% 27%; --chart-1: 219 58% 27%; --chart-2: 14 79% 57%;
-  --radius: 1rem;
-  --font-heading: 'Schibsted Grotesk', system-ui, sans-serif;
-  --font-body: 'Schibsted Grotesk', system-ui, sans-serif;
-  --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
-  --sidebar-background: 0 0% 100%; --sidebar-border: 80 6% 90%;
-  --sidebar-accent: 219 44% 94%; --sidebar-accent-foreground: 219 58% 27%;
-}
+
 .platform-ui {font-size:14.5px;line-height:1.55}
 .platform-ui h1 {font-size:clamp(30px,3.2vw,44px);font-weight:700;line-height:1.08;letter-spacing:-.035em}
 .platform-ui h2,.platform-ui h3 {font-weight:600;letter-spacing:-.025em}
-.platform-mark {display:grid;grid-template-columns:repeat(2,7px);gap:3px;transform:rotate(-12deg)}
-.platform-mark i {width:7px;height:7px;border-radius:2px;background:#e8663d}
-.platform-mark i:nth-child(2),.platform-mark i:nth-child(3) {background:#1d3a6e}
+.platform-mark {width:28px;height:28px;border-radius:8px;background:#1d3a6e;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;padding:6px;flex:none}
+.platform-mark i {border-radius:2px;background:white}
+.platform-mark i:nth-child(4) {background:#e8663d}
 .platform-sidebar nav a {min-height:36px;border-radius:10px;font-size:14px;position:relative}
-.platform-nav-active::before {content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:#e8663d}
-.platform-sidebar nav>div>div:first-child {font-family:var(--font-mono)}
+.platform-nav a {z-index:1}
+.platform-nav-indicator {position:absolute;left:12px;right:12px;top:0;border-radius:10px;background:#e8edf6;pointer-events:none;opacity:0;transition:transform .5s cubic-bezier(.22,1,.36,1),height .3s,opacity .3s}
+.platform-nav-indicator::before {content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:#e8663d}
+.platform-sidebar nav>div>div:first-child:not(:last-child) {font-family:var(--font-mono)}
+.platform-nav>span+div {margin-top:0!important}
 .platform-ui button[class*="bg-primary"],.platform-ui button[class*="border-input"] {border-radius:999px;min-height:36px}
 .platform-ui input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),.platform-ui textarea,.platform-ui button[role="combobox"] {border-radius:12px;background:#fff}
 .platform-ui [role="tablist"] {border-radius:12px;padding:4px;height:auto}
+.platform-main [role="tablist"] {max-width:100%;overflow-x:auto;gap:12px}
+.platform-main [role="tab"] {flex-shrink:0}
 .platform-ui [role="tab"] {border-radius:9px;min-height:32px}
 .platform-main table {background:#fff;border-collapse:separate;border-spacing:0;border:1px solid hsl(var(--border));border-radius:16px;overflow:hidden}
 .platform-main table th {background:#f1f2ef;padding:12px 16px;text-transform:none;letter-spacing:0}
@@ -39,6 +25,18 @@
 .platform-main table tbody tr:hover {background:#f9f9f7}
 .platform-main [class*="rounded-md"][class*="border"] {border-radius:14px}
 .platform-main .platform-panel {background:#fff;border:1px solid hsl(var(--border));border-radius:16px;padding:20px;min-width:0}
+.platform-main .platform-data-table {background:#fff;border:1px solid #e4e6e3;border-radius:16px;overflow-x:auto;max-width:100%}
+.platform-data-table>.grid-cols-12 {min-width:680px;padding:12px 16px}
+.platform-data-table>.grid-cols-12:first-child {background:#f1f2ef;text-transform:none;font-size:12px;font-weight:600;letter-spacing:0}
+.platform-data-table>.grid-cols-12:last-child {border-bottom:0}
+.platform-data-table>.grid-cols-12:not(:first-child):hover {background:#f9f9f7}
+.platform-main .platform-segments {background:#f1f2ef;border:1px solid #e4e6e3;gap:3px;padding:3px}
+.platform-status-pill {padding:4px 10px;border-radius:999px;background:#f1f2ef;white-space:nowrap}
+.platform-status-pill.text-positive {background:#e3f4ea}
+.platform-status-pill.text-warning {background:#fbf0dc}
+.platform-status-pill.text-danger {background:#fde7dc}
+.platform-status-pill.text-info {background:#e8edf6}
+.platform-main .platform-panel>h2 {font-size:17px;font-weight:600;text-transform:none;letter-spacing:-.025em;color:#101828}
 .platform-eyebrow {display:flex;align-items:center;gap:8px;color:#cf5530;font:500 11.5px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
 .platform-eyebrow::before {content:'';width:6px;height:6px;border-radius:50%;background:#e8663d}
 .platform-kpis {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
@@ -46,9 +44,9 @@
 .platform-kpi:hover {transform:translateY(-2px);border-color:#cfd3d6}
 .platform-kpi small {color:#5e6778;font-size:13px;display:flex;gap:8px;align-items:center}
 .platform-kpi b {font-size:clamp(22px,2vw,28px);font-weight:700;letter-spacing:-.04em;overflow-wrap:anywhere}
-.platform-kpi span {font-size:12.5px;color:#5e6778}
+.platform-kpi>span {font-size:12.5px;color:#5e6778}
 .platform-kpi.highlight {background:#0f1f3d;color:white;border-color:#0f1f3d}
-.platform-kpi.highlight small,.platform-kpi.highlight span {color:#aab6cc}
+.platform-kpi.highlight small,.platform-kpi.highlight>span {color:#aab6cc}
 .platform-kpi.highlight svg {color:#e8663d}
 .platform-dashboard-grid {display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
 .platform-bar {height:8px;background:#f1f2ef;border-radius:99px;overflow:hidden}
@@ -69,9 +67,57 @@
 .platform-auth {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);min-height:100vh}
 .platform-auth-form {display:flex;flex-direction:column;padding:32px 48px}
 .platform-auth-form section {width:100%;max-width:400px;margin:auto;padding:48px 0}
-.platform-auth-visual {margin:12px;border-radius:28px;background:radial-gradient(circle at 100% 0,rgba(232,102,61,.35),transparent 60%),#0f1f3d;color:#eef2f8;display:flex;flex-direction:column;justify-content:flex-end;padding:48px;min-height:500px}
+.platform-auth-visual {position:relative;overflow:hidden;margin:12px;border-radius:28px;background:radial-gradient(circle at 100% 0,rgba(232,102,61,.35),transparent 60%),#0f1f3d;color:#eef2f8;display:flex;flex-direction:column;justify-content:flex-end;padding:48px;min-height:500px}
 .platform-auth-visual h2 {font-size:clamp(34px,3.4vw,52px);max-width:14ch;line-height:1.08}
 .platform-auth-visual p {color:#aab6cc;max-width:420px;margin-top:14px}
+.platform-page-enter {animation:platform-page-in .5s cubic-bezier(.22,1,.36,1) both}
+.platform-main>div[class*="animate-"] {animation:none}
+.platform-kpi,.platform-dashboard-grid>.platform-panel,.platform-main .platform-task-card,.platform-main .platform-schedule-item,.platform-events>.platform-event {animation:platform-card-in .65s cubic-bezier(.22,1,.36,1) both}
+.platform-kpis>.platform-kpi:nth-child(2),.platform-events>.platform-event:nth-child(2) {animation-delay:60ms}
+.platform-kpis>.platform-kpi:nth-child(3),.platform-events>.platform-event:nth-child(3) {animation-delay:120ms}
+.platform-kpis>.platform-kpi:nth-child(4) {animation-delay:180ms}
+.platform-bar>div {transform-origin:left;animation:platform-progress-in 1.2s cubic-bezier(.22,1,.36,1) both;transition:width .45s ease}
+.platform-task-card {transition:box-shadow .2s,transform .2s,border-color .2s}
+.platform-task-card:hover {box-shadow:0 10px 24px -14px rgba(16,24,40,.3);transform:translateY(-1px)}
+.platform-event-cover {background-size:auto,16px 16px,auto;transition:background-position .8s cubic-bezier(.22,1,.36,1)}
+.platform-event:hover .platform-event-cover {background-position:16px 0,4px 4px,0 0}
+.platform-mobile-sidebar {max-height:100dvh}
+.platform-mobile-sidebar>div {min-height:0}
+.platform-auth-form section {animation:platform-page-in .7s cubic-bezier(.22,1,.36,1) both}
+.platform-auth-tables {position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.platform-auth-visual h2,.platform-auth-visual p {position:relative}
+.platform-auth-form h1 {font-size:40px}
+.platform-auth-form a:not(:first-child) {color:#1d3a6e}
+.platform-auth-form section>div:first-child {margin-bottom:18px}
+.platform-auth-form form {display:flex;flex-direction:column;gap:18px}
+.platform-auth-form form>div {margin-top:0!important}
+.platform-auth-form label {font-size:13px;font-weight:600}
+.platform-auth-form .relative>svg {display:none}
+.platform-auth-form input {height:44px;padding:0 14px}
+.platform-auth-form button[type="submit"] {background:#e8663d;color:#fff;box-shadow:0 8px 20px -10px #e8663d}
+.platform-auth-form button[type="submit"]:hover {background:#cf5530}
+.platform-auth-google {margin-bottom:18px}
+.platform-auth-google button {height:46px;opacity:1;color:#5e6778}
+.platform-auth-google p {font-size:12px;color:#5e6778;margin-top:6px}
+.platform-auth-divider {display:flex;align-items:center;gap:12px;color:#5e6778;font-size:12.5px;margin-bottom:18px}
+.platform-auth-divider::before,.platform-auth-divider::after {content:'';flex:1;height:1px;background:#e4e6e3}
+.platform-auth-form footer a,.platform-auth-form section>p a {color:#1d3a6e}
+@keyframes platform-page-in {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes platform-card-in {from{opacity:0;translate:0 14px}to{opacity:1;translate:0 0}}
+@keyframes platform-progress-in {from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.platform-summary-chart {margin-bottom:24px}
+.platform-chart-legend {display:flex;gap:20px;justify-content:flex-end;font-size:12px;color:#5e6778}
+.platform-chart-legend span::before {content:'';display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:3px;background:#1d3a6e}
+.platform-chart-legend span:nth-child(2)::before {background:#e8663d}
+.platform-chart-groups {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:24px}
+.platform-chart-bars {display:flex;align-items:flex-end;gap:12px;height:160px;border-bottom:1px solid hsl(var(--border))}
+.platform-chart-column {height:100%;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.platform-chart-column>span {font-size:11px;white-space:nowrap;color:#5e6778;padding-bottom:6px}
+.platform-chart-bar {width:100%;max-width:72px;flex-shrink:0;border-radius:6px 6px 0 0;background:#1d3a6e;transform-origin:bottom;animation:platform-bars-in 1s cubic-bezier(.22,1,.36,1) both;transition:height .45s ease}
+.platform-chart-bar.actual {background:#e8663d;animation-delay:100ms}
+.platform-chart-label {text-align:center;font-size:12px;color:#5e6778;margin-top:10px}
+.platform-main .h-1\.5>div[style],.platform-main .h-2>div[style] {transform-origin:left;animation:platform-progress-in 1.2s cubic-bezier(.22,1,.36,1) both;transition:width .45s ease}
+@keyframes platform-bars-in {from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @media(max-width:1100px){.platform-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.platform-dashboard-grid{grid-template-columns:1fr}}
 @media(max-width:767px){.platform-events,.platform-kanban{grid-template-columns:1fr}.platform-auth{grid-template-columns:1fr}.platform-auth-visual{display:none}.platform-auth-form{padding:24px}.platform-kpi{padding:16px}.platform-ui h1{font-size:30px}}
-@media(prefers-reduced-motion:reduce){.platform-ui *, .platform-ui *::before{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(prefers-reduced-motion:reduce){.platform-ui,.platform-ui *, .platform-ui *::before,.platform-ui *::after,[role="dialog"],[data-state]{animation:none!important;transition:none!important}}

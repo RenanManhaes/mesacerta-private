@@ -79,7 +79,9 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Crie sua conta"
-      subtitle="Cadastre-se para começar"
+      subtitle="Leva menos de um minuto. Criar conta não inicia cobrança."
+      visualTitle="Comece pelo próximo evento."
+      visualDescription="Importe a lista de convidados e tenha as mesas montadas em minutos."
       footer={
         <>
           Já tem uma conta?{" "}

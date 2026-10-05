@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -50,7 +50,24 @@ export function SidebarContent({ onNavigate }) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const navRef = useRef(null);
+  const indicatorRef = useRef(null);
   const base = `/event/${currentEvent?.id || ''}`;
+  useLayoutEffect(() => {
+    const nav = navRef.current, indicator = indicatorRef.current;
+    const align = () => {
+      const active = nav.querySelector('[aria-current="page"]');
+      if (!active || !nav.getBoundingClientRect().width) { indicator.style.opacity = '0'; return; }
+      const top = active.getBoundingClientRect().top - nav.getBoundingClientRect().top + nav.scrollTop;
+      indicator.style.transform = `translateY(${top}px)`;
+      indicator.style.height = `${active.getBoundingClientRect().height}px`;
+      indicator.style.opacity = '1';
+    };
+    align();
+    const observer = new ResizeObserver(align);
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [location.pathname, currentEvent?.modules]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -100,7 +117,8 @@ export function SidebarContent({ onNavigate }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+      <nav ref={navRef} className="platform-nav relative flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-5">
+        <span ref={indicatorRef} className="platform-nav-indicator" aria-hidden="true" />
         {sections.map((sec, i) => (
           <div key={i}>
             {sec.group && (
@@ -113,7 +131,7 @@ export function SidebarContent({ onNavigate }) {
                 return (
                   <NavLink key={it.to} to={full} onClick={onNavigate} className={cn(
                     'flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors',
-                    active ? 'platform-nav-active bg-accent text-accent-foreground font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                    active ? 'platform-nav-active text-accent-foreground font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                   )}>
                     <it.icon className={iconCls} />
                     {it.label}

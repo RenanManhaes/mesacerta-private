@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams, useLocation, Link } from 'react-router-dom';
 import { SidebarContent } from './Sidebar';
 import TopBar from './TopBar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useEvent } from '@/context/EventContext';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import './platform.css';
 
 export default function AppLayout() {
   const { eventId } = useParams();
-  const { setCurrentEventId } = useEvent();
+  const location = useLocation();
+  const { setCurrentEventId, currentEvent, events } = useEvent();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   React.useEffect(() => {
@@ -33,15 +33,19 @@ export default function AppLayout() {
             </Button>
           </SheetTrigger>
         </div>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="platform-ui platform-sidebar platform-mobile-sidebar w-72 p-0 bg-card">
+          <SheetTitle className="sr-only">Menu do evento</SheetTitle>
+          <SheetDescription className="sr-only">Navegue pelos módulos do seu evento.</SheetDescription>
           <SidebarContent onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 
       <div className="lg:pl-64">
         <TopBar />
-        <main className="platform-main px-5 sm:px-8 lg:px-9 py-6 lg:py-8 max-w-[1400px] mx-auto">
-          <Outlet />
+        <main key={location.pathname} className="platform-main platform-page-enter px-5 sm:px-8 lg:px-9 py-6 lg:py-8 max-w-[1400px] mx-auto">
+          {!events.some(event => event.id === eventId) ? (
+            <div><h1>Evento não encontrado</h1><Link to="/eventos" className="text-info">Voltar para meus eventos</Link></div>
+          ) : currentEvent?.id === eventId ? <Outlet /> : <p role="status">Abrindo evento…</p>}
         </main>
       </div>
     </div>

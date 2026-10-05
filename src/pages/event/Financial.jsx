@@ -83,7 +83,7 @@ function ReceitasTab() {
     ...ev.revenues.map(r => ({ desc: r.description, expected: r.expected, received: r.received, cat: r.category, date: r.expectedDate, status: r.status }))
   ];
   return (
-    <div>
+    <div className="platform-data-table">
       <div className="grid grid-cols-12 gap-4 px-2 pb-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
         <div className="col-span-5">Descrição</div><div className="col-span-2">Categoria</div>
         <div className="col-span-2 text-right">Previsto</div><div className="col-span-2 text-right">Recebido</div><div className="col-span-1 text-right">Status</div>
@@ -110,7 +110,7 @@ function DespesasTab() {
     byCat[e.category] = (byCat[e.category] || 0) + total;
   });
   return (
-    <div>
+    <div className="platform-data-table">
       <div className="grid grid-cols-12 gap-4 px-2 pb-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
         <div className="col-span-5">Descrição</div><div className="col-span-2">Categoria</div>
         <div className="col-span-2 text-right">Tipo</div><div className="col-span-2 text-right">Total</div><div className="col-span-1 text-right">Status</div>
@@ -183,9 +183,9 @@ export default function Financial() {
         <p className="mt-1 text-[14px] text-muted-foreground">Quanto você vai ganhar, gastar e o que já está pago.</p>
       </div>
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-transparent h-9 p-0 gap-6 border-b border-border rounded-none w-full justify-start">
+        <TabsList className="platform-segments w-fit max-w-full justify-start">
           {['resumo','receitas','despesas','fluxo'].map(t => (
-            <TabsTrigger key={t} value={t} className="rounded-none text-[13px] capitalize data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground px-0 pb-2.5 -mb-px data-[state=active]:border-b-2 data-[state=active]:border-primary border-b-2 border-transparent">
+            <TabsTrigger key={t} value={t} className="text-[13px] capitalize px-3 data-[state=active]:bg-card data-[state=active]:shadow-sm">
               {t === 'fluxo' ? 'Fluxo de caixa' : t}
             </TabsTrigger>
           ))}

@@ -35,7 +35,7 @@ export default function Sponsors() {
         <Button size="sm" variant="outline" className="h-8 gap-1.5 text-[13px]" onClick={() => setPlanOpen(true)}><Plus className="h-3.5 w-3.5" /> Plano</Button>
       </div>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Planos de patrocínio</SectionLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {ev.sponsorPlans.map(p => (
@@ -48,12 +48,12 @@ export default function Sponsors() {
         </div>
       </section>
 
-      <section>
+      <section className="platform-panel">
         <SectionLabel className="mb-3">Patrocinadores</SectionLabel>
         {ev.sponsors.length === 0 ? (
           <EmptyState title="Nenhum patrocinador" hint="Use o botão Adicionar no topo para cadastrar uma empresa." />
         ) : (
-          <div className="border-t border-border">
+          <div className="platform-data-table">
             <div className="grid grid-cols-12 gap-3 px-2 pb-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
               <div className="col-span-3">Empresa</div><div className="col-span-2">Plano</div>
               <div className="col-span-2 text-right">Negociado</div><div className="col-span-2 text-right">Recebido</div>

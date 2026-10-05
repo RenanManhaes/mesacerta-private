@@ -4,96 +4,27 @@
 
 @layer base {
   :root {
-    /* Mesa Certa — tokens de marca. Ver docs/branding-mesa-certa.md para a
-       justificativa de cada valor (ligada ao PRD §42/§43). */
-    --background: 40 47% 96%;
-    --foreground: 40 12% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 40 12% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 40 12% 10%;
-    --primary: 171 43% 21%;
-    --primary-foreground: 40 47% 96%;
-    --secondary: 40 33% 91%;
-    --secondary-foreground: 42 13% 15%;
-    --muted: 40 32% 91%;
-    --muted-foreground: 41 10% 38%;
-    --accent: 160 19% 91%;
-    --accent-foreground: 171 43% 21%;
-    --destructive: 9 61% 44%;
-    --destructive-foreground: 40 47% 96%;
-    --border: 41 25% 85%;
-    --input: 41 25% 85%;
-    --ring: 171 43% 21%;
-    --positive: 145 46% 34%;
-    --positive-foreground: 40 47% 96%;
-    --warning: 37 88% 38%;
-    --warning-foreground: 40 47% 96%;
-    --danger: 9 61% 44%;
-    --danger-foreground: 40 47% 96%;
-    --info: 211 47% 44%;
-    --info-foreground: 40 47% 96%;
-    --chart-1: 171 43% 21%;
-    --chart-2: 211 47% 44%;
-    --chart-3: 37 88% 38%;
-    --chart-4: 145 46% 34%;
-    --chart-5: 9 61% 44%;
-    --radius: 0.375rem;
-    --font-heading: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-    --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-    --font-display: "Instrument Serif", ui-serif, Georgia, serif;
-    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    --sidebar-background: 40 47% 96%;
-    --sidebar-foreground: 41 10% 30%;
-    --sidebar-primary: 171 43% 21%;
-    --sidebar-primary-foreground: 40 47% 96%;
-    --sidebar-accent: 40 33% 91%;
-    --sidebar-accent-foreground: 42 13% 15%;
-    --sidebar-border: 41 25% 85%;
-    --sidebar-ring: 171 43% 21%;
-  }
-
-  .dark {
-    --background: 204 11% 9%;
-    --foreground: 41 31% 90%;
-    --card: 206 11% 12%;
-    --card-foreground: 41 31% 90%;
-    --popover: 206 11% 12%;
-    --popover-foreground: 41 31% 90%;
-    --primary: 167 34% 58%;
-    --primary-foreground: 170 18% 7%;
-    --secondary: 200 11% 16%;
-    --secondary-foreground: 41 31% 90%;
-    --muted: 200 11% 16%;
-    --muted-foreground: 40 8% 57%;
-    --accent: 169 20% 17%;
-    --accent-foreground: 162 40% 76%;
-    --destructive: 11 67% 63%;
-    --destructive-foreground: 204 11% 9%;
-    --border: 204 9% 21%;
-    --input: 204 9% 21%;
-    --ring: 167 34% 58%;
-    --positive: 145 42% 56%;
-    --positive-foreground: 204 11% 9%;
-    --warning: 38 73% 56%;
-    --warning-foreground: 204 11% 9%;
-    --danger: 11 67% 63%;
-    --danger-foreground: 204 11% 9%;
-    --info: 208 59% 67%;
-    --info-foreground: 204 11% 9%;
-    --chart-1: 167 34% 58%;
-    --chart-2: 208 59% 67%;
-    --chart-3: 38 73% 56%;
-    --chart-4: 145 42% 56%;
-    --chart-5: 11 67% 63%;
-    --sidebar-background: 206 11% 12%;
-    --sidebar-foreground: 40 8% 70%;
-    --sidebar-primary: 167 34% 58%;
-    --sidebar-primary-foreground: 170 18% 7%;
-    --sidebar-accent: 200 11% 16%;
-    --sidebar-accent-foreground: 41 31% 90%;
-    --sidebar-border: 204 9% 21%;
-    --sidebar-ring: 167 34% 58%;
+  --background: 60 14% 97%; --foreground: 220 43% 11%;
+  --card: 0 0% 100%; --card-foreground: 220 43% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 220 43% 11%;
+  --primary: 14.386 78.802% 57.451%; --primary-foreground: 0 0% 100%;
+  --secondary: 80 10% 94%; --secondary-foreground: 220 27% 22%;
+  --muted: 80 10% 94%; --muted-foreground: 219 12% 42%;
+  --accent: 219 44% 94%; --accent-foreground: 219 58% 27%;
+  --border: 80 6% 90%; --input: 214 8% 83%; --ring: 219 58% 27%;
+  --positive: 154 63% 33%; --warning: 36 71% 42%; --danger: 17 88% 40%;
+  --destructive: 17 88% 40%; --destructive-foreground: 0 0% 100%;
+  --info: 219 58% 27%; --chart-1: 219 58% 27%; --chart-2: 14 79% 57%;
+  --radius: 1rem;
+  --font-heading: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-body: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --sidebar-background: 0 0% 100%; --sidebar-border: 80 6% 90%;
+  --sidebar-accent: 219 44% 94%; --sidebar-accent-foreground: 219 58% 27%;
+  --positive-foreground: 0 0% 100%; --warning-foreground: 0 0% 100%; --info-foreground: 0 0% 100%; --danger-foreground: 0 0% 100%;
+  --chart-3: 36 71% 42%; --chart-4: 154 63% 33%; --chart-5: 17 88% 40%;
+  --sidebar-foreground: 219 12% 42%; --sidebar-primary: 219 58% 27%; --sidebar-primary-foreground: 0 0% 100%; --sidebar-ring: 219 58% 27%;
   }
 }
 

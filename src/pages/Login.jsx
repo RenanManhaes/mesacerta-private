@@ -4,8 +4,9 @@ import { supabase } from "@/api/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
+import { LogIn, Loader2, ArrowRight } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import GoogleIcon from "@/components/GoogleIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 function traduzErro(err) {
@@ -44,10 +45,10 @@ export default function Login() {
     <AuthLayout
       icon={LogIn}
       title="Bem-vindo de volta"
-      subtitle="Entre na sua conta"
+      subtitle="Entre para abrir seus eventos."
       footer={
         <>
-          Não tem uma conta?{" "}
+          Ainda não tem conta?{" "}
           <Link
             to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
             className="text-primary font-medium hover:underline"
@@ -57,6 +58,11 @@ export default function Login() {
         </>
       }
     >
+      <div className="platform-auth-google">
+        <Button type="button" variant="outline" disabled title="Entrada com Google indisponível. Use seu e-mail." aria-describedby="google-unavailable"><GoogleIcon className="w-4 h-4" />Continuar com Google</Button>
+        <p id="google-unavailable">Google indisponível. Entre com seu e-mail.</p>
+      </div>
+      <div className="platform-auth-divider">ou com e-mail</div>
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
@@ -67,16 +73,15 @@ export default function Login() {
         <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="email"
               type="email"
               autoComplete="email"
               autoFocus
-              placeholder="voce@exemplo.com"
+              placeholder="voce@empresa.com.br"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
+              className="h-11"
               required
             />
           </div>
@@ -85,11 +90,10 @@ export default function Login() {
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Senha</Label>
             <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              Esqueceu a senha?
+              Esqueci a senha
             </Link>
           </div>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="password"
               type="password"
@@ -97,7 +101,7 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
+              className="h-11"
               required
             />
           </div>
@@ -109,7 +113,7 @@ export default function Login() {
               Entrando...
             </>
           ) : (
-            "Entrar"
+            <>Entrar <ArrowRight className="w-4 h-4" aria-hidden="true" /></>
           )}
         </Button>
       </form>

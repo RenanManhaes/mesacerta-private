@@ -31,7 +31,7 @@ export default function Suppliers() {
         <p className="text-[13px] text-muted-foreground">Cada fornecedor alimenta automaticamente as despesas. Você não precisa digitar o mesmo valor duas vezes.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border rounded-md overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {ev.suppliers.map(sup => {
           const toPay = sup.contracted - sup.paid;
           return (

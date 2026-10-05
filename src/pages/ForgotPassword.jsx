@@ -30,8 +30,10 @@ export default function ForgotPassword() {
   return (
     <AuthLayout
       icon={Mail}
-      title="Redefinir senha"
-      subtitle="Vamos te enviar um link para redefinir"
+      title="Recuperar senha"
+      subtitle="Informe seu e-mail e enviaremos um link para criar uma nova senha."
+      visualTitle="Tudo continua onde você deixou."
+      visualDescription="Seus eventos, números e pendências ficam salvos."
       footer={
         <Link to="/login" className="text-primary font-medium hover:underline">
           <ArrowLeft className="w-3 h-3 inline mr-1" />Voltar para o login

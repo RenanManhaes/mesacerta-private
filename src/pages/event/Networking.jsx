@@ -75,7 +75,7 @@ export default function Networking() {
         <div><span className="block text-muted-foreground">Mesas</span><strong>{input.tables.length}</strong></div>
         <div><span className="block text-muted-foreground">Rodadas</span><strong>{cfg.rounds ?? '—'}</strong></div>
       </div>
-      <section className="space-y-3" aria-labelledby="rules-heading">
+      <section className="platform-panel space-y-3" aria-labelledby="rules-heading">
         <h2 id="rules-heading" className="font-medium">Mesas e regras</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <label className="text-xs">Quantidade de mesas<input aria-label="Quantidade de mesas" className={field} type="number" min="2" max="40" value={cfg.tables ?? ''} disabled={generating} onChange={e => setCfg({ tables: Number(e.target.value) })} /></label>
@@ -92,7 +92,7 @@ export default function Networking() {
           </fieldset>)}</div>
         </details>
       </section>
-      <section className="space-y-3" aria-labelledby="people-heading">
+      <section className="platform-panel space-y-3" aria-labelledby="people-heading">
         <h2 id="people-heading" className="font-medium">Pessoas cadastradas no evento</h2>
         <p className="text-xs text-muted-foreground">Os nomes vêm de Participantes. Escolha o papel e vincule os anfitriões à mesa de sua empresa.</p>
         <details><summary className="cursor-pointer text-sm">Configurar {input.people.length} pessoas</summary>
@@ -103,7 +103,7 @@ export default function Networking() {
           </fieldset>)}</div>
         </details>
       </section>
-      {(input.errors.length > 0 || input.warnings.length > 0) && <section aria-label="Validação antes da geração" className="border border-border p-4 text-sm space-y-2">
+      {(input.errors.length > 0 || input.warnings.length > 0) && <section aria-label="Validação antes da geração" className="platform-panel text-sm space-y-2">
         <h2 className="font-medium">Confira antes de gerar</h2>
         {input.errors.map((text, i) => <p key={`e${i}`} className="text-destructive">! {text}</p>)}
         {input.warnings.map((text, i) => <p key={`w${i}`} className="text-muted-foreground">⚠ {text}</p>)}
@@ -113,22 +113,22 @@ export default function Networking() {
       </div>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {result && <>
-        <section aria-label="Resultado da distribuição" className="border-y border-border py-4 text-sm space-y-1">
+        <section aria-label="Resultado da distribuição" className="platform-panel text-sm space-y-1">
           <p>Seed utilizada: <strong>{result.seed}</strong> · {result.analise.pairs.length} duplas com reencontro · {result.analise.sameTable} duplas na mesma mesa · máximo de {result.analise.maxMeet} encontros por dupla.</p>
           <p className="text-muted-foreground">Reencontros entre pessoas e retornos à mesa são indicadores diferentes. A análise abaixo mostra cada dupla.</p>
         </section>
-        <section aria-labelledby="plan-heading" className="space-y-3">
+        <section aria-labelledby="plan-heading" className="platform-panel space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="plan-heading" className="font-medium">Planta da rodada {round}</h2><label className="text-xs">Rodada exibida<select aria-label="Rodada exibida" className={field} value={round} onChange={e => { setRound(Number(e.target.value)); setSelectedPerson(null); setSelectedTable(null); }}>{Array.from({ length: result.input.engine.R }, (_, r) => <option key={r} value={r + 1}>Rodada {r + 1}</option>)}</select></label></div>
           <p className="text-xs text-muted-foreground">⚑ Fixo · ◇ Anfitrião rotativo · Casa: própria empresa · ↩ Retorno · ! Reencontro na mesma mesa · Tracejado: vazio. Selecione uma cadeira ou o centro da mesa.</p>
           <div data-testid="table-grid" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{result.input.tables.map((table, t) => <TablePlan key={table.id} table={table} round={round} occupants={occupants(result, round - 1, t)} onPerson={setSelectedPerson} onTable={() => setSelectedTable(t)} />)}</div>
         </section>
-        <section aria-labelledby="routes-heading" className="space-y-3">
+        <section aria-labelledby="routes-heading" className="platform-panel space-y-3">
           <h2 id="routes-heading" className="font-medium">Rotas individuais</h2>
           <div className="flex flex-wrap gap-3 items-center"><label className="text-xs grow">Buscar nome, código ou empresa<input className={field} aria-label="Buscar rota" value={query} onChange={e => setQuery(e.target.value)} /></label><label className="text-xs flex gap-2 items-center"><input type="checkbox" checked={onlyConflict} onChange={e => setOnlyConflict(e.target.checked)} />Somente com conflito</label></div>
           {!routes.length && <p className="text-sm text-muted-foreground">Nenhuma pessoa corresponde ao filtro.</p>}
           {routes.map(person => <details key={person.id} data-testid="person-route" className="border border-border p-3"><summary className="cursor-pointer text-sm break-words">{person.name} · {person.code} · {roles[person.role]}</summary><ol className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">{personRoute(result, person).map(step => <li key={step.rodada} data-testid="route-step" className="border border-border p-2 text-xs">Rodada {step.rodada}<strong className="block break-words">{tableName(step)}</strong></li>)}</ol></details>)}
         </section>
-        <section aria-labelledby="conflicts-heading" className="space-y-3">
+        <section aria-labelledby="conflicts-heading" className="platform-panel space-y-3">
           <h2 id="conflicts-heading" className="font-medium">Análise de conflitos por dupla</h2>
           <p className="text-xs text-muted-foreground">Primeiro, reencontros na mesma mesa. Depois, duplas com mais encontros. Esta análise considera quem circula; anfitriões fixos permanecem em suas mesas.</p>
           {!result.analise.pairs.length && <p className="text-sm">Nenhuma dupla de pessoas que circulam se reencontra.</p>}
