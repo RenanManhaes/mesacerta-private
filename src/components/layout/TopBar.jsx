@@ -5,15 +5,13 @@ import { formatDateFull } from '@/lib/format';
 import { Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { StatusPill } from '@/components/common/Primitives';
 import AddMenu from './AddMenu';
 import LogoutButton from '@/components/LogoutButton';
 import { alerts as alertsFn } from '@/lib/selectors';
 
-const statusLabel = { planejamento: 'Planejamento', confirmado: 'Confirmado', andamento: 'Em andamento', finalizado: 'Finalizado' };
 
 export default function TopBar() {
-  const { currentEvent } = useEvent();
+  const { currentEvent, saveStatus } = useEvent();
   const navigate = useNavigate();
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
@@ -34,14 +32,14 @@ export default function TopBar() {
             <span className="truncate text-[14px] font-medium">{currentEvent?.name}</span>
             <span className="hidden sm:inline text-muted-foreground">·</span>
             <span className="hidden sm:inline text-[13px] font-semibold truncate">{labels[location.pathname.split('/').pop()] || (currentEvent?.date && formatDateFull(currentEvent.date))}</span>
-            {currentEvent && <StatusPill status={statusLabel[currentEvent.status] || currentEvent.status} className="hidden md:inline-flex" />}
+            <span className="hidden md:inline-flex text-xs text-muted-foreground items-center gap-2"><i className={`h-1.5 w-1.5 rounded-full ${saveStatus==='error'?'bg-danger':saveStatus==='saving'?'bg-warning':'bg-positive'}`}/>{saveStatus==='saving'?'Salvando…':saveStatus==='error'?'Não salvo':'Salvo'}</span>
           </div>
         </div>
 
         <form onSubmit={onSearch} className="hidden sm:block w-44 lg:w-56">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar participantes" className="h-8 pl-8 text-[13px] bg-card" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar no evento" className="h-8 pl-8 text-[13px] bg-card" />
           </div>
         </form>
 

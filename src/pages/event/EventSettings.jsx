@@ -1,95 +1,366 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/api/supabaseClient';
+import {
+  PageHeader,
+  Panel,
+  Field,
+  initials,
+} from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SectionLabel } from '@/components/common/Primitives';
-import { AlertTriangle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  CalendarDays,
+  Truck,
+  Ticket,
+  Sparkles,
+  Network,
+  Gauge,
+  Check,
+  UserPlus,
+  Archive,
+} from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-
-const MODULES = [
-  { key: 'tickets', label: 'Venda de ingressos', desc: 'Gerencie lotes e vendas.' },
-  { key: 'sponsors', label: 'Patrocínios', desc: 'Planos e patrocinadores.' },
-  { key: 'suppliers', label: 'Fornecedores', desc: 'Contratos e pagamentos.' },
-  { key: 'schedule', label: 'Programação', desc: 'Cronograma de atividades.' },
-  { key: 'networking', label: 'Networking', desc: 'Rodadas de negócio.' }
+/** @type {Array<[string, string, typeof CalendarDays]>} */
+const modules = [
+  ['schedule', 'Programação', CalendarDays],
+  ['suppliers', 'Fornecedores', Truck],
+  ['tickets', 'Ingressos e receitas', Ticket],
+  ['sponsors', 'Patrocínios', Sparkles],
+  ['networking', 'Rodadas de negócio', Network],
+  ['capacity', 'Capacidade', Gauge],
 ];
-
 export default function EventSettings() {
-  const { currentEvent: ev, updateCurrent, resetDemo } = useEvent();
-  const navigate = useNavigate();
+  const { currentEvent: ev, updateCurrent, orgId } = useEvent();
+  const { memberships } = useAuth();
+  const [draft, setDraft] = useState(() =>
+    Object.fromEntries(
+      [
+        'name',
+        'date',
+        'expectedAudience',
+        'location',
+        'city',
+        'desiredEndTime',
+        'goalRevenue',
+        'goalSponsorship',
+        'cateringBudget',
+        'status',
+        'modules',
+      ].map((key) => [key, key === 'modules' ? { ...ev.modules } : ev[key]]),
+    ),
+  );
+  const [team, setTeam] = useState([]),
+    [teamError, setTeamError] = useState(''),
+    [email, setEmail] = useState(''),
+    [invite, setInvite] = useState(false),
+    [pending, setPending] = useState(false),
+    [archive, setArchive] = useState(false);
   const { toast } = useToast();
-  const set = (k) => (e) => updateCurrent(ev2 => ({ ...ev2, [k]: e.target ? e.target.value : e }));
-  const toggleModule = (k) => updateCurrent(ev2 => ({ ...ev2, modules: { ...ev2.modules, [k]: !ev2.modules[k] }, networking: k === 'networking' ? { ...ev2.networking, enabled: !ev2.modules.networking } : ev2.networking }));
-
+  const navigate = useNavigate();
+  const admin = memberships.some(
+    (m) => m.organization_id === orgId && ['owner', 'admin'].includes(m.role),
+  );
+  const loadTeam = async () => {
+    if (!orgId) return;
+    const { data, error } = await supabase.rpc('platform_team', {
+      p_org: orgId,
+    });
+    setTeam(data || []);
+    setTeamError(error ? 'Não foi possível carregar a equipe.' : '');
+  };
+  useEffect(() => {
+    let active = true;
+    if (orgId)
+      supabase
+        .rpc('platform_team', { p_org: orgId })
+        .then(({ data, error }) => {
+          if (active) {
+            setTeam(data || []);
+            setTeamError(error ? 'Não foi possível carregar a equipe.' : '');
+          }
+        });
+    return () => {
+      active = false;
+    };
+  }, [orgId]);
+  const set = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+  const dirty = Object.keys(draft).some(key=>JSON.stringify(draft[key])!==JSON.stringify(ev[key]));
+  const save = () => {
+    if (!draft.name.trim()) {
+      toast({ title: 'Informe o nome do evento', variant: 'destructive' });
+      return;
+    }
+    updateCurrent((e) => ({
+      ...e,
+      ...draft,
+      networking: { ...e.networking, enabled: !!draft.modules.networking },
+    }));
+    toast({
+      title: 'Alterações aplicadas',
+      description: 'Acompanhe o salvamento no topo.',
+    });
+  };
+  const addMember = async (e) => {
+    e.preventDefault();
+    setPending(true);
+    try {
+      const { error } = await supabase.rpc('platform_add_member', {
+        p_org: orgId,
+        p_email: email,
+      });
+      if (error) throw error;
+      await loadTeam();
+      setInvite(false);
+      setEmail('');
+      toast({ title: 'Pessoa adicionada à organização' });
+    } catch (err) {
+      toast({
+        title: 'Não foi possível adicionar',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setPending(false);
+    }
+  };
   return (
-    <div className="space-y-10 animate-fade-in max-w-3xl">
-      <div>
-        <h1 className="font-display text-[26px] tracking-tight">Configurações</h1>
-        <p className="mt-1 text-[14px] text-muted-foreground">Ajuste as informações e os módulos do evento.</p>
-      </div>
-
-      <section className="platform-panel">
-        <SectionLabel className="mb-3">Informações</SectionLabel>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
-          <div><Label className="text-[13px]">Nome</Label><Input className="mt-1.5 h-9 text-[13px]" value={ev.name} onChange={set('name')} /></div>
-          <div><Label className="text-[13px]">Data</Label><Input type="date" className="mt-1.5 h-9 text-[13px]" value={ev.date} onChange={set('date')} /></div>
-          <div><Label className="text-[13px]">Cidade / local</Label><Input className="mt-1.5 h-9 text-[13px]" value={ev.city} onChange={set('city')} /></div>
-          <div><Label className="text-[13px]">Local</Label><Input className="mt-1.5 h-9 text-[13px]" value={ev.location} onChange={set('location')} /></div>
-          <div><Label className="text-[13px]">Status</Label>
-            <Select value={ev.status} onValueChange={v => updateCurrent(e => ({ ...e, status: v }))}>
-              <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue /></SelectTrigger>
-              <SelectContent>{['planejamento','confirmado','andamento','finalizado'].map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}</SelectContent>
-            </Select>
+    <div className="reference-page">
+      <PageHeader
+        eyebrow="Evento"
+        title="Configurações"
+        subtitle="Dados do evento, módulos e equipe."
+        actions={
+          <>{dirty && <small role="status" className="text-warning">Alterações pendentes</small>}<Button onClick={save}>
+            <Check size={16} />
+            Salvar
+          </Button></>
+        }
+      />
+      <div className="reference-grid-2">
+        <Panel title="Dados do evento">
+          <div className="space-y-4">
+            <Field
+              label="Nome"
+              value={draft.name}
+              required
+              onChange={(v) => set('name', v)}
+            />
+            <div className="reference-grid-2">
+              <Field
+                label="Data"
+                type="date"
+                value={draft.date}
+                onChange={(v) => set('date', v)}
+              />
+              <Field
+                label="Público"
+                type="number"
+                min={0}
+                value={draft.expectedAudience}
+                onChange={(v) => set('expectedAudience', Math.floor(v))}
+              />
+            </div>
+            <Field
+              label="Local"
+              value={draft.location}
+              onChange={(v) => set('location', v)}
+            />
+            <details>
+              <summary className="text-sm text-muted-foreground cursor-pointer">
+                Mais informações e metas
+              </summary>
+              <div className="reference-grid-2 mt-4">
+                <Field
+                  label="Cidade"
+                  value={draft.city}
+                  onChange={(v) => set('city', v)}
+                />
+                <Field
+                  label="Término desejado"
+                  type="time"
+                  value={draft.desiredEndTime}
+                  onChange={(v) => set('desiredEndTime', v)}
+                />
+                <Field
+                  label="Meta de faturamento (R$)"
+                  type="number"
+                  min={0}
+                  value={draft.goalRevenue}
+                  onChange={(v) => set('goalRevenue', v)}
+                />
+                <Field
+                  label="Meta de patrocínios (R$)"
+                  type="number"
+                  min={0}
+                  value={draft.goalSponsorship}
+                  onChange={(v) => set('goalSponsorship', v)}
+                />
+                <Field
+                  label="Orçamento de alimentação (R$)"
+                  type="number"
+                  min={0}
+                  value={draft.cateringBudget}
+                  onChange={(v) => set('cateringBudget', v)}
+                />
+                <label className="reference-field">
+                  Status
+                  <select
+                    value={draft.status}
+                    onChange={(e) => set('status', e.target.value)}
+                  >
+                    {[
+                      'planejamento',
+                      'confirmado',
+                      'andamento',
+                      'finalizado',
+                    ].map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </details>
           </div>
-          <div><Label className="text-[13px]">Horário desejado de término</Label><Input type="time" className="mt-1.5 h-9 text-[13px]" value={ev.desiredEndTime} onChange={set('desiredEndTime')} /></div>
-        </div>
-      </section>
-
-      <section className="platform-panel">
-        <SectionLabel className="mb-3">Público e capacidade</SectionLabel>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-border pt-4">
-          <div><Label className="text-[13px]">Público previsto</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.expectedAudience} onChange={set('expectedAudience')} /></div>
-          <div><Label className="text-[13px]">Capacidade</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.capacity} onChange={set('capacity')} /></div>
-          <div><Label className="text-[13px]">Confirmados</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.confirmed} onChange={set('confirmed')} /></div>
-          <div><Label className="text-[13px]">Cortesias</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.complimentary} onChange={set('complimentary')} /></div>
-        </div>
-      </section>
-
-      <section className="platform-panel">
-        <SectionLabel className="mb-3">Financeiro</SectionLabel>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-border pt-4">
-          <div><Label className="text-[13px]">Meta de faturamento (R$)</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.goalRevenue} onChange={set('goalRevenue')} /></div>
-          <div><Label className="text-[13px]">Orçamento de alimentação (R$)</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.cateringBudget} onChange={set('cateringBudget')} /></div>
-          <div><Label className="text-[13px]">Equipe</Label><Input type="number" className="mt-1.5 h-9 text-[13px] tnum" value={ev.staff} onChange={set('staff')} /></div>
-        </div>
-      </section>
-
-      <section className="platform-panel">
-        <SectionLabel className="mb-3">Módulos</SectionLabel>
-        <div className="border-t border-border">
-          {MODULES.map(m => (
-            <div key={m.key} className="flex items-center justify-between py-3.5 border-b border-border">
-              <div><div className="text-[13px] font-medium">{m.label}</div><div className="text-[12px] text-muted-foreground">{m.desc}</div></div>
-              <Switch checked={ev.modules[m.key]} onCheckedChange={() => toggleModule(m.key)} />
+        </Panel>
+        <Panel title="Módulos" extra={<small>Ligue só o que usa</small>}>
+          {modules.map(([key, label, Icon]) => (
+            <div key={key} className="reference-list-row">
+              <span className="reference-avatar">
+                <Icon size={16} />
+              </span>
+              <span>{label}</span>
+              <Switch
+                aria-label={label}
+                checked={
+                  key === 'capacity'
+                    ? draft.modules.capacity !== false
+                    : !!draft.modules[key]
+                }
+                onCheckedChange={(checked) =>
+                  setDraft((d) => ({
+                    ...d,
+                    modules: { ...d.modules, [key]: checked },
+                  }))
+                }
+              />
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="border-t border-border pt-6">
-        <div className="flex items-start gap-2.5 rounded-md border border-danger/30 bg-danger/5 px-4 py-3">
-          <AlertTriangle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
-          <div>
-            <div className="text-[13px] font-medium text-foreground">Restaurar dados demo</div>
-            <div className="text-[12px] text-muted-foreground mt-0.5">Isso substitui todos os eventos pelos dados de demonstração originais.</div>
-          </div>
-          <Button variant="outline" size="sm" className="ml-auto h-8 text-[13px] text-danger border-danger/30 hover:bg-danger/5" onClick={() => { resetDemo(); toast({ title: 'Dados demo restaurados', duration: 1500 }); navigate(`/event/summit-conecta-2026/dashboard`); }}>Restaurar</Button>
-        </div>
-      </section>
+        </Panel>
+        <Panel
+          title="Equipe"
+          extra={
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!admin}
+              onClick={() => setInvite(true)}
+            >
+              <UserPlus size={16} />
+              Convidar
+            </Button>
+          }
+        >
+          {team.map((m) => (
+            <div className="reference-list-row" key={m.id}>
+              <span className="reference-avatar coral">{initials(m.name)}</span>
+              <span>
+                <b>{m.name}</b>
+                <small>{m.email}</small>
+              </span>
+              <span className="reference-tag">
+                {m.role === 'owner'
+                  ? 'Dono'
+                  : m.role === 'admin'
+                    ? 'Administrador'
+                    : 'Membro'}
+              </span>
+            </div>
+          ))}
+          {teamError && <p className="text-danger text-sm">{teamError}</p>}
+          <p className="text-muted-foreground text-xs mt-3">
+            A equipe da organização tem acesso aos seus eventos.
+          </p>
+        </Panel>
+        <Panel title="Zona de risco">
+          <p className="text-muted-foreground text-sm mb-4">
+            Arquivar remove o evento da lista principal, mas mantém os dados.
+          </p>
+          <Button
+            variant="outline"
+            className="text-danger"
+            onClick={() => setArchive(true)}
+          >
+            <Archive size={16} />
+            Arquivar evento
+          </Button>
+        </Panel>
+      </div>
+      <Dialog open={invite} onOpenChange={setInvite}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Convidar para a organização</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={addMember} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Informe o e-mail de uma pessoa que já criou e confirmou sua conta
+              no Mesa Certa. Ela receberá acesso como membro da organização.
+            </p>
+            <Field
+              label="E-mail"
+              type="email"
+              required
+              value={email}
+              onChange={setEmail}
+            />
+            <DialogFooter>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setInvite(false)}
+              >
+                Cancelar
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending ? 'Adicionando…' : 'Adicionar membro'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={archive} onOpenChange={setArchive}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Arquivar {ev.name}?</DialogTitle>
+          </DialogHeader>
+          <p>
+            Os dados serão mantidos. Você pode restaurar o evento na lista de
+            arquivados.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setArchive(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                updateCurrent((e) => ({ ...e, archived: true }));
+                navigate('/eventos');
+              }}
+            >
+              Arquivar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

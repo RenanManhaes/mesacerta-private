@@ -1,99 +1,276 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
-import { financialSummary, expenseTotal } from '@/lib/selectors';
-import { formatBRLc } from '@/lib/format';
+import {
+  financialSummary,
+  expenseTotal,
+  expensePaid,
+  saveExpense,
+} from '@/lib/selectors';
+import { formatBRL, uid } from '@/lib/format';
 import ExpenseCostFields from '@/components/financial/ExpenseCostFields';
-import { SectionLabel } from '@/components/common/Primitives';
+import {
+  PageHeader,
+  Kpi,
+  Progress,
+  Field,
+} from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Receipt, CheckCircle2, Clock, Plus } from 'lucide-react';
 export default function Expenses() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const { toast } = useToast();
+  const [draft, setDraft] = useState(null);
   const fin = financialSummary(ev);
-
-  const setExp = (id, patch) => updateCurrent(e => ({ ...e, expenses: e.expenses.map(x => x.id === id ? { ...x, ...patch } : x) }));
-  const addExp = () => updateCurrent(e => ({ ...e, expenses: [{ id: Math.random().toString(36).slice(2), description: 'Nova despesa', category: 'Outros', type: 'fixed', revenueBase: 'total', qty: 1, unitValue: 0, dueDate: '', status: 'pendente', note: '' }, ...e.expenses] }));
-  const removeExp = (id) => updateCurrent(e => ({ ...e, expenses: e.expenses.filter(x => x.id !== id) }));
-
-  const byCat = {};
-  ev.expenses.forEach(e => { const t = expenseTotal(e, ev.expectedAudience, fin); byCat[e.category] = (byCat[e.category] || 0) + t; });
-
+  const patch = (p) => setDraft((d) => ({ ...d, ...p }));
+  const total = draft ? expenseTotal(draft, ev.expectedAudience, fin) : 0;
+  const nextDue = [...ev.expenses]
+    .filter((e) => e.status !== 'pago' && e.dueDate)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+  const save = (e) => {
+    e.preventDefault();
+    if (draft.status === 'parcial' && draft.paidAmount > total) return;
+    updateCurrent((ev) => saveExpense(ev, draft));
+    setDraft(null);
+  };
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="font-display text-[26px] tracking-tight">Despesas</h1>
-          <p className="mt-1 text-[14px] text-muted-foreground">{formatBRLc(fin.despesasPrevistas)} previstas · {formatBRLc(fin.pago)} pago · {formatBRLc(fin.aPagar)} a pagar</p>
-        </div>
-        <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => { addExp(); toast({ title: 'Despesa criada', duration: 1500 }); }}>
-          <Plus className="h-3.5 w-3.5" /> Despesa
-        </Button>
+    <div className="reference-page">
+      <PageHeader
+        eyebrow="Financeiro"
+        title="Despesas"
+        subtitle="Tudo o que o evento custa, por categoria."
+        actions={
+          <Button
+            onClick={() =>
+              setDraft({
+                id: uid(),
+                description: '',
+                category: 'Outros',
+                type: 'fixed',
+                qty: 1,
+                unitValue: 0,
+                dueDate: '',
+                status: 'pendente',
+                paidAmount: 0,
+                note: '',
+              })
+            }
+          >
+            <Plus size={16} />
+            Nova despesa
+          </Button>
+        }
+      />
+      <div className="reference-grid-3">
+        <Kpi
+          icon={Receipt}
+          label="Total previsto"
+          value={fin.despesasPrevistas}
+          format={formatBRL}
+          sub={`${new Set(ev.expenses.map((e) => e.category)).size} categorias`}
+        />
+        <Kpi
+          icon={CheckCircle2}
+          label="Pago"
+          value={fin.pago}
+          format={formatBRL}
+          sub={`${Math.round(fin.despesasPrevistas ? (fin.pago / fin.despesasPrevistas) * 100 : 0)}% do total`}
+        />
+        <Kpi
+          icon={Clock}
+          label="A pagar"
+          value={fin.aPagar}
+          format={formatBRL}
+          sub={
+            nextDue
+              ? `Próximo vencimento: ${new Date(nextDue.dueDate + 'T12:00:00').toLocaleDateString('pt-BR')}`
+              : 'Sem vencimentos pendentes'
+          }
+          highlight
+        />
       </div>
-
-      <div className="platform-data-table">
-        <div className="grid grid-cols-12 gap-3 px-2 py-2 border-b border-border text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-          <div className="col-span-12 sm:col-span-4">Descrição</div>
-          <div className="hidden sm:block col-span-2">Categoria</div>
-          <div className="hidden sm:block col-span-4">Cálculo</div>
-          <div className="hidden sm:block col-span-2 text-right">Total / Status</div>
-        </div>
-
-        {ev.expenses.map(e => {
-          const total = expenseTotal(e, ev.expectedAudience, fin);
-          return (
-            <div key={e.id} className="group grid grid-cols-12 gap-3 px-2 py-2.5 border-b border-border items-center text-[13px]">
-              <div className="col-span-12 sm:col-span-4 min-w-0">
-                <Input value={e.description} onChange={evt => setExp(e.id, { description: evt.target.value })} className="h-8 text-[13px]" />
-                <Input type="date" value={e.dueDate} onChange={evt => setExp(e.id, { dueDate: evt.target.value })} className="mt-1.5 h-7 text-[11px] w-40" />
+      <div className="overflow-x-auto">
+        <table className="reference-table">
+          <thead>
+            <tr>
+              <th className="text-left">Categoria</th>
+              <th className="text-left">Fornecedor</th>
+              <th className="text-left">Pagamento</th>
+              <th className="r">Pago</th>
+              <th className="r">Total</th>
+              <th className="text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ev.expenses.map((e) => {
+              const total = expenseTotal(e, ev.expectedAudience, fin),
+                paid = expensePaid(e, total, ev);
+              const supplier = ev.suppliers.find((s) => s.id === e.supplierId);
+              return (
+                <tr
+                  key={e.id}
+                  tabIndex={0}
+                  aria-label={`Editar ${e.description}`}
+                  onClick={() =>
+                    setDraft({ ...e, paidAmount: expensePaid(e, total, ev) })
+                  }
+                  onKeyDown={(evt) => {
+                    if (['Enter', ' '].includes(evt.key)) {
+                      evt.preventDefault();
+                      setDraft({ ...e, paidAmount: expensePaid(e, total, ev) });
+                    }
+                  }}
+                >
+                  <td>
+                    <b>{e.category}</b>
+                    <small className="block text-muted-foreground">
+                      {e.description}
+                    </small>
+                  </td>
+                  <td className="text-muted-foreground">
+                    {supplier?.name || 'Sem fornecedor'}
+                  </td>
+                  <td>
+                    <Progress
+                      value={paid}
+                      total={total}
+                      tone={e.status === 'pago' ? 'green' : 'blue'}
+                    />
+                  </td>
+                  <td className="r">{formatBRL(paid)}</td>
+                  <td className="r">{formatBRL(total)}</td>
+                  <td>
+                    <span
+                      className={`reference-tag ${e.status === 'pago' ? 'positive' : 'warning'}`}
+                    >
+                      ●{' '}
+                      {e.status === 'pago'
+                        ? 'Quitado'
+                        : e.status === 'parcial'
+                          ? 'Parcial'
+                          : 'Pendente'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {!ev.expenses.length && (
+          <p className="platform-panel text-muted-foreground">
+            Nenhuma despesa cadastrada.
+          </p>
+        )}
+      </div>
+      <Dialog
+        open={!!draft}
+        onOpenChange={(v) => {
+          if (!v) setDraft(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Despesa</DialogTitle>
+          </DialogHeader>
+          {draft && (
+            <form onSubmit={save} className="space-y-4">
+              <Field
+                label="Descrição"
+                value={draft.description}
+                required
+                onChange={(description) => patch({ description })}
+              />
+              <div className="reference-grid-2">
+                <label className="reference-field">
+                  Categoria
+                  <select
+                    value={draft.category}
+                    onChange={(e) => patch({ category: e.target.value })}
+                  >
+                    {ev.expenseCategories.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="reference-field">
+                  Fornecedor
+                  <select
+                    value={draft.supplierId || ''}
+                    onChange={(e) => patch({ supplierId: e.target.value })}
+                  >
+                    <option value="">Sem fornecedor</option>
+                    {ev.suppliers.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
-              <div className="col-span-12 sm:col-span-2 flex items-center">
-                <Select value={e.category} onValueChange={v => setExp(e.id, { category: v })}>
-                  <SelectTrigger className="h-8 text-[12px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>{ev.expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-12 sm:col-span-4">
-                <ExpenseCostFields expense={e} onChange={patch => setExp(e.id, patch)} />
-              </div>
-              <div className="col-span-12 sm:col-span-2 flex flex-wrap justify-end items-center gap-2">
-                <div className="w-full text-right tnum">{formatBRLc(total)}</div>
-                {e.status === 'parcial' && (
-                  <Input type="number" value={e.paidAmount || 0} onChange={evt => setExp(e.id, { paidAmount: Number(evt.target.value) || 0 })} className="h-7 w-20 text-[11px] tnum" title="Valor pago" />
+              <ExpenseCostFields expense={draft} onChange={patch} />
+              <div className="reference-grid-2">
+                <Field
+                  label="Vencimento"
+                  type="date"
+                  value={draft.dueDate}
+                  onChange={(dueDate) => patch({ dueDate })}
+                />
+                <Field
+                  label="Data do pagamento"
+                  type="date"
+                  value={draft.paidDate}
+                  onChange={(paidDate) => patch({ paidDate })}
+                />
+                <label className="reference-field">
+                  Situação
+                  <select
+                    value={draft.status}
+                    onChange={(e) => patch({ status: e.target.value })}
+                  >
+                    <option value="pendente">Pendente</option>
+                    <option value="parcial">Parcial</option>
+                    <option value="pago">Quitado</option>
+                  </select>
+                </label>
+                {draft.status === 'parcial' && (
+                  <Field
+                    label="Valor pago (R$)"
+                    type="number"
+                    min={0}
+                    max={total}
+                    value={draft.paidAmount || 0}
+                    onChange={(paidAmount) => patch({ paidAmount })}
+                  />
                 )}
-                <Select value={e.status} onValueChange={v => setExp(e.id, { status: v })}>
-                  <SelectTrigger className="h-8 text-[12px] w-28"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="parcial">Parcial</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
-                  </SelectContent>
-                </Select>
-                <button onClick={() => removeExp(e.id)} className="text-muted-foreground hover:text-danger opacity-0 group-hover:opacity-100 transition-opacity" title="Excluir">
-                  <Trash2 className="h-4 w-4" />
-                </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {Object.keys(byCat).length > 0 && (
-        <section className="platform-panel">
-          <SectionLabel className="mb-2">Por categoria</SectionLabel>
-          <div className="border-t border-border max-w-xl">
-            {Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([cat, v]) => (
-              <div key={cat} className="flex justify-between py-2 border-b border-border text-[13px]">
-                <span className="text-muted-foreground">{cat}</span>
-                <span className="tnum">{formatBRLc(v)}</span>
+              <Field
+                label="Observações"
+                value={draft.note}
+                onChange={(note) => patch({ note })}
+              />
+              <div className="reference-progress-label">
+                <span>Total da despesa</span>
+                <b>{formatBRL(total)}</b>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDraft(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit">Salvar</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

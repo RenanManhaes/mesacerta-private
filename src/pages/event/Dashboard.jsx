@@ -1,75 +1,275 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import { financialSummary, scheduleSummary, taskSummary, supplierSummary, alerts, upcomingActions, relativeLabel } from '@/lib/selectors';
-import { formatBRL, formatPercent, formatDateFull, daysUntil, formatDateShort } from '@/lib/format';
-import { StatusPill } from '@/components/common/Primitives';
-import AnimatedValue from '@/components/common/AnimatedValue';
-import SummaryChart from '@/components/financial/SummaryChart';
-import { Wallet, Users, TrendingUp, ArrowDownRight, AlertTriangle, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
-
-const alertStyle = { critico: { icon: AlertTriangle, color: 'text-danger' }, atencao: { icon: AlertCircle, color: 'text-warning' }, ok: { icon: CheckCircle2, color: 'text-positive' } };
+import { useAuth } from '@/lib/AuthContext';
+import {
+  financialSummary,
+  taskSummary,
+  scheduleSummary,
+  supplierSummary,
+  alerts,
+  relativeLabel,
+} from '@/lib/selectors';
+import {
+  formatBRL,
+  formatPercent,
+  formatDateFull,
+  daysUntil,
+} from '@/lib/format';
+import {
+  PageHeader,
+  Kpi,
+  Panel,
+  Progress,
+  Ring,
+  FlowChart,
+  Legend,
+} from '@/components/common/ReferenceUI';
+import { Button } from '@/components/ui/button';
+import {
+  CalendarClock,
+  TrendingUp,
+  Wallet,
+  Users,
+  Share2,
+  Plus,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function Dashboard() {
-  const { currentEvent: ev } = useEvent();
+  const { currentEvent: ev, updateCurrent } = useEvent();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  if (!ev) return null;
-  const fin = financialSummary(ev), sch = scheduleSummary(ev), tasks = taskSummary(ev), sup = supplierSummary(ev);
-  const al = alerts(ev), actions = upcomingActions(ev);
-  const go = to => navigate(`/event/${ev.id}/${to}`);
+  const fin = financialSummary(ev),
+    tasks = taskSummary(ev),
+    sch = scheduleSummary(ev),
+    sup = supplierSummary(ev);
+  const attention = alerts(ev).slice(0, 4);
+  const upcoming = [...ev.tasks]
+    .filter((t) => t.status !== 'Concluído')
+    .sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999'))
+    .slice(0, 4);
+  const go = (to) => navigate(`/event/${ev.id}/${to}`);
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ title: 'Link do evento copiado' });
+    } catch {
+      toast({
+        title: 'Não foi possível copiar o link',
+        variant: 'destructive',
+      });
+    }
+  };
   const hour = new Date().getHours();
-  const summary = [
-    { label: 'Faturamento previsto', value: fin.faturamentoPrevisto, format: formatBRL, sub: `${formatBRL(fin.recebido)} recebido`, icon: Wallet, to: 'financeiro' },
-    { label: 'Despesas previstas', value: fin.despesasPrevistas, format: formatBRL, sub: `${formatBRL(fin.aPagar)} a pagar`, icon: ArrowDownRight, to: 'despesas' },
-    { label: 'Resultado previsto', value: fin.resultadoPrevisto, format: formatBRL, sub: `Margem de ${formatPercent(fin.margem)}`, icon: TrendingUp, to: 'financeiro', highlight: true },
-    { label: 'Confirmados', value: ev.confirmed || 0, sub: `de ${ev.expectedAudience || 0} esperados`, icon: Users, to: 'participantes' }
-  ];
-  const operational = [
-    ['Participantes', `${ev.confirmed || 0} confirmados / ${ev.expectedAudience || 0} esperados`, 'participantes'],
-    ['Programação', `${sch.count} atividades / ${sch.durationText}`, 'programacao'],
-    ['Tarefas', `${tasks.done} concluídas / ${tasks.pending} pendentes / ${tasks.overdue} atrasadas`, 'tarefas'],
-    ['Fornecedores', `${sup.count} contratados / ${sup.pendingPayments} pagamentos pendentes`, 'fornecedores'],
-    ...(ev.modules?.networking ? [['Networking', `${ev.networking.tables} mesas / ${ev.networking.rounds} rodadas`, 'networking']] : [])
+  const name =
+    user?.user_metadata?.full_name?.split(' ')[0] ||
+    user?.email?.split('@')[0] ||
+    '';
+  const organization = [
+    [
+      'Participantes',
+      ev.confirmed || 0,
+      ev.expectedAudience || 0,
+      `${ev.confirmed || 0} / ${ev.expectedAudience || 0}`,
+      'participantes',
+    ],
+    [
+      'Tarefas',
+      tasks.done,
+      tasks.total,
+      `${tasks.done} / ${tasks.total}`,
+      'tarefas',
+    ],
+    [
+      'Fornecedores pagos',
+      sup.paid,
+      sup.contracted,
+      formatBRL(sup.paid),
+      'fornecedores',
+    ],
+    [
+      'Programação',
+      sch.count,
+      sch.count,
+      `${sch.count} atividades`,
+      'programacao',
+    ],
   ];
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <p className="platform-eyebrow">Visão geral</p>
-        <h1 className="mt-2">{ev.name}</h1>
-        <p className="text-muted-foreground mt-2">{hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'}. Veja como está o seu evento.</p>
-        <p className="text-muted-foreground mt-1 text-[13px]">{formatDateFull(ev.date)} · {ev.location || ev.city}{ev.date && <> · {daysUntil(ev.date)} dias para o evento</>}</p>
-      </div>
+    <div className="reference-page">
+      <PageHeader
+        eyebrow={`${formatDateFull(ev.date)} · ${ev.location || ev.city || 'Local a definir'}`}
+        title={ev.name}
+        subtitle={`${hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'}${name ? ', ' + name : ''}. Veja como está o seu evento.`}
+        actions={
+          <>
+            <Button variant="outline" onClick={share}>
+              <Share2 size={16} />
+              Compartilhar
+            </Button>
+            <Button onClick={() => go('tarefas')}>
+              <Plus size={16} />
+              Nova tarefa
+            </Button>
+          </>
+        }
+      />
       <div className="platform-kpis">
-        {summary.map(({ label, value, format, sub, icon: Icon, to, highlight }) => <button key={label} onClick={() => go(to)} className={`platform-kpi ${highlight ? 'highlight' : ''}`}><small><Icon className="w-4 h-4" />{label}</small><b><AnimatedValue value={value} format={format} /></b><span>{sub}</span></button>)}
+        <Kpi
+          icon={CalendarClock}
+          label="Dias para o evento"
+          value={ev.date ? Math.max(0, daysUntil(ev.date)) : '—'}
+          sub={`Faltam ${tasks.pending} tarefas`}
+          highlight
+        />
+        <Kpi
+          icon={TrendingUp}
+          label="Faturamento previsto"
+          value={fin.faturamentoPrevisto}
+          format={formatBRL}
+          sub={`${formatPercent(fin.faturamentoPrevisto ? (fin.recebido / fin.faturamentoPrevisto) * 100 : 0, 0)} já recebido`}
+          onClick={() => go('financeiro')}
+        />
+        <Kpi
+          icon={Wallet}
+          label="Resultado previsto"
+          value={fin.resultadoPrevisto}
+          format={formatBRL}
+          sub={`Margem de ${formatPercent(fin.margem, 0)}`}
+          onClick={() => go('financeiro')}
+        />
+        <Kpi
+          icon={Users}
+          label="Confirmados"
+          value={Number(ev.confirmed) || 0}
+          sub={`de ${ev.expectedAudience || 0} esperados`}
+          onClick={() => go('participantes')}
+        />
       </div>
-      <div className="platform-dashboard-grid">
-        <section className="platform-panel">
-          <div className="flex items-center justify-between mb-5"><h2>Resumo financeiro</h2><button className="text-sm text-info" onClick={() => go('financeiro')}>Ver financeiro →</button></div>
-          <SummaryChart summary={fin} />
-          <dl className="grid sm:grid-cols-2 gap-5">
-            {[
-              ['Recebido', fin.recebido], ['A receber', fin.aReceber], ['Já pago', fin.pago], ['A pagar', fin.aPagar], ['Patrocínios previstos', fin.sponsorExpected], ['Patrocínios recebidos', fin.sponsorReceived]
-            ].map(([label, value]) => <div key={label}><dt className="text-muted-foreground text-[13px]">{label}</dt><dd className="font-semibold text-lg mt-1">{formatBRL(Number(value))}</dd></div>)}
-          </dl>
-          <div className="mt-6 pt-5 border-t border-border">
-            <div className="flex justify-between gap-3 text-sm mb-3"><span>Meta de faturamento</span><strong>{formatBRL(fin.meta)}</strong></div>
-            <div className="platform-bar"><div style={{ width: `${Math.max(0, Math.min(100, fin.metaPct))}%` }} /></div>
-            <p className="text-muted-foreground text-sm mt-3">{fin.meta > 0 ? <>{formatPercent(fin.metaPct)} da meta · {fin.faltaMeta > 0 ? `Faltam ${formatBRL(fin.faltaMeta)}` : 'Meta atingida'}</> : 'Defina sua meta em Configurações.'}</p>
+      <div className="reference-grid-21">
+        <Panel title="Entradas e saídas" extra={<Legend />}>
+          <FlowChart event={ev} />
+        </Panel>
+        <Panel
+          title="Precisa da sua atenção"
+          extra={<small>{attention.length} itens</small>}
+        >
+          {attention.map((a, i) => (
+            <button
+              className="reference-list-row"
+              key={i}
+              onClick={() => go(a.to)}
+            >
+              <span
+                className={`reference-avatar ${a.level === 'ok' ? 'positive' : 'coral'}`}
+              >
+                {a.level === 'ok' ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <AlertTriangle size={18} />
+                )}
+              </span>
+              <span>{a.title}</span>
+              <ChevronRight size={16} />
+            </button>
+          ))}
+          {!attention.length && (
+            <p className="text-muted-foreground">
+              Nenhuma pendência encontrada.
+            </p>
+          )}
+        </Panel>
+      </div>
+      <div className="reference-grid-3">
+        <Panel
+          title="Meta de faturamento"
+          extra={<small>{formatPercent(fin.metaPct, 0)}</small>}
+        >
+          <div className="reference-ring-row">
+            <Ring
+              value={fin.faturamentoPrevisto}
+              total={fin.meta}
+              label={formatPercent(fin.metaPct, 0)}
+              sub="da meta"
+            />
+            <dl className="reference-dl">
+              {[
+                ['Meta', fin.meta],
+                ['Previsto', fin.faturamentoPrevisto],
+                ['Falta', fin.faltaMeta],
+              ].map(([l, v]) => (
+                <div key={l}>
+                  <dt>{l}</dt>
+                  <dd>{formatBRL(v)}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-        </section>
-        <section className="platform-panel">
-          <h2 className="mb-3">Precisa da sua atenção</h2>
-          {al.map((a, i) => { const { icon: Icon, color } = alertStyle[a.level]; return <button key={i} onClick={() => go(a.to)} className="w-full flex items-center gap-3 text-left py-3 border-b border-border last:border-0 hover:bg-secondary rounded-lg"><Icon className={`w-4 h-4 shrink-0 ${color}`} /><span className="flex-1 text-sm">{a.title}</span><ChevronRight className="w-4 h-4 text-muted-foreground" /></button>; })}
-        </section>
-      </div>
-      <div className="grid lg:grid-cols-2 gap-4">
-        <section className="platform-panel"><h2 className="mb-3">Próximas ações</h2>
-          {!actions.length && <p className="text-muted-foreground text-sm py-4">Nada urgente nos próximos dias.</p>}
-          {actions.map((a, i) => <div key={i} className="flex items-start gap-3 py-3 border-b border-border last:border-0"><div className="w-16 shrink-0 text-xs text-muted-foreground"><b>{relativeLabel(a.days)}</b><div>{formatDateShort(a.date)}</div></div><div className="min-w-0"><div className="font-medium text-sm">{a.label}</div><div className="text-xs text-muted-foreground mt-1">{a.owner} · <StatusPill status={a.status} /></div></div></div>)}
-        </section>
-        <section className="platform-panel"><h2 className="mb-3">Organização</h2>
-          {operational.map(([label, value, to]) => <button key={label} onClick={() => go(to)} className="w-full flex items-center gap-3 py-3 border-b border-border last:border-0 text-left"><span className="text-sm text-muted-foreground">{label}</span><span className="flex-1 text-right text-sm font-medium">{value}</span><ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" /></button>)}
-        </section>
+          {!fin.meta && (
+            <button
+              onClick={() => go('configuracoes')}
+              className="text-sm text-info"
+            >
+              Definir meta
+            </button>
+          )}
+        </Panel>
+        <Panel
+          title="Próximas tarefas"
+          extra={<button onClick={() => go('tarefas')}>Ver todas</button>}
+        >
+          {upcoming.map((t) => (
+            <label key={t.id} className="reference-list-row">
+              <input
+                type="checkbox"
+                checked={false}
+                onChange={() =>
+                  updateCurrent((e) => ({
+                    ...e,
+                    tasks: e.tasks.map((x) =>
+                      x.id === t.id ? { ...x, status: 'Concluído' } : x,
+                    ),
+                  }))
+                }
+              />
+              <span>{t.name}</span>
+              <small className="reference-tag">
+                {t.date ? relativeLabel(daysUntil(t.date)) : 'Sem prazo'}
+              </small>
+            </label>
+          ))}
+          {!upcoming.length && (
+            <p className="text-muted-foreground">
+              Todas as tarefas concluídas.
+            </p>
+          )}
+        </Panel>
+        <Panel title="Organização">
+          <div className="space-y-4">
+            {organization.map(([l, v, total, text, to]) => (
+              <button
+                className="w-full text-left"
+                key={l}
+                onClick={() => go(to)}
+              >
+                <div className="reference-progress-label">
+                  <span>{l}</span>
+                  <b>{text}</b>
+                </div>
+                <Progress
+                  value={v}
+                  total={total}
+                  tone={l === 'Programação' ? 'green' : 'blue'}
+                />
+              </button>
+            ))}
+          </div>
+        </Panel>
       </div>
     </div>
   );

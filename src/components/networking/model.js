@@ -1,4 +1,4 @@
-import { gerarDistribuicao, rotaDoParticipante } from '../../lib/networking/engine.js';
+import { analyze, gerarDistribuicao, rotaDoParticipante } from '../../lib/networking/engine.js';
 
 export const roles = { rotating: 'Participante', fixed: 'Anfitrião fixo', host: 'Anfitrião rotativo', out: 'Fora das rodadas' };
 const normalize = value => String(value || '').trim().toLocaleLowerCase('pt-BR');
@@ -106,4 +106,28 @@ export function occupants(result, round, table) {
 export function routeHasConflict(result, person) {
   const i = result.input.mobile.findIndex(p => p.id === person.id);
   return i >= 0 && (result.analise.person[i].again.length > 0 || result.analise.repByPart[i].reps.length > 0 || result.tab[i].includes(result.input.engine.mesaDaCasa[i]));
+}
+
+export function restoreNetworking(input, saved) {
+  if (!saved || input.errors.length || saved.signature !== networkingSignature(input)) return null;
+  const {P,T,R}=input.engine;
+  if (!Array.isArray(saved.tab) || saved.tab.length!==P || saved.tab.some(row=>!Array.isArray(row) || row.length!==R || row.some(t=>!Number.isInteger(t)||t<0||t>=T))) return null;
+  const result={tab:saved.tab,seed:saved.seed,input,analise:analyze(saved.tab,P,T,R)};
+  for(let r=0;r<R;r++) for(let t=0;t<T;t++) if(result.analise.at[r][t].length + input.fixed.filter(p=>p.tableId===input.tables[t].id).length > input.tables[t].capacity) return null;
+  return result;
+}
+export const networkingSignature = input => JSON.stringify({tables:input.tables,people:input.people,engine:input.engine});
+export function encounterSummary(result) {
+  if(!result) return {unique:0,repeats:0,average:0};
+  const pairs=new Set();let encounters=0;
+  const fixedByTable=result.input.tables.map(t=>result.input.fixed.filter(p=>p.tableId===t.id).map(p=>({id:p.id,fixed:true})));
+  for(const round of result.analise.at) round.forEach((seats,t)=>{
+    const group=[...fixedByTable[t],...seats.map(i=>({id:result.input.mobile[i].id,fixed:false}))];
+    for(let a=0;a<group.length;a++) for(let b=a+1;b<group.length;b++) {
+      if(group[a].fixed && group[b].fixed) continue;
+      pairs.add([group[a].id,group[b].id].sort().join('|'));encounters++;
+    }
+  });
+  const people=result.input.mobile.length+result.input.fixed.length;
+  return {unique:pairs.size,repeats:encounters-pairs.size,average:people?Math.round(pairs.size*2/people):0};
 }

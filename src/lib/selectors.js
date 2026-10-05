@@ -40,12 +40,7 @@ export function financialSummary(ev) {
   const revenue = { faturamentoPrevisto, sponsorExpected };
 
   const despesasPrevistas = money(sum(ev.expenses || [], e => expenseTotal(e, audience, revenue)));
-  const pago = money(sum(ev.expenses || [], e => {
-    const total = expenseTotal(e, audience, revenue);
-    if (e.status === 'pago') return total;
-    if (e.status === 'parcial') return Math.min(total, (e.paidAmount || 0));
-    return 0;
-  }));
+  const pago = money(sum(ev.expenses || [], e => expensePaid(e, expenseTotal(e, audience, revenue), ev)));
   const aPagar = money(despesasPrevistas - pago);
 
   const resultadoPrevisto = money(faturamentoPrevisto - despesasPrevistas);
@@ -189,10 +184,43 @@ export function alerts(ev) {
   }
 
   if (ev.modules?.networking) {
-    out.push({ level: 'ok', title: 'Nenhum conflito encontrado nas rodadas de negócio.', to: 'networking' });
+    out.push({ level: 'atencao', title: 'Confira a distribuição e os reencontros nas rodadas de negócio.', to: 'networking' });
   }
 
   return out;
+}
+
+export function expensePaid(exp, total, ev = null) {
+  if (exp.status === 'pago') return total;
+  const linked = ev?.expenses?.filter(e => e.supplierId && e.supplierId === exp.supplierId);
+  const legacyPaid = linked?.length === 1 ? ev.suppliers?.find(s => s.id === exp.supplierId)?.paid : 0;
+  return exp.status === 'parcial' ? Math.max(0, Math.min(total, Number(exp.paidAmount ?? legacyPaid) || 0)) : 0;
+}
+
+// Undated aggregate receipts are not invented as dated cash movements.
+export function financialEntries(ev, realized = false) {
+  const fin = financialSummary(ev);
+  return [
+    ...(ev.tickets || []).flatMap(t => (t.lots || []).map(l => ({ id: l.id, label: `${t.name} · ${l.name}`, category: 'Ingressos', date: realized ? l.receivedDate : l.limitDate, value: (l.price || 0) * (realized ? l.sold || 0 : l.expectedSales || 0), direction: 1 }))),
+    ...(ev.sponsors || []).map(s => ({ id: s.id, label: `Patrocínio · ${s.company}`, category: 'Patrocínios', date: realized ? s.receivedDate : s.dueDate, value: realized ? s.received || 0 : s.negotiated || 0, direction: 1 })),
+    ...(ev.revenues || []).map(r => ({ id: r.id, label: r.description, category: r.category, date: realized ? r.receivedDate : r.expectedDate, value: realized ? r.received || 0 : r.expected || 0, direction: 1 })),
+    ...(ev.expenses || []).map(e => { const total = expenseTotal(e, ev.expectedAudience, fin); return { id: e.id, label: e.description, category: e.category, date: realized ? e.paidDate : e.dueDate, value: realized ? expensePaid(e, total, ev) : total, direction: -1 }; })
+  ].filter(e => e.value > 0).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+}
+export function cashFlow(ev, realized = false, now = new Date()) {
+  const entries = financialEntries(ev, realized);
+  const end = new Date((ev.date || now.toISOString().slice(0, 10)) + 'T12:00:00');
+  const start = new Date(end); start.setDate(start.getDate() - 55);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const weeks = Array.from({ length: 8 }, (_, i) => { const d = new Date(start); d.setDate(d.getDate() + i * 7); return { date: iso(d), income: 0, expense: 0 }; });
+  let undated = 0;
+  for (const entry of entries) {
+    if (!entry.date) { undated += entry.value; continue; }
+    const d = new Date(entry.date + 'T12:00:00');
+    const days = Math.round((d.getTime() - start.getTime()) / 86400000);
+    if (days >= 0 && days < 56) weeks[Math.floor(days / 7)][entry.direction === 1 ? 'income' : 'expense'] += entry.value;
+  }
+  return { weeks, end: iso(end), undated };
 }
 
 export function upcomingActions(ev) {
@@ -214,4 +242,29 @@ export function relativeLabel(days) {
   if (days === 0) return 'Hoje';
   if (days === 1) return 'Amanhã';
   return `Em ${days} dias`;
+}
+
+// Synchronize the supplier display with the expense ledger after an expense edit.
+export function saveExpense(ev, expense) {
+  const previous=ev.expenses.find(e=>e.id===expense.id);
+  const before=financialSummary(ev);
+  const normalized=ev.expenses.map(e=>({...e,paidAmount:expensePaid(e,expenseTotal(e,ev.expectedAudience,before),ev)}));
+  const expenses=previous?normalized.map(e=>e.id===expense.id?expense:e):[...normalized,expense];
+  const next={...ev,expenses};const fin=financialSummary(next);
+  const ids=new Set([previous?.supplierId,expense.supplierId].filter(Boolean));
+  return {...next,suppliers:ev.suppliers.map(s=>{
+    if(!ids.has(s.id))return s;
+    const linked=expenses.filter(e=>e.supplierId===s.id);
+    const paid=money(sum(linked,e=>expensePaid(e,expenseTotal(e,ev.expectedAudience,fin),next)));
+    return {...s,paid,status:paid>=s.contracted && s.contracted>0?'pago':'pendente'};
+  })};
+}
+export function updateSupplierPayment(ev,id,amount) {
+  const supplier=ev.suppliers.find(s=>s.id===id);if(!supplier)return ev;
+  const paid=money(Math.max(0,Math.min(supplier.contracted,Number(amount)||0)));
+  const fin=financialSummary(ev),linked=ev.expenses.filter(e=>e.supplierId===id);
+  const total=money(sum(linked,e=>expenseTotal(e,ev.expectedAudience,fin)));
+  let remaining=Math.min(paid,total);
+  const payments=new Map(linked.map((e,i)=>{const cost=expenseTotal(e,ev.expectedAudience,fin);const value=i===linked.length-1?remaining:Math.min(remaining,money(total?Math.min(paid,total)*cost/total:0));remaining=money(remaining-value);return [e.id,{paidAmount:value,status:value>=cost && cost>0?'pago':value>0?'parcial':'pendente'}];}));
+  return {...ev,suppliers:ev.suppliers.map(s=>s.id===id?{...s,paid,status:paid>=s.contracted && s.contracted>0?'pago':'pendente'}:s),expenses:ev.expenses.map(e=>payments.has(e.id)?{...e,...payments.get(e.id)}:e)};
 }

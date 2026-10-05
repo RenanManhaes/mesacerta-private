@@ -37,7 +37,7 @@ const sections = [
   {
     group: 'Operação',
     items: [
-      { to: 'capacidade', label: 'Capacidade', icon: Gauge },
+      { to: 'capacidade', label: 'Capacidade', icon: Gauge, module: 'capacity' },
       { to: 'networking', label: 'Networking', icon: Network, module: 'networking' }
     ]
   },
@@ -99,7 +99,7 @@ export function SidebarContent({ onNavigate }) {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-60">
-            {events.map(ev => (
+            {events.filter(ev=>!ev.archived).map(ev => (
               <DropdownMenuItem key={ev.id} onClick={() => switchEvent(ev.id)} className="flex-col items-start py-2">
                 <span className="text-[13px] font-medium">{ev.name}</span>
                 <span className="text-[11px] text-muted-foreground">{formatDateFull(ev.date)}</span>
@@ -118,7 +118,7 @@ export function SidebarContent({ onNavigate }) {
               <div className="px-2 mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{sec.group}</div>
             )}
             <div className="space-y-0.5">
-              {sec.items.filter(it => !it.module || currentEvent?.modules?.[it.module]).map(it => {
+              {sec.items.filter(it => !it.module || (it.module==='capacity' ? currentEvent?.modules?.capacity!==false : currentEvent?.modules?.[it.module])).map(it => {
                 const full = `${base}/${it.to}`;
                 const active = location.pathname === full || location.pathname.startsWith(full + '/');
                 return (
