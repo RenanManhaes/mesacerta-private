@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { uid } from '@/lib/format';
@@ -29,10 +30,10 @@ export default function AddMenu() {
   const { currentEvent, updateCurrent } = useEvent();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState(null);
-  const [form, setForm] = useState({});
+  const [type, setType] = useEventField('add.type', null);
+  const [form, setForm] = useEventField('add.form', {});
 
-  const openFor = (t) => { setType(t); setForm({}); setOpen(true); };
+  const openFor = (t) => { if (t !== type) setForm({}); setType(t); setOpen(true); };
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const submit = () => {
@@ -57,6 +58,7 @@ export default function AddMenu() {
       }
     });
     toast({ title: `${TYPES.find(t => t.key === type).label} adicionado`, duration: 1800 });
+    setForm({});
     setOpen(false);
   };
 

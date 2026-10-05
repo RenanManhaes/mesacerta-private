@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary, financialEntries } from '@/lib/selectors';
@@ -23,7 +24,7 @@ import {
 export default function Financial() {
   const { currentEvent: ev } = useEvent();
   const navigate = useNavigate();
-  const [realized, setRealized] = useState(false);
+  const [realized, setRealized] = useEventField('financial.realized', false);
   const fin = financialSummary(ev),
     entries = financialEntries(ev, realized);
   const revenue = realized ? fin.recebido : fin.faturamentoPrevisto;

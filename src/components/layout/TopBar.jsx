@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useEventField } from '@/lib/useEventField';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { formatDateFull } from '@/lib/format';
@@ -15,7 +16,7 @@ export default function TopBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useEventField('global.search', '');
   const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
 
   const onSearch = (e) => {
@@ -32,7 +33,7 @@ export default function TopBar() {
             <span className="truncate text-[14px] font-medium">{currentEvent?.name}</span>
             <span className="hidden sm:inline text-muted-foreground">·</span>
             <span className="hidden sm:inline text-[13px] font-semibold truncate">{labels[location.pathname.split('/').pop()] || (currentEvent?.date && formatDateFull(currentEvent.date))}</span>
-            <span className="hidden md:inline-flex text-xs text-muted-foreground items-center gap-2"><i className={`h-1.5 w-1.5 rounded-full ${saveStatus==='error'?'bg-danger':saveStatus==='saving'?'bg-warning':'bg-positive'}`}/>{saveStatus==='saving'?'Salvando…':saveStatus==='error'?'Não salvo':'Salvo'}</span>
+            <span role="status" aria-live="polite" className="inline-flex text-xs text-muted-foreground items-center gap-2"><i className={`h-1.5 w-1.5 rounded-full ${saveStatus==='error'?'bg-danger':saveStatus==='saving'?'bg-warning':'bg-positive'}`}/>{saveStatus==='saving'?'Salvando…':saveStatus==='error'?'Não salvo':'Salvo'}</span>
           </div>
         </div>
 
