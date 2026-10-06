@@ -38,7 +38,7 @@ export default function EventTeam() {
   };
   const set=(key,value)=>setDraft(d=>({...d,[key]:value}));
   return <div className="reference-page">
-    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<><Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Gerenciar funções, áreas e cargos</Button></>} />
+    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<><Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Funções e áreas</Button></>} />
     <Panel title="Equipe do evento" extra={<span>{members.length} pessoas</span>}>
       <Field label="Buscar pessoa" value={search} onChange={setSearch} />
       <div className="grid md:grid-cols-2 gap-4 mt-4">{filtered.map(person=><button key={person.id} onClick={()=>{setError('');setRemove(false);setDraft({...person});}} className="rounded-xl border p-4 text-left" aria-label={`Editar ${person.name}`}>

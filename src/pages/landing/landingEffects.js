@@ -90,7 +90,7 @@ export function initLanding(root) {
     const el = root.querySelector('#' + id); if (!el) return;
     const to = el.getBoundingClientRect().top + window.scrollY - 80, from = window.scrollY, d = to - from;
     if (RM) { window.scrollTo(0, to); return; }
-    const dur = Math.min(1200, Math.max(600, Math.abs(d) * .3)); let s;
+    const dur = 280; let s;
     const f = n => { if (token !== scrollToken) return; s ??= n; const k = clamp((n - s) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; window.scrollTo(0, from + d * e); if (k < 1) raf(f); };
     raf(f);
   };

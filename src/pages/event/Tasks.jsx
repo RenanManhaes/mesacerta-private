@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {createPortal} from 'react-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useEventField } from '@/lib/useEventField';
 import { useEvent } from '@/context/EventContext';
@@ -87,11 +88,12 @@ export default function Tasks() {
                         const tone = taskTone(t);
                         return (
                           <Draggable key={t.id} draggableId={t.id} index={index}>
-                            {(drag, dragSnap) => (
+                            {(drag, dragSnap) => {
+                              const card = (
                               <div ref={drag.innerRef} {...drag.draggableProps} {...drag.dragHandleProps}
                                 aria-label={`Tarefa ${t.name}, ${t.status}. Espaço para pegar e mover.`}
                                 data-task-id={t.id} data-tone={tone}
-                                className={cn('platform-task-card platform-task-card--dnd grid grid-cols-12 gap-3 items-center', `task-tone-${tone}`, dragSnap.isDragging && 'is-dragging')}>
+                                className={cn('platform-task-card platform-task-card--dnd grid grid-cols-12 gap-3 items-center', `task-tone-${tone}`, dragSnap.isDragging && 'is-dragging platform-ui')}>
                                 <div className="col-span-12 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className={cn('text-[14px] font-medium', t.status === 'Concluído' && 'line-through text-muted-foreground')}>{t.name}</span>
@@ -110,7 +112,9 @@ export default function Tasks() {
                                   </Select>
                                 </div>
                               </div>
-                            )}
+                              );
+                              return dragSnap.isDragging ? createPortal(card,document.body) : card;
+                            }}
                           </Draggable>
                         );
                       })}

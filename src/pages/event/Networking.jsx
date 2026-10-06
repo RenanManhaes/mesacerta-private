@@ -20,6 +20,7 @@ import {
   initials,
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {
   Armchair,
   Repeat,
@@ -68,6 +69,7 @@ export default function Networking() {
   const [round, setRound] = useEventField('networking.round', 1);
   const [query, setQuery] = useEventField('networking.query', '');
   const [playing, setPlaying] = useState(false);
+  const [configOpen,setConfigOpen] = useState(false);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -234,6 +236,7 @@ export default function Networking() {
         subtitle="Distribua os convidados e confira reencontros. Clique em um convidado para ver o roteiro."
         actions={
           <>
+            <Button variant="outline" onClick={()=>setConfigOpen(true)}><Settings size={16} />Configurar rodadas</Button>
             <Button
               variant="outline"
               disabled={generating || input.errors.length > 0}
@@ -496,11 +499,10 @@ export default function Networking() {
           </Panel>
         </div>
       )}
-      <details className="reference-network-settings" open={!result}>
-        <summary>
-          <Settings size={16} /> Configurar mesas, participantes e regras
-        </summary>
-        <div className="space-y-4 mt-4">
+      <Dialog open={configOpen} onOpenChange={setConfigOpen}>
+        <DialogContent className="platform-ui max-w-4xl max-h-[85dvh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Configurar rodadas</DialogTitle><DialogDescription>Defina mesas, participantes e regras. As alterações são salvas no evento; depois gere a distribuição.</DialogDescription></DialogHeader>
+        <div className="platform-main space-y-4 mt-4">
           <section
             className="platform-panel space-y-3"
             aria-labelledby="rules-heading"
@@ -724,7 +726,9 @@ export default function Networking() {
             </section>
           )}
         </div>
-      </details>
+        <Button variant="outline" onClick={()=>setConfigOpen(false)}>Concluir configuração</Button>
+        </DialogContent>
+      </Dialog>
       {result && selectedTable !== null && (
         <Details
           title={result.input.tables[selectedTable].name}
