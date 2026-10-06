@@ -15,6 +15,11 @@ de login. As provas com tokens reais estão nos testes de API da corrente.
   backup e fundador autenticado de eventos novos.
 - [lint.txt](lint.txt), [typecheck.txt](typecheck.txt), [build.txt](build.txt),
   [engine.txt](engine.txt): quatro verificações obrigatórias, `EXIT_CODE=0`.
+- [legacy-full.txt](legacy-full.txt): mesma correção após todas as migrações
+  dependentes, incluindo os triggers de equipe e a regra comercial.
+- [api.txt](api.txt): `node scripts/test-legacy-founder-api.mjs`, com Auth local
+  real. Proprietário antigo recebe HTTP 403/42501 ao gerar convite; Renan recebe
+  HTTP 200. Documentos atuais e backup continuam preservados.
 
 Arquivos: bootstrap MCT-57, migração corretiva
 `20261006180655_confirmed_legacy_founder.sql`, teste e evidências desta pasta.

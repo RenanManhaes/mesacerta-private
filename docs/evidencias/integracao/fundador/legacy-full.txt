@@ -1,0 +1,9 @@
+$ node scripts/test-legacy-founder.mjs
+MISSING ACCOUNT PASS: bootstrap fails atomically with legacy data and no verified Renan; no partial platform_events table.
+UNVERIFIED ACCOUNT PASS: bootstrap refuses an unverified founder account.
+BOOTSTRAP PASS: confirmed Renan is founder even without org membership; oldest owner becomes director; original document retained.
+AMBIGUOUS ACCOUNT PASS: compatibility refuses duplicate normalized identities, including an unverified duplicate; transaction rolls back.
+COMPATIBILITY PASS: old fallback corrected idempotently, current edits and legacy backup retained; new authenticated creator unchanged.
+Local synthetic database retained: mct_legacy_fa05b964ae4945c88ced284749f2a2ff. No remote access or deletion.
+
+EXIT_CODE=0

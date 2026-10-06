@@ -1,0 +1,7 @@
+$ node scripts/test-legacy-founder-api.mjs
+OLD OWNER JWT DENIED: HTTP 403, SQLSTATE 42501, message=Somente o fundador pode gerar convites
+CONFIRMED FOUNDER JWT ALLOWED: HTTP 200 for invite, without granting organization membership.
+API MIGRATION PASS: confirmed founder, current document and legacy backup preserved.
+Local synthetic fixtures retained; no remote access or deletion.
+
+EXIT_CODE=0
