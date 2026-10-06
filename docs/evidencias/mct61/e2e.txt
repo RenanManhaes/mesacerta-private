@@ -1,0 +1,15 @@
+PASS Alta: borda laranja :: rgb(249, 115, 22)
+PASS Alta + atrasada: borda vermelha prevalece :: rgb(220, 38, 38)
+PASS Normal: borda padrao (nem laranja nem vermelha) :: rgb(230, 231, 228)
+PASS Arrastar: card mudou de coluna :: Em andamento
+PASS Arrastar: gravado no banco :: writes=1
+PASS Apos recarregar: continua em Em andamento
+PASS Teclado: status mudou para Concluido :: Concluído
+PASS Teclado: gravado no banco
+failNext restante 4
+PASS Falha: card voltou para A fazer :: A fazer
+PASS Falha: banco manteve o status antigo
+PASS Falha: aviso de reversao exibido
+PASS Sem erros de console/pagina
+
+12/12 checks passed
