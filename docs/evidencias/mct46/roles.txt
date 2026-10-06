@@ -7,6 +7,13 @@ CA2 bypass checks: full event document HTTP 200 []; legacy organization workspac
 CA2 remaining forbidden API modules: revenues/suppliers/sponsors/networking/simulations/locations/tickets/payments all return zero authorized rows.
 CA2 financial document injection: HTTP 403, SQLSTATE 42501, message=Staff só pode acessar participantes, programação e suas tarefas
 CA1 mutation PASS: staff updates own task status; other task and private expense remain unchanged.
+REVIEW normalized task titulo PATCH: HTTP 403, SQLSTATE 42501.
+REVIEW normalized task prioridade PATCH: HTTP 403, SQLSTATE 42501.
+REVIEW normalized task descricao PATCH: HTTP 403, SQLSTATE 42501.
+REVIEW normalized task assigned_user_id PATCH: HTTP 403, SQLSTATE 42501.
+REVIEW normalized task INSERT: HTTP 403, SQLSTATE 42501.
+REVIEW normalized task DELETE: HTTP 204 with zero authorized rows; independent admin read proves original task retained.
+REVIEW normalized task allowed writes: staff status succeeds; director title edit succeeds.
 CA4 PASS: founder promotes/demotes via API; next authenticated event_list reflects role and projection. Director role change denied HTTP 403.
 Local synthetic records retained; no customer data deleted, no remote migrations applied.
 
