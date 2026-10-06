@@ -173,6 +173,11 @@ export default function Networking() {
     };
   }, [playing, result]);
   const meetings = useMemo(() => encounterSummary(result), [result]);
+  // Duplas que se reencontram. E o mesmo numero da lista de repeticoes
+  // logo abaixo e do alerta do Dashboard. Antes o KPI usava
+  // encounterSummary().repeats, que conta encontros excedentes e inclui
+  // anfitrioes fixos: dava um numero diferente do da lista para onde ele leva.
+  const reencontros = result ? result.analise.pairs.length : null;
   useEffect(() => () => clearTimeout(flashTimer.current), []);
   // Repetitions indicator -> opens the analysis, scrolls to the list and
   // highlights it for ~1s. With prefers-reduced-motion: jump straight there,
@@ -282,10 +287,10 @@ export default function Networking() {
         <Kpi
           icon={ShieldCheck}
           label="Repetições"
-          value={result ? meetings.repeats : '—'}
+          value={result ? reencontros : '—'}
           sub={
             result
-              ? meetings.repeats
+              ? reencontros
                 ? 'Confira a análise abaixo'
                 : 'Nenhum encontro repetido'
               : 'Aguardando distribuição'

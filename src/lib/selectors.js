@@ -1,4 +1,5 @@
 import { timeToMinutes, minutesToTime, daysUntil } from './format.js';
+import { networkingInput, networkingSignature, restoreNetworking } from '../components/networking/model.js';
 import { sortSchedule, findConflicts, endMinutes } from './schedule.js';
 
 const sum = (arr, f) => arr.reduce((a, b) => a + (f(b) || 0), 0);
@@ -191,6 +192,34 @@ export function supplierOverview(ev, from = new Date()) {
   };
 }
 
+const LEVEL_ORDER = { critico: 0, atencao: 1, ok: 2 };
+
+// Reencontros da distribuição salva, como o analyze() do motor os calcula
+// (duplas que se encontram mais de uma vez; é a lista da tela de Networking).
+// Devolve:
+//   null      -> não há distribuição salva;
+//   undefined -> há, mas não confere com o cadastro atual (nada é afirmado);
+//   número    -> reencontros calculados sobre a grade salva.
+// O alerts() roda a cada render: o analyze() só roda de novo quando o objeto
+// salvo ou a assinatura do cadastro mudam.
+const repeatsCache = new WeakMap();
+function networkingRepeats(ev) {
+  const saved = ev.networkingDistribution;
+  if (!saved || typeof saved !== 'object') return null;
+  try {
+    const input = networkingInput(ev);
+    const signature = networkingSignature(input);
+    const hit = repeatsCache.get(saved);
+    if (hit && hit.signature === signature) return hit.value;
+    const restored = restoreNetworking(input, saved);
+    const value = restored ? restored.analise.pairs.length : undefined;
+    repeatsCache.set(saved, { signature, value });
+    return value;
+  } catch {
+    return undefined;
+  }
+}
+
 export function alerts(ev) {
   const fin = financialSummary(ev);
   const cap = capacitySummary(ev);
@@ -206,6 +235,7 @@ export function alerts(ev) {
   }
   if (tasks.noOwner) out.push({ level: 'atencao', title: `${tasks.noOwner} tarefas ainda não têm responsável.`, to: 'tarefas' });
   if (tasks.overdue) out.push({ level: 'atencao', title: `${tasks.overdue} tarefa${tasks.overdue > 1 ? 's' : ''} atrasada${tasks.overdue > 1 ? 's' : ''}.`, to: 'tarefas' });
+  if (tasks.critical) out.push({ level: 'atencao', title: `${tasks.critical} tarefa${tasks.critical > 1 ? 's' : ''} crítica${tasks.critical > 1 ? 's' : ''} em aberto.`, to: 'tarefas' });
 
   // catering over budget
   const catering = (ev.expenses || []).find(e => e.category === 'Alimentação');
@@ -226,10 +256,21 @@ export function alerts(ev) {
   }
 
   if (ev.modules?.networking) {
-    out.push({ level: 'atencao', title: 'Confira a distribuição e os reencontros nas rodadas de negócio.', to: 'networking' });
+    const reencontros = networkingRepeats(ev);
+    if (reencontros === null) {
+      out.push({ level: 'atencao', title: 'As rodadas de negócio ainda não foram geradas.', to: 'networking' });
+    } else if (reencontros === undefined) {
+      out.push({ level: 'atencao', title: 'O cadastro mudou depois que as rodadas foram geradas; gere de novo para ver os reencontros.', to: 'networking' });
+    } else if (reencontros === 0) {
+      out.push({ level: 'ok', title: 'Nas rodadas de negócio, ninguém repete companhia.', to: 'networking' });
+    } else {
+      out.push({ level: 'atencao', title: `Nas rodadas de negócio, ${reencontros} dupla${reencontros > 1 ? 's' : ''} se reencontra${reencontros > 1 ? 'm' : ''}.`, to: 'networking' });
+    }
   }
 
-  return out;
+  // Mais grave primeiro. Array.prototype.sort é estável, então dentro do mesmo
+  // nível a ordem em que os itens nasceram é preservada.
+  return out.sort((a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level]);
 }
 
 export function expensePaid(exp, total, ev = null) {
