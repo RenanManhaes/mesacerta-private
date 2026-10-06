@@ -1,0 +1,20 @@
+PASS Modal abre com titulo, inicio, duracao, responsavel, tipo e observacao
+PASS Nada criado antes de confirmar (lista e banco) :: linhas=2 banco=2
+PASS Cancelar nao cria nada
+PASS Sem conflito: aviso nao aparece
+PASS Atividade das 14h aparece entre 13h e 15h (lista) :: Atividade 13h | Atividade 14h | Atividade 15h
+PASS Atividade das 14h entre 13h e 15h (banco) :: Atividade 13h | Atividade 14h | Atividade 15h
+PASS Campos salvos: responsavel, observacao, cor, duracao :: {"id":"s425hrc0","room":"","title":"Atividade 14h","start":"14:00","duration":60,"speaker":"Marina","type":"Palestra","notes":"Levar microfone","color":"turquesa"}
+PASS Cor escolhida aparece na lista :: rgb(20, 184, 166)
+PASS Cor escolhida aparece no cronograma :: rgb(20, 184, 166)
+PASS Arrastar: horario mudou (60 px = 50 min => 15:50) :: inicio=15:50; durante o arraste: Atividade 15h 15:50–16:50
+PASS Arrastar: salvo no banco :: gravacoes=2
+PASS Apos recarregar o horario continua 15:50
+PASS Teclado: setas mudam o horario (15:50 -> 15:40)
+PASS Conflito: aviso aparece no modal
+PASS Conflito nao bloqueia o salvamento
+PASS Conflito sinalizado na lista e no cronograma
+PASS Titulo vazio nao cria atividade
+PASS Sem erros de console/pagina
+
+18/18 checks passed

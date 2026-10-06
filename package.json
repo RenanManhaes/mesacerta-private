@@ -9,7 +9,7 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "test": "node --test src/lib/networking/engine.test.mjs src/components/networking/model.test.mjs src/lib/pessoas/dedup.test.mjs src/lib/pessoas/empresa.test.mjs src/lib/pessoas/prefiltro.test.mjs src/lib/qa/aferidor.test.mjs src/lib/selectors.test.mjs src/lib/referenceScreens.test.mjs src/lib/staff.test.mjs",
+    "test": "node --test src/lib/networking/engine.test.mjs src/components/networking/model.test.mjs src/lib/pessoas/dedup.test.mjs src/lib/pessoas/empresa.test.mjs src/lib/pessoas/prefiltro.test.mjs src/lib/qa/aferidor.test.mjs src/lib/selectors.test.mjs src/lib/referenceScreens.test.mjs src/lib/staff.test.mjs src/lib/headerSearch.test.mjs src/lib/notifications.test.mjs src/lib/schedule.test.mjs src/lib/activityTypes.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -95,6 +95,7 @@
     "globals": "^15.14.0",
     "nitro": "^3.0.260610-beta",
     "postcss": "^8.5.3",
+    "react-test-renderer": "18.2.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.2",
     "vite": "^8.2.0"

@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary } from '@/lib/selectors';
@@ -27,9 +28,9 @@ import { useToast } from '@/components/ui/use-toast';
 export default function Sponsors() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const { toast } = useToast();
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useEventField('sponsors.draft', null);
   const [planOpen, setPlanOpen] = useState(false);
-  const [plan, setPlan] = useState({ name: '', price: '', available: '' });
+  const [plan, setPlan] = useEventField('sponsors.planDraft', { name: '', price: '', available: '' });
 
   const fin = financialSummary(ev);
 

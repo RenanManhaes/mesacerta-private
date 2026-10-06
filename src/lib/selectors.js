@@ -1,4 +1,5 @@
 import { timeToMinutes, minutesToTime, daysUntil } from './format.js';
+import { sortSchedule, findConflicts, endMinutes } from './schedule.js';
 
 const sum = (arr, f) => arr.reduce((a, b) => a + (f(b) || 0), 0);
 
@@ -109,25 +110,30 @@ export function capacitySummary(ev) {
   return { capacity, reserved, available, expected, overExpected, status, confirmed: ev.confirmed || 0, complimentary: ev.complimentary || 0, staff: ev.staff || 0 };
 }
 
+// Cada atividade tem horário próprio (início + duração). Conflito = sobreposição; não bloqueia nada.
 export function scheduleSummary(ev) {
-  const items = [...(ev.schedule || [])].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
-  if (!items.length) return { count: 0, totalMinutes: 0, durationText: '—', start: null, end: null, overMinutes: 0 };
+  const items = sortSchedule(ev.schedule || []);
+  if (!items.length) return { count: 0, totalMinutes: 0, durationText: '—', start: null, end: null, overMinutes: 0, computed: [], conflicts: 0 };
+  const conflicts = findConflicts(items);
   let total = 0;
-  let cursor = timeToMinutes(items[0].start);
+  let lastEnd = 0;
   const computed = items.map((it) => {
-    const start = cursor;
-    const end = start + (it.duration || 0);
     total += it.duration || 0;
-    cursor = end;
-    return { ...it, computedStart: minutesToTime(start), computedEnd: minutesToTime(end) };
+    lastEnd = Math.max(lastEnd, endMinutes(it));
+    return {
+      ...it,
+      computedStart: minutesToTime(timeToMinutes(it.start)),
+      computedEnd: minutesToTime(endMinutes(it)),
+      conflictsWith: (conflicts.get(it.id) || []).map((o) => o.title),
+    };
   });
   const start = computed[0].computedStart;
-  const end = computed[computed.length - 1].computedEnd;
+  const end = minutesToTime(lastEnd);
   const desired = timeToMinutes(ev.desiredEndTime || '18:00');
-  const overMinutes = timeToMinutes(end) - desired;
+  const overMinutes = lastEnd - desired;
   const h = Math.floor(total / 60), m = total % 60;
   const durationText = `${h}h${m ? String(m).padStart(2, '0') : ''}`;
-  return { count: items.length, totalMinutes: total, durationText, start, end, overMinutes, computed };
+  return { count: items.length, totalMinutes: total, durationText, start, end, overMinutes, computed, conflicts: conflicts.size };
 }
 
 export function taskSummary(ev) {
@@ -147,6 +153,42 @@ export function supplierSummary(ev) {
   const toPay = contracted - paid;
   const pendingPayments = list.filter(s => s.status === 'pendente').length;
   return { count: list.length, contracted, paid, toPay, pendingPayments };
+}
+
+const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+
+// Per-supplier view for the Suppliers screen. Derived only from the existing
+// fields (contracted, paid, dueDate); the data model is unchanged.
+//  - quitado:   paid covers the whole contract
+//  - parcial:   something paid, balance remaining
+//  - orcamento: nothing paid yet (no payment commitment registered)
+// dueLabel is set when the balance falls due within the next 7 days
+// ("Vence sexta", "Vence hoje") or is already late ("Vencido").
+export function supplierView(sup, from = new Date()) {
+  const contracted = sup.contracted || 0;
+  const paid = sup.paid || 0;
+  const toPay = Math.max(0, contracted - paid);
+  const progress = contracted > 0 ? Math.min(1, paid / contracted) : 0;
+  const state = contracted > 0 && paid >= contracted ? 'quitado' : paid > 0 ? 'parcial' : 'orcamento';
+  let dueLabel = null;
+  if (toPay > 0 && sup.dueDate) {
+    const d = daysUntil(sup.dueDate, from);
+    if (d < 0) dueLabel = 'Vencido';
+    else if (d === 0) dueLabel = 'Vence hoje';
+    else if (d <= 7) dueLabel = `Vence ${WEEKDAYS[new Date(sup.dueDate + 'T00:00:00').getDay()]}`;
+  }
+  return { toPay, progress, state, dueLabel, dueThisWeek: dueLabel !== null && dueLabel !== 'Vencido' };
+}
+
+export function supplierOverview(ev, from = new Date()) {
+  const base = supplierSummary(ev);
+  const views = (ev.suppliers || []).map(s => supplierView(s, from));
+  return {
+    ...base,
+    budgetCount: views.filter(v => v.state === 'orcamento').length,
+    paidPercent: base.contracted > 0 ? Math.round((base.paid / base.contracted) * 100) : 0,
+    dueThisWeekCount: views.filter(v => v.dueThisWeek).length
+  };
 }
 
 export function alerts(ev) {

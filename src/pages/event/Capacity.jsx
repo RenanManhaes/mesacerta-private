@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useEvent } from '@/context/EventContext';
 import { capacitySummary } from '@/lib/selectors';
 import { uid } from '@/lib/format';
+import { chartPalette } from '@/lib/chartPalette';
 import {
   PageHeader,
   Panel,
@@ -19,7 +21,7 @@ import {
 import { Plus } from 'lucide-react';
 export default function Capacity() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useEventField('capacity.draft', null);
   const cap = capacitySummary(ev),
     pct = cap.capacity ? (cap.reserved / cap.capacity) * 100 : 0;
   const environments = ev.environments || [];
@@ -64,14 +66,14 @@ export default function Capacity() {
               <path
                 d="M20 140 A110 110 0 0 1 240 140"
                 fill="none"
-                stroke="#f1f2ef"
+                stroke={chartPalette.track}
                 strokeWidth="20"
                 strokeLinecap="round"
               />
               <path
                 d="M20 140 A110 110 0 0 1 240 140"
                 fill="none"
-                stroke="#e8663d"
+                stroke={chartPalette.base}
                 strokeWidth="20"
                 strokeLinecap="round"
                 pathLength="100"

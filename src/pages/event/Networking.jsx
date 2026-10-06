@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import {
@@ -64,26 +65,46 @@ export default function Networking() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const input = useMemo(() => networkingInput(ev), [ev]);
   const [result, setResult] = useState(null);
-  const [round, setRound] = useState(1);
-  const [query, setQuery] = useState('');
+  const [round, setRound] = useEventField('networking.round', 1);
+  const [query, setQuery] = useEventField('networking.query', '');
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
   const pendingGeneration = useRef(null);
+  const analysisPanel = useRef(null);
+  const repeatsList = useRef(null);
+  const flashTimer = useRef(null);
+  const [flashRepeats, setFlashRepeats] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
   const cfg = ev.networking || {};
+  const shownEventId = useRef(ev.id);
   useEffect(() => {
     clearTimeout(pendingGeneration.current);
     setGenerating(false);
     setPlaying(false);
-    setResult(restoreNetworking(input, ev.networkingDistribution));
+    // A saved grid for the current numbers wins. Otherwise keep the grid on
+    // screen (flagged as outdated) instead of discarding it when the
+    // organizer edits tables, rounds or people; only a different event resets.
+    const sameEvent = shownEventId.current === ev.id;
+    shownEventId.current = ev.id;
+    setResult((prev) => {
+      const restored = restoreNetworking(input, ev.networkingDistribution);
+      if (restored) return restored;
+      return sameEvent ? prev : null;
+    });
     setSelectedPerson(null);
     setSelectedTable(null);
     setError('');
     return () => clearTimeout(pendingGeneration.current);
   }, [ev.id, ev.participants, ev.networking]);
+  // The grid on screen was built from `result.input`; it is outdated when the
+  // current numbers (tables, rounds, capacities, people) no longer match it.
+  const stale =
+    !!result &&
+    !input.errors.length &&
+    networkingSignature(result.input) !== networkingSignature(input);
   const setCfg = (patch) =>
     updateCurrent((event) => ({
       ...event,
@@ -152,6 +173,30 @@ export default function Networking() {
     };
   }, [playing, result]);
   const meetings = useMemo(() => encounterSummary(result), [result]);
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+  // Repetitions indicator -> opens the analysis, scrolls to the list and
+  // highlights it for ~1s. With prefers-reduced-motion: jump straight there,
+  // no animated scroll and no colour flash (focus marks the destination).
+  const goToRepeats = () => {
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    if (analysisPanel.current) analysisPanel.current.open = true;
+    const target = repeatsList.current;
+    if (!target) return;
+    target.scrollIntoView({
+      behavior: reduced ? 'auto' : 'smooth',
+      block: 'start',
+    });
+    target.focus({ preventScroll: true });
+    clearTimeout(flashTimer.current);
+    if (reduced) {
+      setFlashRepeats(false);
+      return;
+    }
+    setFlashRepeats(true);
+    flashTimer.current = setTimeout(() => setFlashRepeats(false), 1000);
+  };
   const exportRoutes = async (format) => {
     setExporting(true);
     setError('');
@@ -193,7 +238,7 @@ export default function Networking() {
               {generating
                 ? 'Gerando…'
                 : result
-                  ? 'Gerar novamente'
+                  ? 'Recalcular e substituir grade'
                   : 'Gerar distribuição'}
             </Button>
             <Button
@@ -245,12 +290,36 @@ export default function Networking() {
                 : 'Nenhum encontro repetido'
               : 'Aguardando distribuição'
           }
+          onClick={result ? goToRepeats : undefined}
         />
       </div>
       {error && (
         <p role="alert" className="text-danger">
           {error}
         </p>
+      )}
+      {result && stale && (
+        <div
+          role="status"
+          data-testid="stale-grid-notice"
+          className="platform-panel flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <p>
+            <b className="text-warning">Grade desatualizada.</b> Os números
+            mudaram (mesas, rodadas, capacidades ou pessoas) e a grade abaixo
+            ainda reflete a configuração anterior. Recalcular substitui esta
+            grade; o cadastro de pessoas, patrocinadores e anfitriões não
+            muda.
+          </p>
+          <Button
+            variant="outline"
+            disabled={generating || input.errors.length > 0}
+            onClick={generate}
+          >
+            <RefreshCw size={16} />
+            Recalcular e substituir grade
+          </Button>
+        </div>
       )}
       {result ? (
         <>
@@ -371,7 +440,7 @@ export default function Networking() {
               )}
             </Panel>
           </div>
-          <details className="platform-panel">
+          <details className="platform-panel" ref={analysisPanel}>
             <summary>Análise de reencontros e exportação</summary>
             <p className="text-sm text-muted-foreground my-3">
               Seed {result.seed} · {result.analise.sameTable} duplas reencontram
@@ -385,7 +454,19 @@ export default function Networking() {
             >
               Exportar CSV
             </Button>
-            <ul className="mt-4 space-y-2">
+            <ul
+              id="networking-repeats-list"
+              ref={repeatsList}
+              tabIndex={-1}
+              aria-label="Lista de repetições"
+              data-testid="repeats-list"
+              className={`mt-4 space-y-2 rounded-sm outline-offset-4 ${flashRepeats ? 'reference-repeats-flash' : ''}`}
+            >
+              {!result.analise.pairs.length && (
+                <li className="text-sm text-muted-foreground">
+                  Nenhuma dupla repetida.
+                </li>
+              )}
               {result.analise.pairs.map((pair) => (
                 <li key={`${pair.a}-${pair.b}`} className="text-sm">
                   {result.input.mobile[pair.a].name} +{' '}

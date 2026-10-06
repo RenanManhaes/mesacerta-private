@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
@@ -42,7 +43,7 @@ const modules = [
 export default function EventSettings() {
   const { currentEvent: ev, updateCurrent, orgId } = useEvent();
   const { memberships } = useAuth();
-  const [draft, setDraft] = useState(() =>
+  const [draft, setDraft] = useEventField('settings.draft', () =>
     Object.fromEntries(
       [
         'name',

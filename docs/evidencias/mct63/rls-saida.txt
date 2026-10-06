@@ -1,0 +1,52 @@
+--- 1. organizacao nova nasce com 8 tipos
+ nome  | tipos 
+-------+-------
+ Org A |     8
+ Org B |     8
+(2 rows)
+
+--- 2. membro da Org A so enxerga os tipos da Org A
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-0000000000a1
+(1 row)
+
+ visiveis | orgs 
+----------+------
+        8 |    1
+(1 row)
+
+--- 3. criar tipo novo (ok)
+   name   
+----------
+ Workshop
+(1 row)
+
+--- 4. duplicado sem diferenciar maiusculas (deve falhar)
+ERROR:  duplicate key value violates unique constraint "activity_types_org_name_key"
+--- 5. criar na Org B (deve falhar por RLS)
+--- 6. renomear e excluir na propria org
+ERROR:  new row violates row-level security policy for table "activity_types"
+  name   
+---------
+ Oficina
+(1 row)
+
+  name   
+---------
+ Oficina
+(1 row)
+
+--- 7. excluir tipo da Org B (0 linhas afetadas)
+ name 
+------
+(0 rows)
+
+--- 8. nome vazio / com espacos nas pontas (deve falhar)
+ERROR:  new row for relation "activity_types" violates check constraint "activity_types_name_check"
+ERROR:  new row for relation "activity_types" violates check constraint "activity_types_name_check"
+--- 9. anon nao le
+ERROR:  permission denied for table activity_types
+HINT:  Grant the required privileges to the current role with: GRANT SELECT ON public.activity_types TO anon;
+--- 10. funcao de seed nao executavel por authenticated
+ERROR:  permission denied for function seed_activity_types

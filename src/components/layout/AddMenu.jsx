@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
 import { useEvent } from '@/context/EventContext';
 import { uid } from '@/lib/format';
+import { insertActivity } from '@/lib/schedule';
+import ActivityDialog from '@/components/schedule/ActivityDialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -29,11 +32,23 @@ export default function AddMenu() {
   const { currentEvent, updateCurrent } = useEvent();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState(null);
-  const [form, setForm] = useState({});
+  const [type, setType] = useEventField('add.type', null);
+  const [form, setForm] = useEventField('add.form', {});
 
-  const openFor = (t) => { setType(t); setForm({}); setOpen(true); };
+  const [activityOpen, setActivityOpen] = useState(false);
+  const openFor = (t) => {
+    if (t === 'atividade') { setActivityOpen(true); return; } // modal próprio da programação
+    if (t !== type) setForm({});
+    setType(t); setOpen(true);
+  };
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Pages can open the add dialog directly: window.dispatchEvent(new CustomEvent('mesacerta:add', { detail: 'fornecedor' }))
+  useEffect(() => {
+    const onAdd = (e) => { if (TYPES.some(t => t.key === e.detail)) openFor(e.detail); };
+    window.addEventListener('mesacerta:add', onAdd);
+    return () => window.removeEventListener('mesacerta:add', onAdd);
+  }, []);
 
   const submit = () => {
     if (!type || !currentEvent) return;
@@ -49,14 +64,13 @@ export default function AddMenu() {
           return { ...ev, revenues: [{ id: uid(), description: form.description || 'Receita', type: form.type || 'Outros', expected: Number(form.expected) || 0, received: 0, expectedDate: form.expectedDate || '', receivedDate: null, category: form.type || 'Outros', status: 'previsto' }, ...ev.revenues] };
         case 'fornecedor':
           return { ...ev, suppliers: [{ id: uid(), name: form.name || 'Fornecedor', service: form.service || '', contact: '', contracted: Number(form.contracted) || 0, paid: Number(form.paid) || 0, entry: 0, nextDue: form.dueDate || null, dueDate: form.dueDate || null, paymentData: '', notes: '', status: Number(form.paid) >= Number(form.contracted) && form.contracted ? 'pago' : 'pendente', expenseCategory: form.service || 'Outros', expenseType: 'fixed' }, ...ev.suppliers] };
-        case 'atividade':
-          return { ...ev, schedule: [...ev.schedule, { id: uid(), start: form.start || '09:00', duration: Number(form.duration) || 30, title: form.title || 'Atividade', type: form.type || 'Personalizado', speaker: '', room: '' }] };
         case 'patrocinador':
           return { ...ev, sponsors: [{ id: uid(), company: form.company || 'Empresa', contact: '', plan: form.plan || 'Apoio', negotiated: Number(form.negotiated) || 0, received: 0, dueDate: form.dueDate || '', guests: 0, status: 'pendente', deliverables: '' }, ...ev.sponsors] };
         default: return ev;
       }
     });
     toast({ title: `${TYPES.find(t => t.key === type).label} adicionado`, duration: 1800 });
+    setForm({});
     setOpen(false);
   };
 
@@ -149,19 +163,6 @@ export default function AddMenu() {
             </div>
           )}
 
-          {type === 'atividade' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2"><Label className={labelCls}>Título</Label><Input className={fieldCls} value={form.title || ''} onChange={e => set('title', e.target.value)} /></div>
-              <div><Label className={labelCls}>Início</Label><Input type="time" className={fieldCls} value={form.start || '09:00'} onChange={e => set('start', e.target.value)} /></div>
-              <div><Label className={labelCls}>Duração (min)</Label><Input type="number" className={fieldCls} value={form.duration || 30} onChange={e => set('duration', e.target.value)} /></div>
-              <div className="col-span-2"><Label className={labelCls}>Tipo</Label>
-                <Select value={form.type || 'Palestra'} onValueChange={v => set('type', v)}>
-                  <SelectTrigger className={fieldCls}><SelectValue /></SelectTrigger><SelectContent>{['Credenciamento','Abertura','Palestra','Painel','Workshop','Intervalo','Almoço','Networking','Apresentação','Encerramento','Personalizado'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
           {type === 'patrocinador' && (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2"><Label className={labelCls}>Empresa</Label><Input className={fieldCls} value={form.company || ''} onChange={e => set('company', e.target.value)} /></div>
@@ -181,6 +182,15 @@ export default function AddMenu() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ActivityDialog
+        open={activityOpen}
+        onOpenChange={setActivityOpen}
+        event={currentEvent}
+        onConfirm={(value) => {
+          updateCurrent(ev => ({ ...ev, schedule: insertActivity(ev.schedule, { id: uid(), room: '', ...value }) }));
+          toast({ title: 'Atividade adicionada', duration: 1800 });
+        }}
+      />
     </>
   );
 }

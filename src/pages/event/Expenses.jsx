@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useEvent } from '@/context/EventContext';
 import {
   financialSummary,
@@ -25,7 +26,7 @@ import {
 import { Receipt, CheckCircle2, Clock, Plus } from 'lucide-react';
 export default function Expenses() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useEventField('expenses.draft', null);
   const fin = financialSummary(ev);
   const patch = (p) => setDraft((d) => ({ ...d, ...p }));
   const total = draft ? expenseTotal(draft, ev.expectedAudience, fin) : 0;

@@ -109,6 +109,7 @@ real ao redor da mesa) em vez de Mesa → lista de pessoas.
 | `participants` | §20 | `tipo` e `status` são os enums do §20. `empresa`, `descricao_empresa` e `segmento` são **obrigatórios para o módulo de diversidade do Networking** — não vêm do PRD literal, vêm de medição registrada em `docs/briefing.md`: inferir segmento só pelo nome da empresa deu 0% de acerto em nomes opacos (8 das 14 patrocinadoras reais do evento de referência); com uma linha de descrição, 100%. Sem esses três campos, o módulo de diversidade de encontros não tem entrada de dado. |
 | `tasks` | §23 | `prioridade` (`normal`/`alta`/`critica`) e `status` (`a_fazer`/`em_andamento`/`concluida`) exatamente como o PRD lista. |
 | `schedule_items` | §22 | Timeline: `hora_inicio` + `duracao_min` + `ordem`. O recálculo de horários seguintes (§22: "mudanças recalculam atividades seguintes") é lógica de aplicação, não trigger de banco — fica fora deste escopo. |
+| `activity_types` | §22 (MCT-63) | Tipos de atividade da programação **por organização** (`organization_id`, `name`; único sem diferenciar maiúsculas). Semeada com 8 tipos em toda organização (gatilho + preenchimento das existentes). A atividade guarda o nome do tipo no documento do evento; renomear acompanha as atividades pela aplicação. RLS: qualquer membro lê/escreve. |
 | `suppliers` | §19 | `dados_pagamento` é `jsonb` porque o PRD não especifica estrutura fixa para esse campo. |
 
 ### Financeiro
