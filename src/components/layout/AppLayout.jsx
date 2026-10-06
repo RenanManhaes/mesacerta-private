@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Outlet, useParams, useLocation, Link } from 'react-router-dom';
+import { Outlet, useParams, useLocation, Link, Navigate } from 'react-router-dom';
 import { SidebarContent } from './Sidebar';
+import {canOpenModule,eventHome} from '@/lib/eventAccess';
 import TopBar from './TopBar';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useEvent } from '@/context/EventContext';
@@ -10,12 +11,16 @@ import { Button } from '@/components/ui/button';
 export default function AppLayout() {
   const { eventId } = useParams();
   const location = useLocation();
-  const { setCurrentEventId, currentEvent, events } = useEvent();
+  const { setCurrentEventId, currentEvent, events, eventAccess } = useEvent();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   React.useEffect(() => {
     if (eventId) setCurrentEventId(eventId);
   }, [eventId, setCurrentEventId]);
+
+  const access = eventAccess[eventId];
+  const route = location.pathname.split('/')[3] || 'dashboard';
+  if (access && !canOpenModule(access.role,route)) return <Navigate to={eventHome(eventId,access)} replace />;
 
   return (
     <div className="platform-ui min-h-screen bg-background">
