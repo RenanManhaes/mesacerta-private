@@ -260,7 +260,7 @@ export function alerts(ev) {
     if (reencontros === null) {
       out.push({ level: 'atencao', title: 'As rodadas de negócio ainda não foram geradas.', to: 'networking' });
     } else if (reencontros === undefined) {
-      out.push({ level: 'atencao', title: 'A distribuição salva das rodadas não confere com o cadastro atual; gere novamente.', to: 'networking' });
+      out.push({ level: 'atencao', title: 'O cadastro mudou depois que as rodadas foram geradas; gere de novo para ver os reencontros.', to: 'networking' });
     } else if (reencontros === 0) {
       out.push({ level: 'ok', title: 'Nas rodadas de negócio, ninguém repete companhia.', to: 'networking' });
     } else {
