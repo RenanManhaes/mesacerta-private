@@ -21,16 +21,16 @@ const directory=await mkdtemp(resolve('node_modules/.team-ui-'));let tree;
 globalThis.window={location:{origin:'http://localhost:5173'}};
 try {
  await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const supabase=globalThis.__teamClient; export const useEvent=()=>globalThis.__teamContext; export const useEventField=(key,initial)=>React.useState(initial); export const Panel=({children})=>React.createElement('section',null,children); export const PageHeader=({title,actions})=>React.createElement('header',null,React.createElement('h1',null,title),actions); export const initials=()=>''; export const Field=({label,value,onChange,...props})=>React.createElement('label',null,label,React.createElement('input',{...props,'aria-label':label,value,onChange:e=>onChange(e.target.value)})); export const Button=({children,variant,...props})=>React.createElement('button',props,children); export const Dialog=({children,open})=>open?React.createElement('div',null,children):null; export const DialogContent=({children})=>React.createElement('div',null,children); export const DialogHeader=DialogContent; export const DialogTitle=DialogContent; export const DialogDescription=DialogContent; export const DialogFooter=DialogContent;`);
- for(const [input,output] of [['src/components/EventTeam.jsx','team.mjs'],['src/components/EventInvites.jsx','invites.mjs']]){
+ for(const [input,output] of [['src/components/EventTeam.jsx','team.mjs'],['src/components/EventInvites.jsx','invites.mjs'],['src/components/TeamCatalog.jsx','catalog.mjs'],['src/hooks/useTeamCatalog.js','hook.mjs']]){
   let source=await readFile(input,'utf8');
-  source=source.replaceAll("'@/components/EventInvites'","'./invites.mjs'");
+  source=source.replaceAll("'@/components/EventInvites'","'./invites.mjs'").replaceAll("'@/components/TeamCatalog'","'./catalog.mjs'").replaceAll("'@/hooks/useTeamCatalog'","'./hook.mjs'");
   for(const name of ['@/context/EventContext','@/api/supabaseClient','@/lib/useEventField','@/components/common/ReferenceUI','@/components/ui/button','@/components/ui/dialog'])source=source.replaceAll(`'${name}'`,"'./mocks.mjs'");
   await writeFile(join(directory,output),ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext}}).outputText);
  }
  globalThis.__teamClient=founder.client;
  const {default:Team}=await import(pathToFileURL(join(directory,'team.mjs')));
- const reload=async()=>{row=(await rpc(founder.client,'event_list'))[0];globalThis.__teamContext={currentEvent:row.document,access:row,flush:async()=>{},reloadEvents:reload};tree.update(React.createElement(Team));};
- globalThis.__teamContext={currentEvent:row.document,access:row,flush:async()=>{},reloadEvents:reload};
+ const reload=async()=>{row=(await rpc(founder.client,'event_list'))[0];globalThis.__teamContext={currentEvent:row.document,access:row,orgId:row.organizationId,flush:async()=>{},reloadEvents:reload};tree.update(React.createElement(Team));};
+ globalThis.__teamContext={currentEvent:row.document,access:row,orgId:row.organizationId,flush:async()=>{},reloadEvents:reload};
  act(()=>{tree=create(React.createElement(Team));});
  assert.ok(JSON.stringify(tree.toJSON()).includes('Equipe do evento'));assert.ok(JSON.stringify(tree.toJSON()).includes('Fundador'));assert.ok(JSON.stringify(tree.toJSON()).includes('Diretor'));
  const button=label=>tree.root.findAllByType('button').find(b=>b.children.join('')===label);

@@ -3,12 +3,16 @@ import {useEventField} from '@/lib/useEventField';
 import {useEvent} from '@/context/EventContext';
 import {supabase} from '@/api/supabaseClient';
 import EventInvites from '@/components/EventInvites';
+import {useTeamCatalog} from '@/hooks/useTeamCatalog';
+import {CatalogField,TeamCatalogManager} from '@/components/TeamCatalog';
 import {PageHeader,Panel,Field,initials} from '@/components/common/ReferenceUI';
 import {Button} from '@/components/ui/button';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription,DialogFooter} from '@/components/ui/dialog';
 
 export default function EventTeam() {
-  const {currentEvent:ev,access,flush,reloadEvents} = useEvent();
+  const {currentEvent:ev,access,flush,reloadEvents,orgId} = useEvent();
+  const catalog=useTeamCatalog(orgId);
+  const [catalogOpen,setCatalogOpen]=useState(false);
   const [draft,setDraft] = useEventField('staff.draft',null);
   const [search,setSearch] = useEventField('staff.search','');
   const [invite,setInvite] = useState(false), [remove,setRemove] = useState(false), [error,setError] = useState(''), [pending,setPending] = useState(false);
@@ -34,7 +38,7 @@ export default function EventTeam() {
   };
   const set=(key,value)=>setDraft(d=>({...d,[key]:value}));
   return <div className="reference-page">
-    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button>} />
+    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<><Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Gerenciar funções, áreas e cargos</Button></>} />
     <Panel title="Equipe do evento" extra={<span>{members.length} pessoas</span>}>
       <Field label="Buscar pessoa" value={search} onChange={setSearch} />
       <div className="grid md:grid-cols-2 gap-4 mt-4">{filtered.map(person=><button key={person.id} onClick={()=>{setError('');setRemove(false);setDraft({...person});}} className="rounded-xl border p-4 text-left" aria-label={`Editar ${person.name}`}>
@@ -51,7 +55,9 @@ export default function EventTeam() {
         <Field label="Nome" required value={draft.name} onChange={value=>set('name',value)} />
         <Field label="E-mail" type="email" value={draft.email || ''} onChange={value=>set('email',value)} />
         <Field label="Telefone" type="tel" value={draft.phone || ''} onChange={value=>set('phone',value)} />
-        <Field label="Função" value={draft.function || ''} onChange={value=>set('function',value)} />
+        <CatalogField label="Função" kind="function" value={draft.function || ''} onChange={value=>set('function',value)} catalog={catalog} />
+        <CatalogField label="Área" kind="area" value={draft.area || ''} onChange={value=>set('area',value)} catalog={catalog} />
+        <CatalogField label="Cargo" kind="title" value={draft.jobTitle || ''} onChange={value=>set('jobTitle',value)} catalog={catalog} disabled={draft.accessRole==='founder'} />
         <p>Papel de acesso: {draft.accessRole==='founder'?'Fundador':draft.role}. O fundador altera papéis em Configurações.</p>
         {error && <p role="alert">{error}</p>}
         {remove && <div role="alert"><p>Remover {draft.name} da equipe? O acesso será revogado. Tarefas e histórico serão preservados.</p><Button disabled={pending} type="button" onClick={removePerson}>Confirmar remoção</Button><Button variant="outline" type="button" onClick={()=>setRemove(false)}>Cancelar remoção</Button></div>}
@@ -62,5 +68,6 @@ export default function EventTeam() {
         </DialogFooter>
       </form>}
     </DialogContent></Dialog>
+    <TeamCatalogManager open={catalogOpen} onOpenChange={setCatalogOpen} catalog={catalog} />
   </div>;
 }
