@@ -1,5 +1,6 @@
 import React from 'react';
 import EventBackupImport from '@/components/EventBackupImport';
+import {eventHome} from '@/lib/eventAccess';
 import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
@@ -13,8 +14,9 @@ const statusLabel = { planejamento: 'Planejamento', confirmado: 'Confirmado', an
 
 function EventRow({ ev }) {
   const navigate = useNavigate();
+  const {eventAccess} = useEvent();
   return (
-    <button onClick={() => navigate(`/event/${ev.id}/dashboard`)} className="platform-event group w-full">
+    <button onClick={() => navigate(eventHome(ev.id,eventAccess[ev.id]))} className="platform-event group w-full">
       <div className="platform-event-cover">{statusLabel[ev.status] || ev.status}</div>
       <div className="platform-event-body">
       <div className="min-w-0">

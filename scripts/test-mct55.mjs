@@ -134,9 +134,9 @@ try {
   const response = await fetch(`${config.API_URL}/rest/v1/platform_workspaces?organization_id=eq.${orgId}&select=events`, {
     headers: {apikey: config.ANON_KEY, Authorization: `Bearer ${outsiderLogin.data.session.access_token}`},
   });
-  assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), []);
-  console.log('RLS PASS: REST request with outsider JWT returns HTTP 200 [] (zero authorized rows); legacy organization backup denied by database policy.');
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).code, '42501');
+  console.log('RLS PASS: REST request with outsider JWT returns HTTP 403 SQLSTATE 42501; legacy organization backup denied by database policy.');
 
   const legacy = {id: randomUUID(), name: 'Synthetic legacy backup', participants: [{id: 'legacy-person', name: 'Synthetic Legacy Person'}]};
   await act(async () => {await event.importBackup(JSON.parse(JSON.stringify({events: [legacy]})));});
