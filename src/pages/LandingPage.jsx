@@ -20,7 +20,7 @@ export default function LandingPage() {
 <header className="nav"><div className="wrap">
 <a href="#top" className="logo" data-scroll="top"><b><span></span><span></span><span></span><span></span></b>Mesa Certa</a>
 <nav className="nav-l"><button data-scroll="rodadas">Rodadas de negócio</button><button data-scroll="para-quem">Para quem</button><button data-scroll="modulos">Módulos</button><button data-scroll="como">Como funciona</button><button data-scroll="planos">Planos</button><button data-scroll="duvidas">Dúvidas</button></nav>
-<div className="nav-r">{isAuthenticated ? <><Link className="lnk" to="/eventos">Meus eventos</Link><LogoutButton className="btn btn-s" /></> : <><Link className="lnk" to="/login">Entrar</Link><a className="btn btn-p btn-s" href="#planos" data-scroll="planos">Começar agora</a></>}</div>
+<div className="nav-r">{isAuthenticated ? <><Link className="lnk" to="/eventos">Meus eventos</Link><LogoutButton className="btn btn-p btn-s" /></> : <><Link className="lnk" to="/login">Entrar</Link><a className="btn btn-p btn-s" href="#planos" data-scroll="planos">Começar agora</a></>}</div>
 </div></header>
 
 <section className="hero" id="top" data-screen-label="01 Hero"><div className="wrap">

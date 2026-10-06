@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { UserPlus, Mail, Lock, Loader2, MailCheck } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import ResendConfirmation from "@/components/ResendConfirmation";
 
 function traduzErro(err) {
   const msg = err?.message || "";
@@ -26,6 +27,9 @@ export default function Register() {
   const [registered, setRegistered] = useState(false);
   const navigate = useNavigate();
   const returnTo = safeReturnTo();
+  // Destino do link do e-mail de confirmação: quem veio de um convite
+  // (/entrar?codigo=...&convite=...) volta para o convite, já logado.
+  const emailRedirectTo = window.location.origin + returnTo;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +43,11 @@ export default function Register() {
       return;
     }
     setLoading(true);
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo },
+    });
     setLoading(false);
     if (signUpError) {
       setError(traduzErro(signUpError));
@@ -69,8 +77,11 @@ export default function Register() {
       >
         <p className="text-sm text-foreground text-center">
           Abra o e-mail que enviamos e clique no link de confirmação. Depois
-          disso, volte aqui e entre normalmente.
+          disso, você volta para o Mesa Certa já conectado.
         </p>
+        <div className="mt-4">
+          <ResendConfirmation email={email} emailRedirectTo={emailRedirectTo} startCooldown />
+        </div>
       </AuthLayout>
     );
   }
