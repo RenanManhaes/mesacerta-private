@@ -41,7 +41,7 @@ try {
  console.log('CA1 UI PASS: actual SidebarContent with staff API projection renders exactly participantes, programacao and tarefas; projection contains only the assigned task and no expense field.');
  const complete=(await rpc(director.client,'event_list'))[0];mount(complete);
  const links=tree.root.findAllByType('a').map(a=>a.props.href.split('/').pop());
- for(const module of ['dashboard','programacao','tarefas','diretores-staffs','participantes','fornecedores','financeiro','receitas','despesas','patrocinios','capacidade','networking','simulador','configuracoes'])assert.ok(links.includes(module));
+ for(const module of ['dashboard','programacao','tarefas','equipe','participantes','fornecedores','financeiro','receitas','despesas','patrocinios','capacidade','networking','simulador','configuracoes'])assert.ok(links.includes(module));
  assert.equal(complete.document.expenses[0].description,'PRIVATE FINANCE');
  console.log('CA3 UI/API PASS: director sees all 14 module links and the full event including financial data.');
 } finally {if(tree)act(()=>tree.unmount());delete globalThis.__roleContext;await rm(directory,{recursive:true,force:true});}
