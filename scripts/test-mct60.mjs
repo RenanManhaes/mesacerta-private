@@ -65,6 +65,24 @@ limited.document.tasks[0].status='Concluído';
 limited.revision=await rpc(staff.client,'event_save',{p_event:id,p_revision:limited.revision,p_document:limited.document});
 const full=(await rpc(founder.client,'event_list'))[0];assert.equal(full.document.tasks.find(t=>t.id==='mine').status,'Concluído');assert.equal(full.document.tasks.find(t=>t.id==='other').status,'A fazer');assert.equal(full.document.expenses[0].description,'PRIVATE FINANCE');
 console.log('CA1 mutation PASS: staff updates own task status; other task and private expense remain unchanged.');
+
+const normalized = await admin.from('tasks').insert({event_id:id,titulo:'Assigned normalized task',assigned_user_id:staff.user.id}).select('*').single();assert.ifError(normalized.error);
+const taskId=normalized.data.id;
+for(const changes of [{titulo:'Forbidden rename'},{prioridade:'critica'},{descricao:'Forbidden edit'},{assigned_user_id:director.user.id}]) {
+ denial=await staff.request(`tasks?id=eq.${taskId}`,'PATCH',changes);
+ assert.equal(denial.status,403);assert.equal(denial.body.code,'42501');
+ console.log(`REVIEW normalized task ${Object.keys(changes)[0]} PATCH: HTTP ${denial.status}, SQLSTATE ${denial.body.code}.`);
+}
+denial=await staff.request('tasks','POST',{event_id:id,titulo:'Forbidden creation',assigned_user_id:staff.user.id});assert.equal(denial.status,403);assert.equal(denial.body.code,'42501');
+console.log('REVIEW normalized task INSERT: HTTP 403, SQLSTATE 42501.');
+denial=await staff.request(`tasks?id=eq.${taskId}`,'DELETE');assert.equal(denial.status,204);
+let retained=await admin.from('tasks').select('*').eq('id',taskId).single();assert.ifError(retained.error);assert.equal(retained.data.titulo,'Assigned normalized task');
+console.log('REVIEW normalized task DELETE: HTTP 204 with zero authorized rows; independent admin read proves original task retained.');
+denial=await staff.request(`tasks?id=eq.${taskId}`,'PATCH',{status:'concluida'});assert.equal(denial.status,204);
+retained=await admin.from('tasks').select('*').eq('id',taskId).single();assert.ifError(retained.error);assert.equal(retained.data.status,'concluida');assert.equal(retained.data.titulo,'Assigned normalized task');
+denial=await director.request(`tasks?id=eq.${taskId}`,'PATCH',{titulo:'Director edit'});assert.equal(denial.status,204);
+retained=await admin.from('tasks').select('titulo').eq('id',taskId).single();assert.ifError(retained.error);assert.equal(retained.data.titulo,'Director edit');
+console.log('REVIEW normalized task allowed writes: staff status succeeds; director title edit succeeds.');
 denial=await director.request('rpc/event_change_role','POST',{p_member:member.id,p_role:'director'});assert.equal(denial.status,403);
 await rpc(founder.client,'event_change_role',{p_member:member.id,p_role:'director'});assert.equal((await rpc(staff.client,'event_list'))[0].role,'director');
 assert.equal((await rpc(staff.client,'event_list'))[0].document.expenses[0].description,'PRIVATE FINANCE');

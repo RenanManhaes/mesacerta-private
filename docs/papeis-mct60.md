@@ -23,3 +23,10 @@ Registros normalizados precisam do vínculo em `platform_events` com o mesmo ID 
 Compartilha Sidebar, TopBar, AppLayout, Events e Tasks com o trabalho do outro agente. Alterações limitadas à autorização, destino de entrada e responsável de tarefa restrita; nenhum redesenho das telas. A PR incorpora MCT-57 como dependência a partir de main, autorizado pelo usuário.
 
 Reverter a interface é possível sem remover dados, mas não reabrir o endpoint antigo do workspace: exporia documentos inteiros a staff. Para reverter regras, produzir migração compensatória revisada com o modelo anterior de acesso aprovado e preservação das tabelas e auditoria. Não remover coluna de atribuição nem tabelas com dados. O motor permanece intocado.
+# Revisão adicional — 06/10/2026
+
+Encontrado e corrigido desvio na API direta: a policy `FOR ALL` de tarefas normalizadas filtrava as linhas, mas permitia a staff renomear uma tarefa atribuída, modificar outros campos e criar/remover tarefas. A nova migração separa SELECT/UPDATE de INSERT/DELETE; um trigger invoker limita UPDATE de staff a status, com timestamp gerado pelo banco. Fundador/diretor conservam a gestão. Nenhuma tela de tarefas do outro agente foi redesenhada.
+
+`node scripts/check-pr-review.mjs mct60` registra em `docs/evidencias/revisao/mct60/` negações HTTP 403/42501 de título, prioridade, descrição, atribuição e INSERT; DELETE retorna zero linhas autorizadas e a leitura independente comprova conservação da tarefa. Status de staff e edição de diretor são verificados como permitidos. Também registra a regressão de entrada sem perda de edição e lint/typecheck/build/motor.
+
+O auditor local (`review-advisors.txt`) acusa a policy antiga `organizations_insert WITH CHECK true`, anterior a estas PRs. A migração de bootstrap já revogou INSERT de authenticated; chamada direta pela API retorna HTTP 403/42501 por falta do privilégio. Não houve alteração oportunista dessa policy fora do escopo. Só o banco local recebeu a correção. Reversão deve preservar a restrição de status; não restaurar a antiga policy ampla sem um modelo aprovado.
