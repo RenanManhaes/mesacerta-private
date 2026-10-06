@@ -8,6 +8,7 @@ import { LogIn, Loader2, ArrowRight } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import ResendConfirmation from "@/components/ResendConfirmation";
 
 function traduzErro(err) {
   const msg = err?.message || "";
@@ -23,6 +24,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const navigate = useNavigate();
   // Post-login destination (e.g. a protected route sends users here with
   // returnTo so they land back where they tried to go). Same-origin only.
@@ -31,11 +33,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setNeedsConfirmation(false);
     setLoading(true);
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (signInError) {
       setError(traduzErro(signInError));
+      setNeedsConfirmation((signInError.message || "").includes("Email not confirmed"));
       return;
     }
     navigate(returnTo, { replace: true });
@@ -66,6 +70,11 @@ export default function Login() {
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
+        </div>
+      )}
+      {needsConfirmation && (
+        <div className="mb-4">
+          <ResendConfirmation email={email} emailRedirectTo={window.location.origin + returnTo} />
         </div>
       )}
 
