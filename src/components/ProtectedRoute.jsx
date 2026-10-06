@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import CreateOrganization from '@/pages/CreateOrganization';
 
@@ -9,6 +9,7 @@ const DefaultFallback = () => (
 );
 
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
+  const location = useLocation();
   const { isAuthenticated, authChecked, memberships, membershipsLoading, sessionExpired, membershipError, refreshMemberships } = useAuth();
 
   if (!authChecked) {
@@ -26,7 +27,7 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
   // Authenticated but no organization yet: RLS (is_org_member) means the
   // user sees nothing in any domain table until one exists. Gate on this
   // before rendering the protected tree, not after it renders empty.
-  if (memberships.length === 0) {
+  if (memberships.length === 0 && location.pathname === '/novo') {
     if (membershipError) return <div role="alert">{membershipError} <button onClick={refreshMemberships}>Tentar novamente</button></div>;
     return <CreateOrganization />;
   }

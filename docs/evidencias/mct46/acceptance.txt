@@ -1,0 +1,11 @@
+$ node scripts/test-mct46.mjs
+CA1 UI/API PASS: new unflagged account has eventCount=0, canCreate=true; actual Events renders Criar evento.
+CA2 UI/API PASS: existing unflagged account has canCreate=false; Events hides all create buttons; direct /novo CreateEvent shows limit alert with no creation control.
+CA3 restricted-JWT POST event_create: HTTP 403, SQLSTATE 42501, message=Sua conta tem limite de um evento. Solicite a liberação de múltiplos eventos.; editable Auth metadata cannot bypass.
+RLS flag escalation: direct PATCH with account JWT returns HTTP 403.
+FLAG PASS: trusted local admin flag update permits second event without frontend deploy.
+CA4 API PASS: specified founder email is seeded multiEvent=true automatically; first and second event creation both succeed.
+CONCURRENCY PASS: two simultaneous creations in different organizations yield exactly one success and one SQLSTATE 42501; account count remains one.
+Synthetic local users/events retained; no remote flag updates, deletions or production deployment.
+
+EXIT_CODE=0

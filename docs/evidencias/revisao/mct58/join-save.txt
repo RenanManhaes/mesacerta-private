@@ -1,0 +1,5 @@
+$ node scripts/test-join-save.mjs
+REVIEW JoinEvent network failure: save rejects; zero join RPCs, zero reloads, route retained and visible error. Unsaved provider state is never reset.
+REVIEW JoinEvent success: actual form awaits save before join RPC and reload, then navigates to invited event.
+
+EXIT_CODE=0

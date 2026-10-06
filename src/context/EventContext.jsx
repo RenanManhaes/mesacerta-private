@@ -18,7 +18,7 @@ function seed() { return {events: [], currentEventId: ''}; }
 export function EventProvider({ children }) {
   const { user, memberships } = useAuth();
   const {pathname} = useLocation();
-  const privatePage = pathname.startsWith('/event') || pathname === '/novo';
+  const privatePage = pathname.startsWith('/event') || pathname === '/novo' || pathname === '/entrar';
   const orgId = memberships[0]?.organization_id;
   const [state, setState] = useState(seed);
   const [loadedScope, setLoadedScope] = useState('');
@@ -27,23 +27,26 @@ export function EventProvider({ children }) {
   const [saveError, setSaveError] = useState('');
   const [loadAttempt, setLoadAttempt] = useState(0);
   const identity = useRef('');
-  const revision = useRef(0);
+  const revision = useRef({});
+  const [eventAccess, setEventAccess] = useState({});
+  const [creationPermission, setCreationPermission] = useState({canCreate:false,multiEvent:false,eventLimit:0});
   const acknowledged = useRef('');
   const latest = useRef(state.events);
   const writing = useRef(null);
 
   latest.current = state.events;
-  const scope = `${user?.id || ''}:${orgId || ''}`;
+  const scope = user?.id || '';
+  const ready = loadedScope === scope && !!user;
 
   useEffect(() => {
     identity.current = scope;
     acknowledged.current = '';
-    revision.current = 0;
+    revision.current = {};
     setState(seed());
 
     setSaveError('');
     setLoadedScope('');
-    if (!user || !orgId) {
+    if (!user) {
       setLoading(false);
       return;
     }
@@ -51,39 +54,17 @@ export function EventProvider({ children }) {
     setLoading(true);
     (async () => {
       try {
-        let { data, error } = await supabase
-          .from('platform_workspaces')
-          .select('events,revision')
-          .eq('organization_id', orgId)
-          .maybeSingle();
-        if (error) throw error;
-        if (!data) {
-          const fresh = seed();
-          const inserted = await supabase
-            .from('platform_workspaces')
-            .insert({ organization_id: orgId, events: fresh.events })
-            .select('events,revision')
-            .single();
-          if (inserted.error?.code === '23505') {
-            const existing = await supabase
-              .from('platform_workspaces')
-              .select('events,revision')
-              .eq('organization_id', orgId)
-              .single();
-            if (existing.error) throw existing.error;
-            data = existing.data;
-          } else {
-            if (inserted.error) throw inserted.error;
-            data = inserted.data;
-          }
-        }
+        const [result, permission] = await Promise.all([supabase.rpc('event_list'),supabase.rpc('event_creation_permission')]);
+        const {data,error} = result;
+        if (error) throw new Error(error.message);
+        if (permission.error) throw new Error(permission.error.message);
         if (cancelled) return;
-        revision.current = data.revision;
-        acknowledged.current = JSON.stringify(data.events);
-        setState({
-          events: data.events,
-          currentEventId: data.events[0]?.id || '',
-        });
+        setCreationPermission(permission.data);
+        const events = data.map(row => row.document);
+        revision.current = Object.fromEntries(data.map(row => [row.document.id, row.revision]));
+        setEventAccess(Object.fromEntries(data.map(row => [row.document.id, row])));
+        acknowledged.current = JSON.stringify(events);
+        setState({events, currentEventId: events[0]?.id || ''});
         setSaveStatus('saved');
         setLoadedScope(scope);
 
@@ -101,10 +82,10 @@ export function EventProvider({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [scope, orgId, user?.id, loadAttempt]);
+  }, [scope, user?.id, loadAttempt]);
 
   const flush = useCallback(async () => {
-    if (!user || !orgId || loading || !revision.current) throw new Error('Os eventos ainda não foram carregados; tente novamente após o carregamento.');
+    if (!user || loading || !ready) throw new Error('Os eventos ainda não foram carregados; tente novamente após o carregamento.');
     if (writing.current) {
       await writing.current;
       return flush();
@@ -119,21 +100,19 @@ export function EventProvider({ children }) {
     setSaveStatus('saving');
     setSaveError('');
     const operation = (async () => {
-      const { data, error } = await supabase
-        .from('platform_workspaces')
-        .update({ events: JSON.parse(snapshot) })
-        .eq('organization_id', orgId)
-        .eq('revision', revision.current)
-        .abortSignal(AbortSignal.timeout(15000))
-        .select('revision')
-        .maybeSingle();
-      if (identity.current !== startedScope) return;
-      if (error) throw error;
-      if (!data)
-        throw new Error(
-          'Outra pessoa atualizou os eventos. Recarregue antes de continuar; suas alterações podem ser exportadas.',
-        );
-      revision.current = data.revision;
+      const previous = JSON.parse(acknowledged.current || '[]');
+      for (const document of JSON.parse(snapshot)) {
+        if (JSON.stringify(document) === JSON.stringify(previous.find(e => e.id === document.id))) continue;
+        const {data, error} = await supabase.rpc('event_save', {
+          p_event: document.id, p_revision: revision.current[document.id], p_document: document,
+        }).abortSignal(AbortSignal.timeout(15000));
+        if (identity.current !== startedScope) return;
+        if (error) throw new Error(error.message);
+        revision.current[document.id] = data;
+        const index = previous.findIndex(e => e.id === document.id);
+        if (index >= 0) previous[index] = document; else previous.push(document);
+        acknowledged.current = JSON.stringify(previous);
+      }
       acknowledged.current = snapshot;
       setSaveStatus(snapshot === JSON.stringify(latest.current) ? 'saved' : 'saving');
     })();
@@ -154,14 +133,13 @@ export function EventProvider({ children }) {
       JSON.stringify(latest.current) !== acknowledged.current
     )
       return flush();
-  }, [orgId, user?.id, loading]);
+  }, [user?.id, loading, ready]);
 
   useEffect(() => {
     if (
       loading ||
       !user ||
-      !orgId ||
-      !revision.current ||
+      !ready ||
       JSON.stringify(state.events) === acknowledged.current
     )
       return;
@@ -170,12 +148,12 @@ export function EventProvider({ children }) {
       flush().catch(() => {});
     }, 300);
     return () => clearTimeout(timer);
-  }, [state.events, loading, orgId, user?.id, flush]);
+  }, [state.events, loading, ready, user?.id, flush]);
   useEffect(() => {
     const guard = (e) => {
       if (
         JSON.stringify(latest.current) !== acknowledged.current &&
-        revision.current
+        acknowledged.current
       ) {
         e.preventDefault();
         e.returnValue = '';
@@ -237,27 +215,37 @@ export function EventProvider({ children }) {
     });
   }, []);
 
-  const addEvent = useCallback((data) => {
-    const ev = emptyEventTemplate(data);
-    setState((s) => { const events = [...s.events, ev]; latest.current = events; return { events, currentEventId: ev.id }; });
+  const addEvent = useCallback(async (data) => {
+    if (!orgId) throw new Error('Crie uma organização antes de criar seu evento.');
+    await flush();
+    const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: emptyEventTemplate(data)});
+    if (error) throw error;
+    const ev = row.document;
+    setCreationPermission(row.creationPermission);
+    revision.current[ev.id] = row.revision;
+    setEventAccess(access => ({...access, [ev.id]: row}));
+    acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current || '[]'), ev]);
+    setState(s => {const events = [...s.events, ev]; latest.current = events; return {events, currentEventId: ev.id};});
     return ev;
-  }, []);
+  }, [orgId, flush]);
 
-  const importBackup = useCallback((backup) => {
-    if (!Array.isArray(backup?.events) || !backup.events.length || backup.events.some(e => !e || typeof e.id !== 'string' || typeof e.name !== 'string')) {
-      throw new Error('O arquivo não contém um backup válido de eventos.');
-    }
+  const importBackup = useCallback(async (backup) => {
+    if (!Array.isArray(backup?.events) || !backup.events.length || backup.events.some(e => !e || typeof e.id !== 'string' || typeof e.name !== 'string')) throw new Error('O arquivo não contém um backup válido de eventos.');
     const ids = new Set(backup.events.map(e => e.id));
-    if (ids.size !== backup.events.length || latest.current.some(e => ids.has(e.id))) {
-      throw new Error('Há IDs de eventos repetidos. A importação foi recusada para não substituir dados existentes.');
+    if (ids.size !== backup.events.length || latest.current.some(e => ids.has(e.id))) throw new Error('Há IDs de eventos repetidos. A importação foi recusada para não substituir dados existentes.');
+    if (!ready || !orgId) throw new Error('Aguarde o carregamento e crie uma organização antes de importar.');
+    await flush();
+    // Every imported record goes through the same authenticated creation transaction.
+    for (const document of backup.events) {
+      const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: document});
+      if (error) throw error;
+      revision.current[document.id] = row.revision;
+      setCreationPermission(row.creationPermission);
+      setEventAccess(access => ({...access, [document.id]: row}));
+      acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current), row.document]);
+      setState(s => {const events = [...s.events, row.document]; latest.current = events; return {...s, events};});
     }
-    if (!revision.current) throw new Error('Aguarde o carregamento antes de importar.');
-    setState(s => {
-      const events = [...s.events, ...backup.events];
-      latest.current = events;
-      return {...s, events};
-    });
-  }, []);
+  }, [ready, orgId, flush]);
 
   const exportBackup = useCallback(() => {
     const url = URL.createObjectURL(
@@ -273,6 +261,11 @@ export function EventProvider({ children }) {
   }, []);
   const value = {
     events,
+    eventAccess,
+    canCreateEvent: creationPermission.canCreate,
+    eventLimit: creationPermission.eventLimit,
+    access: eventAccess[currentEvent?.id],
+    reloadEvents: () => setLoadAttempt(n => n + 1),
     currentEvent,
     currentEventId,
     setCurrentEventId,
@@ -285,7 +278,7 @@ export function EventProvider({ children }) {
     saveStatus,
     saveError,
     flush,
-    orgId,
+    orgId: eventAccess[currentEvent?.id]?.organizationId || orgId,
     exportBackup,
   };
   return (
@@ -297,7 +290,7 @@ export function EventProvider({ children }) {
         >
           <p>{saveError}</p>
           <div className="flex gap-4 mt-2">
-            <button onClick={() => revision.current ? flush().catch(() => {}) : setLoadAttempt(n => n + 1)}>
+            <button onClick={() => ready ? flush().catch(() => {}) : setLoadAttempt(n => n + 1)}>
               Tentar novamente
             </button>
             <button onClick={exportBackup}>Exportar alterações</button>
@@ -305,7 +298,7 @@ export function EventProvider({ children }) {
           </div>
         </div>
       )}
-      {privatePage && (loading || (user && orgId && loadedScope !== scope)) ? (
+      {privatePage && (loading || (user && loadedScope !== scope)) ? (
         <div className="p-8" role="status">
           {saveError ? 'Os eventos não foram carregados. Use Tentar novamente.' : 'Carregando seus eventos…'}
         </div>

@@ -14,6 +14,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import LandingPage from '@/pages/LandingPage';
 import { EventProvider } from '@/context/EventContext';
+import JoinEvent from '@/pages/JoinEvent';
 import Events from '@/pages/Events';
 import CreateEvent from '@/pages/CreateEvent';
 import AppLayout from '@/components/layout/AppLayout';
@@ -42,6 +43,7 @@ const AuthenticatedApp = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/entrar" element={<JoinEvent />} />
         <Route path="/design-system" element={<DesignSystem />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/eventos" element={<Events />} />
@@ -51,7 +53,8 @@ const AuthenticatedApp = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="programacao" element={<Schedule />} />
             <Route path="tarefas" element={<Tasks />} />
-            <Route path="diretores-staffs" element={<Staff />} />
+            <Route path="equipe" element={<Staff />} />
+            <Route path="diretores-staffs" element={<Navigate to="../equipe" replace />} />
             <Route path="participantes" element={<Participants />} />
             <Route path="fornecedores" element={<Suppliers />} />
             <Route path="financeiro" element={<Financial />} />

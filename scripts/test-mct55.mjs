@@ -33,9 +33,11 @@ assert.ifError(createdOrg.error);
 const memberships = await firstClient.from('memberships').select('organization_id').eq('user_id', added.data.user.id);
 assert.ifError(memberships.error);
 const orgId = memberships.data[0].organization_id;
+const permission = await admin.from('user_event_permissions').update({multi_event: true}).eq('user_id', added.data.user.id);
+assert.ifError(permission.error); // This test intentionally imports a second event.
 const id = randomUUID();
 const fixture = {id, name: 'Synthetic event', participants: [], tasks: [], expenses: [], revenues: [], suppliers: [], sponsors: [], tickets: [], sponsorPlans: [], schedule: [], modules: {networking: true}, networking: {tables: 3, rounds: 3, tableList: [{id: 'table-a', name: 'Table A', capacity: 4}], participantSettings: {}}, networkingDistribution: {signature: 'synthetic', tab: [[1,2,3]], seed: 1}};
-const inserted = await firstClient.from('platform_workspaces').insert({organization_id: orgId, events: [fixture]});
+const inserted = await firstClient.rpc('event_create', {p_org: orgId, p_document: fixture});
 assert.ifError(inserted.error);
 
 const dir = await mkdtemp(resolve('node_modules/.mct55-'));
@@ -103,7 +105,7 @@ try {
   assert.deepEqual(event.currentEvent, snapshot);
   console.log('CA2 PASS: fresh client with persistSession=false and storage methods that throw restores identical event without browser cache.');
 
-  configure({from() {throw new Error('Synthetic network interruption');}}, auth);
+  configure({rpc() {throw new Error('Synthetic network interruption');}}, auth);
   act(() => setDraft({description: 'Failed write stays in memory'}));
   await act(async () => {await assert.rejects(event.flush(), /Synthetic network interruption/);});
   assert.equal(event.saveStatus, 'error');
@@ -116,9 +118,9 @@ try {
   await act(async () => {retry.props.onClick(); await new Promise(resolve => setTimeout(resolve, 150));});
   await act(async () => {await event.flush();});
   assert.equal(event.saveStatus, 'saved');
-  const readBack = await thirdClient.from('platform_workspaces').select('events').eq('organization_id', orgId).single();
+  const readBack = await thirdClient.rpc('event_list');
   assert.ifError(readBack.error);
-  assert.equal(readBack.data.events[0].uiState[added.data.user.id]['expenses.draft'].description, 'Failed write stays in memory');
+  assert.equal(readBack.data[0].document.uiState[added.data.user.id]['expenses.draft'].description, 'Failed write stays in memory');
   console.log('CA3 PASS: network failure produces visible alert and saveStatus=error; retry button persists retained draft through authenticated API.');
 
   const contextSource = await readFile('src/context/EventContext.jsx', 'utf8');
@@ -134,21 +136,24 @@ try {
   const response = await fetch(`${config.API_URL}/rest/v1/platform_workspaces?organization_id=eq.${orgId}&select=events`, {
     headers: {apikey: config.ANON_KEY, Authorization: `Bearer ${outsiderLogin.data.session.access_token}`},
   });
-  assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), []);
-  console.log('RLS PASS: REST request with outsider JWT returns HTTP 200 [] (zero authorized rows); organization document denied by database policy.');
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).code, '42501');
+  console.log('RLS PASS: REST request with outsider JWT returns HTTP 403 SQLSTATE 42501; legacy organization backup denied by database policy.');
 
   const legacy = {id: randomUUID(), name: 'Synthetic legacy backup', participants: [{id: 'legacy-person', name: 'Synthetic Legacy Person'}]};
-  act(() => event.importBackup(JSON.parse(JSON.stringify({events: [legacy]}))));
+  await act(async () => {await event.importBackup(JSON.parse(JSON.stringify({events: [legacy]})));});
   await act(async () => {await event.flush();});
-  const imported = await thirdClient.from('platform_workspaces').select('events').eq('organization_id', orgId).single();
+  const imported = await thirdClient.rpc('event_list');
   assert.ifError(imported.error);
-  assert.deepEqual(imported.data.events.find(e => e.id === legacy.id), legacy);
-  assert.throws(() => event.importBackup({events: [legacy]}), /IDs de eventos repetidos/);
+  const recovered = imported.data.find(e => e.document.id === legacy.id).document;
+  for (const key of Object.keys(legacy)) assert.deepEqual(recovered[key], legacy[key]);
+  assert.ok(recovered.staffMembers.some(person => person.accessRole === 'founder'));
+  await assert.rejects(() => event.importBackup({events: [legacy]}), /IDs de eventos repetidos/);
   console.log('MIGRATION PASS: explicit JSON backup import persists all legacy fields; duplicate IDs rejected without overwriting existing events.');
 
   // Concurrency protection: another client updates while this form is open.
-  const changed = await thirdClient.from('platform_workspaces').update({events: imported.data.events}).eq('organization_id', orgId);
+  const row = imported.data.find(e => e.document.id === id);
+  const changed = await thirdClient.rpc('event_save', {p_event: id, p_revision: row.revision, p_document: row.document});
   assert.ifError(changed.error);
   act(() => setDraft({description: 'Conflict must not overwrite'}));
   await act(async () => {await assert.rejects(event.flush(), /Outra pessoa atualizou/);});

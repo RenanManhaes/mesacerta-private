@@ -1,0 +1,12 @@
+$ node scripts/test-mct54.mjs
+CA1 PASS: focus SIGNED_IN + TOKEN_REFRESHED preserve input and mounted instance (mounts=1).
+CA2 PASS: same user renewal performs no membership reload, no login redirect (queries=1).
+CA1 PASS: explicit background revalidation retains form before and after response.
+CA1 PASS: failed revalidation retains organization and input with visible error.
+CA3 PASS: expired session shows alert without redirect or loss; isAuthenticated=false.
+CA3 PASS: signing in again as same user preserves form and clears expiration.
+REGRESSION PASS: explicit logout clears session and protected form.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+EXIT_CODE=0

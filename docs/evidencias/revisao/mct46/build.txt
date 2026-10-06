@@ -1,0 +1,35 @@
+$ npm run build
+
+> base44-app@0.0.0 build
+> vite build
+
+[base44] Warning: VITE_BASE44_APP_ID is not set — this build
+[base44] will not know its app id and its API calls will fail.
+[base44] Build with:  base44 build   (or base44 deploy --build)
+[base44] Proxy not enabled (VITE_BASE44_APP_BASE_URL not set)
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 2051 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                        1.98 kB │ gzip:   0.94 kB
+dist/assets/index-BKZkD4Sr.css       129.92 kB │ gzip:  23.92 kB
+dist/assets/purify.es-Bvo9QlJ8.js     28.08 kB │ gzip:  11.08 kB
+dist/assets/index.es-B73DwqVe.js     151.40 kB │ gzip:  48.89 kB
+dist/assets/html2canvas-Bj60qA4j.js  199.48 kB │ gzip:  46.77 kB
+dist/assets/export-BSo6IkmF.js       400.57 kB │ gzip: 130.33 kB
+dist/assets/index-DjAIJqMD.js        981.94 kB │ gzip: 286.78 kB
+
+✓ built in 3.12s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 1.8s of this 3.1s build (58%).
+1 callback is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
+  - plugin vite:css transform (4 calls)
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+
+EXIT_CODE=0
