@@ -5,6 +5,7 @@ const directory = 'docs/evidencias/mct57';
 mkdirSync(directory, {recursive: true});
 for (const [name, command] of [
   ['acceptance', 'node scripts/test-mct57.mjs'],
+  ['join-save', 'node scripts/test-join-save.mjs'],
   ['interface', 'node scripts/test-invite-ui.mjs'],
   ['persistence', 'node scripts/test-mct55.mjs'],
   ['focus', 'node scripts/test-mct54.mjs'],
