@@ -114,6 +114,8 @@ Esta proposta se relaciona às PRs [MCT-57 #28](https://github.com/RenanManhaes/
 
 ## Evidência e reversão
 
+Revisão adicional em 06/10/2026: conferidos os limites da spike, identidade e consumo da liberação, recuperação, caminhos de convite/manual/compra e cálculo de esforço. Nenhum novo achado impeditivo no escopo documental. A proposta continua exigindo decisões de produto antes de implementação; não altera cadastro. `node docs/evidencias/mct64/check.mjs` foi repetido na revisão: critérios, diff sem código, lint, typecheck, build e motor passaram.
+
 `docs/evidencias/mct64/acceptance.txt` registra verificação dos caminhos/modelo/comportamento (CA1), recomendação/custo e soma do esforço por comando (CA2), e diff sem alterações em `src/`, `supabase/`, configuração ou dependências (CA3). Os demais arquivos registram lint, typecheck, build e motor 9/9.
 
 Para reverter a spike, reverter somente o commit documental. Não há banco ou configuração a reverter. Na implementação futura, ativação e reversão da regra serão planejadas e aprovadas separadamente, preservando usuários, eventos e auditoria.

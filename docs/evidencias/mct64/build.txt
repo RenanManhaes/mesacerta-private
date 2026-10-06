@@ -20,7 +20,7 @@ dist/assets/html2canvas-D8tIHcii.js  199.48 kB │ gzip:  46.77 kB
 dist/assets/export-CwlUltNq.js       400.57 kB │ gzip: 130.32 kB
 dist/assets/index-0Ks4_zST.js        971.96 kB │ gzip: 283.59 kB
 
-✓ built in 1.77s
+✓ built in 2.78s
 [plugin builtin:vite-reporter] 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
