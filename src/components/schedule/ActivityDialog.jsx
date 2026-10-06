@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TypeCombobox from '@/components/schedule/TypeCombobox';
+import { useEvent } from '@/context/EventContext';
+import { useActivityTypes } from '@/hooks/useActivityTypes';
+import { DEFAULT_TYPES, findType, normalizeTypeName } from '@/lib/activityTypes';
 import { AlertCircle, Check } from 'lucide-react';
 import { COOL_PALETTE, DEFAULT_COLOR, conflictsFor, validateActivity, endMinutes } from '@/lib/schedule';
 import { minutesToTime, timeToMinutes } from '@/lib/format';
 import { cn } from '@/lib/utils';
-
-export const ACTIVITY_TYPES = ['Credenciamento', 'Abertura', 'Palestra', 'Painel', 'Workshop', 'Intervalo', 'Almoço', 'Networking', 'Apresentação', 'Encerramento', 'Personalizado'];
 
 const fieldCls = 'h-9 text-[13px]';
 const labelCls = 'text-[12px] font-medium';
@@ -42,7 +43,13 @@ export const ColorPicker = ({ value, onChange, name = 'Cor do bloco' }) => (
 );
 
 // Modal de nova atividade. Nada é criado antes de confirmar: onConfirm só roda no envio válido.
-export default function ActivityDialog({ open, onOpenChange, event, onConfirm, types = ACTIVITY_TYPES }) {
+export default function ActivityDialog({ open, onOpenChange, event, onConfirm }) {
+  const { orgId } = useEvent();
+  const { types, loading: typesLoading, error: typesError, create: createType } = useActivityTypes(orgId);
+  const [typeError, setTypeError] = useState('');
+  const [saving, setSaving] = useState(false);
+  // Se os tipos não carregarem, as sugestões caem na lista inicial (o tipo novo ainda é criado ao confirmar).
+  const suggestions = typesError ? DEFAULT_TYPES.map((name) => ({ id: name, name })) : types;
   const schedule = useMemo(() => event?.schedule || [], [event]);
   const [form, setForm] = useState(/** @type {Record<string, any>} */ ({}));
   const [submitted, setSubmitted] = useState(false);
@@ -50,8 +57,9 @@ export default function ActivityDialog({ open, onOpenChange, event, onConfirm, t
 
   useEffect(() => {
     if (open) {
-      setForm({ title: '', start: suggestedStart(schedule), duration: 30, speaker: '', type: types.includes('Palestra') ? 'Palestra' : types[0], notes: '', color: DEFAULT_COLOR });
+      setForm({ title: '', start: suggestedStart(schedule), duration: 30, speaker: '', type: 'Palestra', notes: '', color: DEFAULT_COLOR });
       setSubmitted(false);
+      setTypeError('');
     }
     // só reinicia ao abrir
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,11 +70,21 @@ export default function ActivityDialog({ open, onOpenChange, event, onConfirm, t
   const conflicts = hasErrors && (errors.start || errors.duration) ? [] : conflictsFor(schedule, { id: '__novo', ...value });
   const members = (event?.staffMembers || []).filter((p) => p.active !== false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
-    if (hasErrors) return;
-    onConfirm(value);
+    if (hasErrors || saving) return;
+    // Tipo digitado que não existe ainda: é criado na organização ao confirmar e passa a aparecer nas sugestões.
+    const typed = normalizeTypeName(form.type) || 'Palestra';
+    const existing = findType(suggestions, typed);
+    let typeName = existing ? existing.name : typed;
+    if (!existing) {
+      setSaving(true); setTypeError('');
+      try { typeName = (await createType(typed)).name; }
+      catch (err) { setTypeError(`Não foi possível criar o tipo: ${err.message}`); setSaving(false); return; }
+      setSaving(false);
+    }
+    onConfirm({ ...value, type: typeName });
     onOpenChange(false);
   };
 
@@ -99,11 +117,9 @@ export default function ActivityDialog({ open, onOpenChange, event, onConfirm, t
             <datalist id="act-members">{members.map((p) => <option key={p.id} value={p.name} />)}</datalist>
           </div>
           <div>
-            <Label className={labelCls}>Tipo</Label>
-            <Select value={form.type || ''} onValueChange={(v) => set('type', v)}>
-              <SelectTrigger aria-label="Tipo" className={fieldCls}><SelectValue /></SelectTrigger>
-              <SelectContent>{types.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label htmlFor="act-type" className={labelCls}>Tipo</Label>
+            <TypeCombobox id="act-type" value={form.type || ''} onChange={(v) => set('type', v)} types={suggestions} loading={typesLoading} />
+            {typeError && <p role="alert" className="mt-1 text-[11px] text-danger">{typeError}</p>}
           </div>
           <div className="col-span-2">
             <Label htmlFor="act-notes" className={labelCls}>Observação</Label>
@@ -121,7 +137,7 @@ export default function ActivityDialog({ open, onOpenChange, event, onConfirm, t
           )}
           <DialogFooter className="col-span-2">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-8 text-[13px]">Cancelar</Button>
-            <Button type="submit" className="h-8 text-[13px]">Adicionar atividade</Button>
+            <Button type="submit" disabled={saving} className="h-8 text-[13px]">Adicionar atividade</Button>
           </DialogFooter>
         </form>
       </DialogContent>
