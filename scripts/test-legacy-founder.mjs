@@ -43,6 +43,9 @@ sql(`select set_config('request.jwt.claim.sub','${oldOwner}',true);
  update public.platform_events set founder_id='${oldOwner}',document=document||'{"name":"Edited after bootstrap"}' where id='${legacy}';
  update public.event_members set role=case when user_id='${oldOwner}' then 'founder' else 'staff' end where event_id='${legacy}';`);
 const correction=readFileSync('supabase/migrations/20261006180655_confirmed_legacy_founder.sql','utf8');
+// On dependent branches, also exercise the correction after the full role,
+// profile, catalogue and commercial migrations, including their triggers.
+for(const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')&&f>bootstrap&&f<'20261006180655_confirmed_legacy_founder.sql').sort())sql(readFileSync(`supabase/migrations/${file}`,'utf8'));
 assert.match(sql(`insert into auth.users(id,email) values('${randomUUID()}','RENANNASCIMENTO0304@gmail.com');\n${correction}`,3),/conta/);
 console.log('AMBIGUOUS ACCOUNT PASS: compatibility refuses duplicate normalized identities, including an unverified duplicate; transaction rolls back.');
 sql(correction); sql(correction);
