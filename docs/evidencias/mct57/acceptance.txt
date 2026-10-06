@@ -1,0 +1,12 @@
+$ node scripts/test-mct57.mjs
+CA1 PASS: API creates unique eight-character code; Settings offers code copy, role selector, generate/copy invite URL /entrar?codigo=...&convite=... .
+CA2 PASS: code-only JWT joins as staff; director-link JWT joins as director; each sees only invited event, has zero organization memberships; creator remains founder after code entry.
+CA3 revoked-link: HTTP 400, message=Convite inválido ou revogado
+CA3 revoked-code: HTTP 400, message=Código revogado
+CA3 invalid-code: HTTP 400, message=Código inválido; outsider still has zero events.
+CA4 PASS: authenticated database read contains user_id, joined_at, invitation_id, role and entry_kind for both entries.
+RLS restricted-JWT invite escalation: HTTP 403, SQLSTATE 42501, message=Somente o fundador pode gerar convites
+RLS outsider direct table GET: HTTP 200 [] (zero authorized rows).
+Local synthetic fixtures retained; no remote project accessed and no data deleted.
+
+EXIT_CODE=0
