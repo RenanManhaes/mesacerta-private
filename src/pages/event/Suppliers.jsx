@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEventField } from '@/lib/useEventField';
 import { useEvent } from '@/context/EventContext';
 import { supplierOverview, supplierView, updateSupplierPayment } from '@/lib/selectors';
 import { formatBRL, formatDateShort } from '@/lib/format';
@@ -31,6 +32,7 @@ export default function Suppliers() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const { toast } = useToast();
   const o = supplierOverview(ev);
+  const [paymentDrafts, setPaymentDrafts] = useEventField('suppliers.paymentDrafts', {});
 
   const setPaid = (id, value) => updateCurrent(e => updateSupplierPayment(e, id, value));
   const registerFull = id => {
@@ -92,7 +94,12 @@ export default function Suppliers() {
 
               {v.toPay > 0 && (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <Input type="number" aria-label={`Valor pago a ${sup.name}`} placeholder="Valor pago" className="h-8 text-[13px] w-32" onBlur={e => e.target.value && setPaid(sup.id, e.target.value)} />
+                  <Input type="number" aria-label={`Valor pago a ${sup.name}`} placeholder="Valor pago" className="h-8 text-[13px] w-32" value={paymentDrafts[sup.id] || ''} onChange={e => setPaymentDrafts(d => ({ ...d, [sup.id]: e.target.value }))} onBlur={e => {
+                    if (e.target.value) {
+                      setPaid(sup.id, e.target.value);
+                      setPaymentDrafts(d => ({ ...d, [sup.id]: '' }));
+                    }
+                  }} />
                   <Button size="sm" variant="outline" className="h-8 text-[13px] gap-1.5" onClick={() => registerFull(sup.id)}><Check className="h-3.5 w-3.5" /> Quitar</Button>
                 </div>
               )}

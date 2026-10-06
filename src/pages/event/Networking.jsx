@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import {
@@ -64,8 +65,8 @@ export default function Networking() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const input = useMemo(() => networkingInput(ev), [ev]);
   const [result, setResult] = useState(null);
-  const [round, setRound] = useState(1);
-  const [query, setQuery] = useState('');
+  const [round, setRound] = useEventField('networking.round', 1);
+  const [query, setQuery] = useEventField('networking.query', '');
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);

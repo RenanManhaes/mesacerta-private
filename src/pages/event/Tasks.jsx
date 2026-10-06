@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useEvent } from '@/context/EventContext';
 import { taskSummary } from '@/lib/selectors';
 import { daysUntil, formatDateShort } from '@/lib/format';
@@ -18,7 +19,7 @@ const FILTERS = [
 
 export default function Tasks() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [filter, setFilter] = useState('todas');
+  const [filter, setFilter] = useEventField('tasks.filter', 'todas');
   const s = taskSummary(ev);
 
   const setStatus = (id, status) => updateCurrent(e => ({ ...e, tasks: e.tasks.map(t => t.id === id ? { ...t, status } : t) }));

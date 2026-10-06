@@ -1,4 +1,5 @@
 import React from 'react';
+import EventBackupImport from '@/components/EventBackupImport';
 import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
@@ -88,6 +89,7 @@ export default function Events() {
         <Group title="Próximos" hint={`${upcoming.length} evento${upcoming.length !== 1 ? 's' : ''}`} events={upcoming} />
         <Group title="Finalizados" hint={`${finished.length} evento${finished.length !== 1 ? 's' : ''}`} events={finished} />
         {events.some(e=>e.archived) && <details className="platform-panel"><summary className="cursor-pointer">Eventos arquivados</summary>{events.filter(e=>e.archived).map(e=><div key={e.id} className="flex justify-between items-center gap-4 py-3"><span>{e.name}</span><Button variant="outline" onClick={()=>updateEventById(e.id,x=>({...x,archived:false}))}>Restaurar</Button></div>)}</details>}
+        <EventBackupImport />
       </main>
     </div>
   );

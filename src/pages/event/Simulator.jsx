@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React, { useMemo } from 'react';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary } from '@/lib/selectors';
 import { formatBRL, formatBRLc, formatPercent } from '@/lib/format';
@@ -13,11 +14,11 @@ export default function Simulator() {
   const { currentEvent: ev } = useEvent();
   const current = financialSummary(ev);
 
-  const [participants, setParticipants] = useState(ev.expectedAudience ?? 0);
-  const [price, setPrice] = useState(current.avgTicket);
-  const [sponsors, setSponsors] = useState(current.sponsorExpected);
-  const [costPerParticipant, setCostPerParticipant] = useState(current.variablePerParticipant);
-  const [fixedCosts, setFixedCosts] = useState(current.fixedCosts);
+  const [participants, setParticipants] = useEventField('simulator.participants', ev.expectedAudience ?? 0);
+  const [price, setPrice] = useEventField('simulator.price', current.avgTicket);
+  const [sponsors, setSponsors] = useEventField('simulator.sponsors', current.sponsorExpected);
+  const [costPerParticipant, setCostPerParticipant] = useEventField('simulator.costPerParticipant', current.variablePerParticipant);
+  const [fixedCosts, setFixedCosts] = useEventField('simulator.fixedCosts', current.fixedCosts);
 
   const result = useMemo(() => {
     const scenario = financialSummary({

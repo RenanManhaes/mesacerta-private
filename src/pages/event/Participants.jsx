@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React, { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { capacitySummary } from '@/lib/selectors';
@@ -16,9 +17,9 @@ const STATUSES = ['Confirmado','Pendente','Cancelado','Check-in realizado'];
 export default function Participants() {
   const { currentEvent: ev, updateCurrent } = useEvent();
   const [params] = useSearchParams();
-  const [q, setQ] = useState(params.get('q') || '');
-  const [type, setType] = useState('all');
-  const [status, setStatus] = useState('all');
+  const [q, setQ] = useEventField('participants.query', params.get('q') || '');
+  const [type, setType] = useEventField('participants.type', 'all');
+  const [status, setStatus] = useEventField('participants.status', 'all');
   const { toast } = useToast();
   const cap = capacitySummary(ev);
 

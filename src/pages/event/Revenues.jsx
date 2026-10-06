@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useEvent } from '@/context/EventContext';
 import { financialSummary } from '@/lib/selectors';
 import { formatBRL, uid } from '@/lib/format';
@@ -22,7 +23,7 @@ import { Ticket, Banknote, Plus } from 'lucide-react';
 
 export default function Revenues() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useEventField('revenues.draft', null);
   const fin = financialSummary(ev);
   const patch = (p) => setDraft((d) => ({ ...d, ...p }));
   const lots = ev.tickets.flatMap((t) =>

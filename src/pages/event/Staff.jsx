@@ -1,3 +1,4 @@
+import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
 import { useEvent } from '@/context/EventContext';
 import {
@@ -21,8 +22,8 @@ import { saveStaffMember } from '@/lib/staff';
 
 export default function Staff() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [draft, setDraft] = useState(null);
-  const [search, setSearch] = useState('');
+  const [draft, setDraft] = useEventField('staff.draft', null);
+  const [search, setSearch] = useEventField('staff.search', '');
   const [error, setError] = useState('');
   const members = ev.staffMembers || [];
   const filtered = members.filter((p) =>

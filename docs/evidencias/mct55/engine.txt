@@ -1,0 +1,23 @@
+$ node src/lib/networking/engine.test.mjs
+Cenario real: 76 convidados, 14 mesas, 14 rodadas, 7 por mesa
+
+  ok   a grade tem uma linha por participante
+  ok   cada linha tem uma mesa por rodada
+  ok   todo participante visita as 14 mesas, sem repetir nenhuma
+  ok   lotacao por mesa fica entre floor e ceil de P/T (5–6)
+  ok   nenhuma mesa estoura a capacidade
+  ok   ninguem reencontra a mesma pessoa na MESMA mesa
+  ok   nenhuma dupla se encontra mais de 2 vezes
+  ok   a mesma seed reproduz a mesma grade
+  ok   reanalisar a grade da os mesmos numeros
+
+  seed escolhida:            1
+  tempo de geracao:          220ms
+  duplas que se encontram:   2034 de 2850 possiveis (71.4%)
+  encontram-se so uma vez:   1688
+  reencontros:               346
+  contatos por pessoa:       53.5
+
+Motor portado preserva as garantias do cenario real.
+
+EXIT_CODE=0

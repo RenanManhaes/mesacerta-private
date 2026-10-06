@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useEventField } from '@/lib/useEventField';
+import React from 'react';
 import { useEvent } from '@/context/EventContext';
 import { capacitySummary } from '@/lib/selectors';
 import { uid } from '@/lib/format';
@@ -20,7 +21,7 @@ import {
 import { Plus } from 'lucide-react';
 export default function Capacity() {
   const { currentEvent: ev, updateCurrent } = useEvent();
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useEventField('capacity.draft', null);
   const cap = capacitySummary(ev),
     pct = cap.capacity ? (cap.reserved / cap.capacity) * 100 : 0;
   const environments = ev.environments || [];
