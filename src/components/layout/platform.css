@@ -157,3 +157,7 @@
 @media(prefers-reduced-motion:reduce){.reference-net-seat,.reference-gauge path,.reference-chart-bars>div{transition:none}}
 
 @media(max-width:560px){.reference-ring-row{flex-wrap:wrap;justify-content:center}.reference-composition{flex-basis:100%;min-width:0}}
+.platform-kpis button.platform-kpi {cursor:pointer}
+.platform-kpis button.platform-kpi:focus-visible {outline:2px solid hsl(var(--ring));outline-offset:2px}
+.reference-repeats-flash {background:hsl(var(--warning)/.28);box-shadow:0 0 0 6px hsl(var(--warning)/.28);transition:background-color .6s ease-out,box-shadow .6s ease-out}
+@media(prefers-reduced-motion:reduce){.reference-repeats-flash{transition:none}}

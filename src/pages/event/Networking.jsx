@@ -71,6 +71,10 @@ export default function Networking() {
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
   const pendingGeneration = useRef(null);
+  const analysisPanel = useRef(null);
+  const repeatsList = useRef(null);
+  const flashTimer = useRef(null);
+  const [flashRepeats, setFlashRepeats] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
   const cfg = ev.networking || {};
@@ -168,6 +172,30 @@ export default function Networking() {
     };
   }, [playing, result]);
   const meetings = useMemo(() => encounterSummary(result), [result]);
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+  // Repetitions indicator -> opens the analysis, scrolls to the list and
+  // highlights it for ~1s. With prefers-reduced-motion: jump straight there,
+  // no animated scroll and no colour flash (focus marks the destination).
+  const goToRepeats = () => {
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    if (analysisPanel.current) analysisPanel.current.open = true;
+    const target = repeatsList.current;
+    if (!target) return;
+    target.scrollIntoView({
+      behavior: reduced ? 'auto' : 'smooth',
+      block: 'start',
+    });
+    target.focus({ preventScroll: true });
+    clearTimeout(flashTimer.current);
+    if (reduced) {
+      setFlashRepeats(false);
+      return;
+    }
+    setFlashRepeats(true);
+    flashTimer.current = setTimeout(() => setFlashRepeats(false), 1000);
+  };
   const exportRoutes = async (format) => {
     setExporting(true);
     setError('');
@@ -261,6 +289,7 @@ export default function Networking() {
                 : 'Nenhum encontro repetido'
               : 'Aguardando distribuição'
           }
+          onClick={result ? goToRepeats : undefined}
         />
       </div>
       {error && (
@@ -410,7 +439,7 @@ export default function Networking() {
               )}
             </Panel>
           </div>
-          <details className="platform-panel">
+          <details className="platform-panel" ref={analysisPanel}>
             <summary>Análise de reencontros e exportação</summary>
             <p className="text-sm text-muted-foreground my-3">
               Seed {result.seed} · {result.analise.sameTable} duplas reencontram
@@ -424,7 +453,19 @@ export default function Networking() {
             >
               Exportar CSV
             </Button>
-            <ul className="mt-4 space-y-2">
+            <ul
+              id="networking-repeats-list"
+              ref={repeatsList}
+              tabIndex={-1}
+              aria-label="Lista de repetições"
+              data-testid="repeats-list"
+              className={`mt-4 space-y-2 rounded-sm outline-offset-4 ${flashRepeats ? 'reference-repeats-flash' : ''}`}
+            >
+              {!result.analise.pairs.length && (
+                <li className="text-sm text-muted-foreground">
+                  Nenhuma dupla repetida.
+                </li>
+              )}
               {result.analise.pairs.map((pair) => (
                 <li key={`${pair.a}-${pair.b}`} className="text-sm">
                   {result.input.mobile[pair.a].name} +{' '}
