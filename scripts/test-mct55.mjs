@@ -33,6 +33,8 @@ assert.ifError(createdOrg.error);
 const memberships = await firstClient.from('memberships').select('organization_id').eq('user_id', added.data.user.id);
 assert.ifError(memberships.error);
 const orgId = memberships.data[0].organization_id;
+const permission = await admin.from('user_event_permissions').update({multi_event: true}).eq('user_id', added.data.user.id);
+assert.ifError(permission.error); // This test intentionally imports a second event.
 const id = randomUUID();
 const fixture = {id, name: 'Synthetic event', participants: [], tasks: [], expenses: [], revenues: [], suppliers: [], sponsors: [], tickets: [], sponsorPlans: [], schedule: [], modules: {networking: true}, networking: {tables: 3, rounds: 3, tableList: [{id: 'table-a', name: 'Table A', capacity: 4}], participantSettings: {}}, networkingDistribution: {signature: 'synthetic', tab: [[1,2,3]], seed: 1}};
 const inserted = await firstClient.rpc('event_create', {p_org: orgId, p_document: fixture});

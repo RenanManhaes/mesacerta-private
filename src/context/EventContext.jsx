@@ -29,6 +29,7 @@ export function EventProvider({ children }) {
   const identity = useRef('');
   const revision = useRef({});
   const [eventAccess, setEventAccess] = useState({});
+  const [creationPermission, setCreationPermission] = useState({canCreate:false,multiEvent:false});
   const acknowledged = useRef('');
   const latest = useRef(state.events);
   const writing = useRef(null);
@@ -53,9 +54,12 @@ export function EventProvider({ children }) {
     setLoading(true);
     (async () => {
       try {
-        const { data, error } = await supabase.rpc('event_list');
+        const [result, permission] = await Promise.all([supabase.rpc('event_list'),supabase.rpc('event_creation_permission')]);
+        const {data,error} = result;
         if (error) throw new Error(error.message);
+        if (permission.error) throw new Error(permission.error.message);
         if (cancelled) return;
+        setCreationPermission(permission.data);
         const events = data.map(row => row.document);
         revision.current = Object.fromEntries(data.map(row => [row.document.id, row.revision]));
         setEventAccess(Object.fromEntries(data.map(row => [row.document.id, row])));
@@ -217,6 +221,7 @@ export function EventProvider({ children }) {
     const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: emptyEventTemplate(data)});
     if (error) throw error;
     const ev = row.document;
+    setCreationPermission(row.creationPermission);
     revision.current[ev.id] = row.revision;
     setEventAccess(access => ({...access, [ev.id]: row}));
     acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current || '[]'), ev]);
@@ -235,6 +240,7 @@ export function EventProvider({ children }) {
       const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: document});
       if (error) throw error;
       revision.current[document.id] = row.revision;
+      setCreationPermission(row.creationPermission);
       setEventAccess(access => ({...access, [document.id]: row}));
       acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current), row.document]);
       setState(s => {const events = [...s.events, row.document]; latest.current = events; return {...s, events};});
@@ -256,6 +262,7 @@ export function EventProvider({ children }) {
   const value = {
     events,
     eventAccess,
+    canCreateEvent: creationPermission.canCreate,
     access: eventAccess[currentEvent?.id],
     reloadEvents: () => setLoadAttempt(n => n + 1),
     currentEvent,

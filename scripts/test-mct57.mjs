@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
-import {account,rpc} from './local-api.mjs';
+import {account,rpc,permitMultiple} from './local-api.mjs';
 const founder = await account('mct57-founder'), staff = await account('mct57-staff'), director = await account('mct57-director'), outsider = await account('mct57-outsider');
+await permitMultiple(founder); // Explicit local commercial exception for multi-event regression fixtures.
 const org = await rpc(founder.client,'criar_organizacao',{p_nome:'Synthetic MCT57'});
 const membership = await founder.client.from('memberships').select('organization_id').eq('user_id',founder.user.id).single();
 assert.ifError(membership.error);

@@ -57,7 +57,7 @@ function Group({ title, hint, events }) {
 }
 
 export default function Events() {
-  const { events, updateEventById } = useEvent();
+  const { events, updateEventById, canCreateEvent } = useEvent();
   const navigate = useNavigate();
   const planning = events.filter(e => !e.archived && ['planejamento', 'confirmado'].includes(e.status));
   const upcoming = events.filter(e => !e.archived && e.status === 'andamento');
@@ -72,9 +72,9 @@ export default function Events() {
             <span className="font-display font-bold text-[18px] tracking-tight">Mesa Certa</span>
           </div>
           <div className="flex items-center gap-2">
-          <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
+          {canCreateEvent && <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
             <Plus className="h-3.5 w-3.5" /> Criar evento
-          </Button>
+          </Button>}
           <Button variant="outline" size="sm" onClick={() => navigate('/entrar')}>Entrar em um evento</Button>
           <LogoutButton className="h-8 gap-1.5 text-[13px]" />
           </div>
@@ -92,7 +92,7 @@ export default function Events() {
         <Group title="Próximos" hint={`${upcoming.length} evento${upcoming.length !== 1 ? 's' : ''}`} events={upcoming} />
         <Group title="Finalizados" hint={`${finished.length} evento${finished.length !== 1 ? 's' : ''}`} events={finished} />
         {events.some(e=>e.archived) && <details className="platform-panel"><summary className="cursor-pointer">Eventos arquivados</summary>{events.filter(e=>e.archived).map(e=><div key={e.id} className="flex justify-between items-center gap-4 py-3"><span>{e.name}</span><Button variant="outline" onClick={()=>updateEventById(e.id,x=>({...x,archived:false}))}>Restaurar</Button></div>)}</details>}
-        <EventBackupImport />
+        {canCreateEvent && <EventBackupImport />}
       </main>
     </div>
   );

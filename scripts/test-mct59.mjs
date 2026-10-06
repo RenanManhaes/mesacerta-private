@@ -6,8 +6,9 @@ import {pathToFileURL} from 'node:url';
 import React from 'react';
 import {act,create} from 'react-test-renderer';
 import ts from 'typescript';
-import {account,rpc} from './local-api.mjs';
+import {account,rpc,permitMultiple} from './local-api.mjs';
 const founder=await account('mct59-founder'),staff=await account('mct59-staff');
+await permitMultiple(founder); // Explicit local commercial exception for multi-event regression fixtures.
 await rpc(founder.client,'criar_organizacao',{p_nome:'Synthetic MCT59'});
 const org=await founder.client.from('memberships').select('organization_id').eq('user_id',founder.user.id).single();assert.ifError(org.error);
 const p_org=org.data.organization_id;
