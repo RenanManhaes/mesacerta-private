@@ -26,7 +26,7 @@ const taskTone = (t) => {
 };
 
 export default function Tasks() {
-  const { currentEvent: ev, updateCurrent, commitCurrent } = useEvent();
+  const { currentEvent: ev, updateCurrent, commitCurrent, access } = useEvent();
   const [filter, setFilter] = useEventField('tasks.filter', 'todas');
   const [revertNote, setRevertNote] = useState('');
   const s = taskSummary(ev);
@@ -101,7 +101,7 @@ export default function Tasks() {
                                   <div className="text-[11px] text-muted-foreground mt-0.5">{t.category} · {t.date ? formatDateShort(t.date) : 'sem data'} {tone === 'overdue' && <span className="text-danger">· atrasada</span>}</div>
                                 </div>
                                 <div className="col-span-12">
-                                  <TaskOwnerSelect label={`Responsável por ${t.name}`} members={ev.staffMembers || []} ownerId={t.ownerId || ''} owner={t.owner || ''} onChange={id=>setOwner(t.id,id)}/>
+                                  {access?.role === 'staff' ? <span>{t.owner || 'Minha tarefa'}</span> : <TaskOwnerSelect label={`Responsável por ${t.name}`} members={ev.staffMembers || []} ownerId={t.ownerId || ''} owner={t.owner || ''} onChange={id=>setOwner(t.id,id)}/>}
                                 </div>
                                 <div className="col-span-12 flex justify-end">
                                   <Select value={t.status} onValueChange={v => setStatus(t.id, v)}>

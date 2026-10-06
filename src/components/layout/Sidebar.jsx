@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
+import {visibleSections,eventHome} from '@/lib/eventAccess';
 import LogoutButton from '@/components/LogoutButton';
 import { formatDateFull, daysUntil } from '@/lib/format';
 import {
@@ -47,7 +48,7 @@ const sections = [
 ];
 
 export function SidebarContent({ onNavigate }) {
-  const { events, currentEvent, setCurrentEventId } = useEvent();
+  const { events, currentEvent, setCurrentEventId, access, eventAccess } = useEvent();
   const navigate = useNavigate();
   const location = useLocation();
   const navRef = useRef(null);
@@ -71,7 +72,7 @@ export function SidebarContent({ onNavigate }) {
 
   const switchEvent = (id) => {
     setCurrentEventId(id);
-    navigate(`/event/${id}/dashboard`);
+    navigate(eventHome(id,eventAccess[id]));
     onNavigate?.();
   };
 
@@ -113,7 +114,7 @@ export function SidebarContent({ onNavigate }) {
       {/* Nav */}
       <nav ref={navRef} className="platform-nav relative flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-5">
         <span ref={indicatorRef} className="platform-nav-indicator" aria-hidden="true" />
-        {sections.map((sec, i) => (
+        {visibleSections(sections,currentEvent,access?.role).map((sec, i) => (
           <div key={i}>
             {sec.group && (
               <div className="px-2 mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{sec.group}</div>
