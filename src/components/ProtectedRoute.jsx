@@ -9,13 +9,13 @@ const DefaultFallback = () => (
 );
 
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
-  const { isAuthenticated, authChecked, memberships, membershipsLoading } = useAuth();
+  const { isAuthenticated, authChecked, memberships, membershipsLoading, sessionExpired, membershipError, refreshMemberships } = useAuth();
 
   if (!authChecked) {
     return fallback;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !sessionExpired) {
     return unauthenticatedElement;
   }
 
@@ -27,8 +27,17 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
   // user sees nothing in any domain table until one exists. Gate on this
   // before rendering the protected tree, not after it renders empty.
   if (memberships.length === 0) {
+    if (membershipError) return <div role="alert">{membershipError} <button onClick={refreshMemberships}>Tentar novamente</button></div>;
     return <CreateOrganization />;
   }
 
-  return <Outlet />;
+  // Keep this structure stable across auth events so Outlet never remounts.
+  return <>
+    {sessionExpired && <div role="alert" className="bg-destructive/10 text-destructive p-4">
+      Sua sessão expirou. Seu trabalho continua nesta aba. Entre novamente em outra aba para continuar salvando.
+      {' '}<a href="/login" target="_blank" rel="noopener noreferrer" className="underline">Entrar novamente</a>
+    </div>}
+    {membershipError && <div role="alert">{membershipError} <button onClick={refreshMemberships}>Tentar novamente</button></div>}
+    <Outlet />
+  </>;
 }
