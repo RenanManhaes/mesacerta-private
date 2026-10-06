@@ -1,14 +1,12 @@
 import { useEventField } from '@/lib/useEventField';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import { useAuth } from '@/lib/AuthContext';
-import { supabase } from '@/api/supabaseClient';
+import EventInvites from '@/components/EventInvites';
 import {
   PageHeader,
   Panel,
   Field,
-  initials,
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -27,7 +25,6 @@ import {
   Network,
   Gauge,
   Check,
-  UserPlus,
   Archive,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -41,8 +38,7 @@ const modules = [
   ['capacity', 'Capacidade', Gauge],
 ];
 export default function EventSettings() {
-  const { currentEvent: ev, updateCurrent, orgId } = useEvent();
-  const { memberships } = useAuth();
+  const { currentEvent: ev, updateCurrent } = useEvent();
   const [draft, setDraft] = useEventField('settings.draft', () =>
     Object.fromEntries(
       [
@@ -60,40 +56,9 @@ export default function EventSettings() {
       ].map((key) => [key, key === 'modules' ? { ...ev.modules } : ev[key]]),
     ),
   );
-  const [team, setTeam] = useState([]),
-    [teamError, setTeamError] = useState(''),
-    [email, setEmail] = useState(''),
-    [invite, setInvite] = useState(false),
-    [pending, setPending] = useState(false),
-    [archive, setArchive] = useState(false);
+  const [archive, setArchive] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const admin = memberships.some(
-    (m) => m.organization_id === orgId && ['owner', 'admin'].includes(m.role),
-  );
-  const loadTeam = async () => {
-    if (!orgId) return;
-    const { data, error } = await supabase.rpc('platform_team', {
-      p_org: orgId,
-    });
-    setTeam(data || []);
-    setTeamError(error ? 'Não foi possível carregar a equipe.' : '');
-  };
-  useEffect(() => {
-    let active = true;
-    if (orgId)
-      supabase
-        .rpc('platform_team', { p_org: orgId })
-        .then(({ data, error }) => {
-          if (active) {
-            setTeam(data || []);
-            setTeamError(error ? 'Não foi possível carregar a equipe.' : '');
-          }
-        });
-    return () => {
-      active = false;
-    };
-  }, [orgId]);
   const set = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const dirty = Object.keys(draft).some(key=>JSON.stringify(draft[key])!==JSON.stringify(ev[key]));
   const save = () => {
@@ -110,29 +75,6 @@ export default function EventSettings() {
       title: 'Alterações aplicadas',
       description: 'Acompanhe o salvamento no topo.',
     });
-  };
-  const addMember = async (e) => {
-    e.preventDefault();
-    setPending(true);
-    try {
-      const { error } = await supabase.rpc('platform_add_member', {
-        p_org: orgId,
-        p_email: email,
-      });
-      if (error) throw error;
-      await loadTeam();
-      setInvite(false);
-      setEmail('');
-      toast({ title: 'Pessoa adicionada à organização' });
-    } catch (err) {
-      toast({
-        title: 'Não foi possível adicionar',
-        description: err.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setPending(false);
-    }
   };
   return (
     <div className="reference-page">
@@ -257,41 +199,7 @@ export default function EventSettings() {
             </div>
           ))}
         </Panel>
-        <Panel
-          title="Equipe"
-          extra={
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!admin}
-              onClick={() => setInvite(true)}
-            >
-              <UserPlus size={16} />
-              Convidar
-            </Button>
-          }
-        >
-          {team.map((m) => (
-            <div className="reference-list-row" key={m.id}>
-              <span className="reference-avatar coral">{initials(m.name)}</span>
-              <span>
-                <b>{m.name}</b>
-                <small>{m.email}</small>
-              </span>
-              <span className="reference-tag">
-                {m.role === 'owner'
-                  ? 'Dono'
-                  : m.role === 'admin'
-                    ? 'Administrador'
-                    : 'Membro'}
-              </span>
-            </div>
-          ))}
-          {teamError && <p className="text-danger text-sm">{teamError}</p>}
-          <p className="text-muted-foreground text-xs mt-3">
-            A equipe da organização tem acesso aos seus eventos.
-          </p>
-        </Panel>
+        <EventInvites />
         <Panel title="Zona de risco">
           <p className="text-muted-foreground text-sm mb-4">
             Arquivar remove o evento da lista principal, mas mantém os dados.
@@ -306,38 +214,6 @@ export default function EventSettings() {
           </Button>
         </Panel>
       </div>
-      <Dialog open={invite} onOpenChange={setInvite}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Convidar para a organização</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={addMember} className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Informe o e-mail de uma pessoa que já criou e confirmou sua conta
-              no Mesa Certa. Ela receberá acesso como membro da organização.
-            </p>
-            <Field
-              label="E-mail"
-              type="email"
-              required
-              value={email}
-              onChange={setEmail}
-            />
-            <DialogFooter>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setInvite(false)}
-              >
-                Cancelar
-              </Button>
-              <Button disabled={pending} type="submit">
-                {pending ? 'Adicionando…' : 'Adicionar membro'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
       <Dialog open={archive} onOpenChange={setArchive}>
         <DialogContent>
           <DialogHeader>
