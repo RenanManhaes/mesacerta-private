@@ -12,13 +12,14 @@ export default function JoinEvent() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { reloadEvents } = useEvent();
+  const { reloadEvents, flush } = useEvent();
   const navigate = useNavigate();
   const invitation = params.get('convite');
   const returnTo = `/entrar?${new URLSearchParams({codigo: code, ...(invitation ? {convite: invitation} : {})})}`;
   const join = async e => {
     e.preventDefault(); setError(''); setPending(true);
     try {
+      await flush();
       const {data, error: failure} = await supabase.rpc('event_join', {p_code: code, p_invitation: invitation});
       if (failure) throw failure;
       reloadEvents(); navigate(`/event/${data.id}/dashboard`);

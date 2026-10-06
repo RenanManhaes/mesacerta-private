@@ -25,3 +25,6 @@ As políticas de módulos ficam para MCT-60. O documento antigo por organizaçã
 ## Reversão
 
 Reverter o commit antes da aplicação da migração é suficiente. Depois de receber dados, não remover tabelas nem retornar diretamente ao snapshot antigo: exportar os documentos atuais e produzir migração compensatória de consolidação em `platform_workspaces`, preservando todas as versões e registrando responsáveis. Reverter a interface somente após conferir essa cópia. As tabelas de convite e auditoria ficam conservadas; revogar convites ativos se o fluxo for desabilitado.
+# Revisão adicional — 06/10/2026
+
+Corrigido risco de perda de edição: aceitar um convite agora aguarda `flush()` antes de chamar `event_join` e recarregar eventos. Se salvar falhar, a entrada é interrompida, o erro fica visível e o estado em memória é conservado. `node scripts/test-join-save.mjs` exercita o formulário real com falha e sucesso; saídas e os quatro comandos obrigatórios estão em `docs/evidencias/revisao/mct57/`. A correção também será incorporada às PRs dependentes.
