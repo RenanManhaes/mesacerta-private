@@ -1,4 +1,5 @@
-﻿
+$ npm run build
+
 > base44-app@0.0.0 build
 > vite build
 
@@ -19,18 +20,11 @@ dist/assets/html2canvas-D8tIHcii.js  199.48 kB │ gzip:  46.77 kB
 dist/assets/export-CwlUltNq.js       400.57 kB │ gzip: 130.32 kB
 dist/assets/index-0Ks4_zST.js        971.96 kB │ gzip: 283.59 kB
 
+✓ built in 2.16s
 [plugin builtin:vite-reporter] 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 3.96s
-[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 3.1s of this 3.9s build (80%).
-The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
-  - plugin vite:build-html transform (33%, 1.3s, 1 call)
-Additional callback time came from the callbacks below and from callbacks under 1s.
-1 callback is listed without a time. Its calls overlapped, so the time inside one call includes work from other calls. To find its cost, profile the build with `node --cpu-prof`:
-  - plugin vite:css transform (4 calls)
-See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
-System.Management.Automation.RemoteException
+
 EXIT_CODE=0

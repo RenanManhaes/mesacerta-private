@@ -35,6 +35,7 @@ console.log(summary);
 ```
 
 Nenhuma regra de acesso foi alterada nesta entrega. As evidências de API/RLS
-pertencem às PRs de implementação e ao relatório de revisão referenciado no
-PRD. O ajuste do fundador dos eventos reais na migração permanece pendente;
-este conjunto de verificações não afirma que foi aplicado.
+pertencem às PRs de implementação e aos relatórios referenciados no PRD. O
+ajuste do fundador do legado foi versionado e testado localmente na corrente
+de implementação; este conjunto de verificações não afirma que foi aplicado
+no banco real.

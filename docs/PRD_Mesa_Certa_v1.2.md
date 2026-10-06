@@ -1562,7 +1562,7 @@ Para novos eventos, o fundador é a **conta autenticada que criou o evento**. Es
 
 Ser fundador de um evento não transforma uma pessoa em fundador da plataforma nem libera outros eventos ou organizações. A exceção comercial de Renan é descrita na seção 56.
 
-**Orientação para o legado:** a implementação em revisão usa o proprietário mais antigo da organização como fallback porque os documentos não guardavam o criador autenticado. A informação humana agora fornecida substitui essa inferência para os eventos reais existentes: a migração deve conferir a conta/UUID de Renan e seus eventos, preservando os dados, antes de aplicação real. Este PRD não afirma que o mapeamento já foi corrigido ou aplicado no banco.
+**Orientação para o legado:** a versão inicial inferia o fundador pelo proprietário mais antigo da organização porque os documentos não guardavam o criador autenticado. A confirmação humana substitui essa inferência. A [correção na PR #28](https://github.com/RenanManhaes/mesacerta-private/pull/28), incorporada às dependentes, exige a conta única e verificada de Renan no bootstrap e acrescenta `20261006180655_confirmed_legacy_founder.sql` para ambientes que aplicaram a versão anterior. Somente IDs presentes no backup legado são corrigidos; documentos e criadores de eventos novos são preservados. PostgreSQL local e API com tokens reais locais provaram a correção, inclusive HTTP 403 ao proprietário antigo e HTTP 200 a Renan para gerar convite. Antes de aplicação real, conferir conta/UUID e inventário dos IDs do backup. Este PRD não afirma que a correção já foi aplicada no banco de produção.
 
 ### Matriz de papéis — MCT-60
 
@@ -1698,7 +1698,7 @@ Dependências de revisão/integração autorizadas: **MCT-57 → MCT-60 → MCT-
 
 - [Conferência das telas de referência](qa/reference-screens-review.md) e [revisão da integração visual](qa/platform-design-review.md): evidência histórica do design. Suas descrições antigas de equipe/persistência não substituem as novas regras deste PRD.
 - `src/index.css`, `src/components/layout/platform.css`, `src/styles/chart-palette.css` e `src/pages/DesignSystem.jsx`: tokens, componentes e referências visuais integrados.
-- [Relatório de revisão das PRs de acesso](https://github.com/RenanManhaes/mesacerta-private/blob/7227d97/docs/revisao-prs-mct.md): duas falhas corrigidas, evidências locais e condições de aplicação; confirmação posterior de fundador do legado nesta versão atualiza a premissa histórica daquele relatório.
+- [Relatório de revisão das PRs de acesso](https://github.com/RenanManhaes/mesacerta-private/blob/7227d97/docs/revisao-prs-mct.md): duas falhas corrigidas, evidências locais e condições de aplicação; confirmação posterior de fundador do legado nesta versão atualiza a premissa histórica daquele relatório. A [preparação da integração](https://github.com/RenanManhaes/mesacerta-private/blob/6e51b35/docs/integracao-prs-mct.md) registra a correção posterior, regressão completa, autorização de merge e coordenação com banco/publicação.
 - [Unificação](unificacao.md) e [limites do Jev](jev-no-mesa-certa.md): origem do motor e limites da IA. Não interpretar os estudos como autorização para reescrever motor, automatizar contas ou mudar cadastro.
 
 ---
@@ -1740,6 +1740,6 @@ Antes de cada PR de implementação: `npm run lint`, `npm run typecheck`, `npm r
 | Fechar cadastro / pagamento | Intenção e proposta registradas; aguarda decisão e implementação própria. Nenhuma ativação foi feita pela spike. |
 | Publicação e banco real | Este documento não autoriza merge, deploy ou migração em produção. Conferir conta histórica, dados e versão de aplicação antes de aplicar. |
 
-Esta atualização é documental: não altera estilos, telas, algoritmo, cadastro, permissões ou dados. A correção do mapeamento histórico de fundador na migração em revisão permanece uma adequação necessária antes da aplicação real. Estudos de IA, edição offline, cobrança/planos, envio de convites por e-mail, permissões individuais por módulo, importação de equipe, várias trilhas e edição manual de assentos continuam fora deste lote.
+Esta atualização é documental: não altera estilos, telas, algoritmo, cadastro, permissões ou dados. A correção do mapeamento histórico foi versionada e testada nas PRs de implementação; a conferência dos IDs e da conta real continua necessária antes da aplicação em produção. Estudos de IA, edição offline, cobrança/planos, envio de convites por e-mail, permissões individuais por módulo, importação de equipe, várias trilhas e edição manual de assentos continuam fora deste lote.
 
 **Versão oficial:** PRD Mesa Certa v1.2 — 06/10/2026.
