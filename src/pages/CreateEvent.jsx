@@ -34,7 +34,11 @@ export default function CreateEvent() {
 
   const canNext = step === 0 ? data.name && data.date : step === 1 ? (data.unsure || data.expectedAudience) : true;
 
-  const finish = () => {
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
+  const finish = async () => {
+    setPending(true); setError('');
+    try {
     const c = data.choices;
     const modules = {
       tickets: c.tickets === 'Sim',
@@ -43,7 +47,7 @@ export default function CreateEvent() {
       schedule: c.schedule === 'Sim',
       networking: c.networking === 'Sim'
     };
-    const ev = addEvent({
+    const ev = await addEvent({
       name: data.name,
       date: data.date,
       city: data.city,
@@ -53,6 +57,7 @@ export default function CreateEvent() {
       modules
     });
     navigate(`/event/${ev.id}/dashboard`);
+    } catch (err) {setError(err.message);} finally {setPending(false);}
   };
 
   return (
@@ -69,6 +74,7 @@ export default function CreateEvent() {
       </header>
 
       <main className="max-w-[640px] mx-auto px-5 sm:px-8 py-10">
+        {error && <p role="alert">{error}</p>}
         <div className="flex gap-1.5 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className={cn('h-0.5 flex-1 rounded-full transition-colors', i <= step ? 'bg-primary' : 'bg-border')} />
@@ -138,7 +144,7 @@ export default function CreateEvent() {
           {step < STEPS.length - 1 ? (
             <Button disabled={!canNext} onClick={() => setStep(s => s + 1)} className="gap-1.5 text-[13px]">Continuar <ArrowRight className="h-3.5 w-3.5" /></Button>
           ) : (
-            <Button onClick={finish} className="gap-1.5 text-[13px]"><Check className="h-3.5 w-3.5" /> Criar evento</Button>
+            <Button disabled={pending} onClick={finish} className="gap-1.5 text-[13px]"><Check className="h-3.5 w-3.5" /> Criar evento</Button>
           )}
         </div>
       </main>

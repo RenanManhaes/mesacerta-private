@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {randomUUID} from 'node:crypto';
+import {createClient} from '@supabase/supabase-js';
+const result = spawnSync('npx --yes supabase status -o json', {shell: true, encoding: 'utf8'});
+assert.equal(result.status, 0, 'Start local Supabase first');
+const config = JSON.parse(result.stdout.slice(result.stdout.indexOf('{')));
+assert.match(config.API_URL, /^http:\/\/(127\.0\.0\.1|localhost):/);
+const options = {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}};
+const admin = createClient(config.API_URL, config.SERVICE_ROLE_KEY, options);
+export async function account(label, specifiedEmail) {
+  const email = specifiedEmail || `${label}-${randomUUID()}@example.test`, password = randomUUID();
+  const created = await admin.auth.admin.createUser({email, password, email_confirm: true});
+  assert.ifError(created.error);
+  const client = createClient(config.API_URL, config.ANON_KEY, options);
+  const login = await client.auth.signInWithPassword({email, password});
+  assert.ifError(login.error);
+  const request = async (path, method='GET', body) => {
+    const response = await fetch(`${config.API_URL}/rest/v1/${path}`, {method, headers: {apikey: config.ANON_KEY, Authorization: `Bearer ${login.data.session.access_token}`, 'Content-Type': 'application/json'}, ...(body === undefined ? {} : {body: JSON.stringify(body)})});
+    return {status: response.status, body: await response.json()};
+  };
+  return {client, user: created.data.user, request};
+}
+export async function rpc(client, name, args) {const result = await client.rpc(name,args); assert.ifError(result.error); return result.data;}
+export {admin};
