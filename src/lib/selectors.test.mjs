@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { expenseTotal, financialSummary, alerts } from './selectors.js';
+import { networkingInput, generateNetworking, networkingSignature } from '../components/networking/model.js';
+import { analyze } from './networking/engine.js';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/mct34-expenses.json', import.meta.url), 'utf8'));
 const revenue = { faturamentoPrevisto: fixture.totalRevenue, sponsorExpected: fixture.sponsorRevenue };
@@ -194,3 +196,89 @@ import { supplierView, supplierOverview } from './selectors.js';
   assert.equal(o.dueThisWeekCount, 1);
   console.log('PASS MCT-49: resumo, selo Parcial/Orçamento/Quitado e vencimento na semana');
 }
+
+// ---- Painel "Precisa da sua atenção": MCT-29 (ordem), MCT-38 (críticas), MCT-36 (networking) ----
+const PASSADO = '2020-01-01';
+const nivelDe = lista => lista.map(a => a.level);
+const eventoCinco = (extra = {}) => ({
+  suppliers: [{ status: 'pendente', dueDate: PASSADO }],
+  tasks: [{ status: 'A fazer', date: PASSADO }],
+  cateringBudget: 1000,
+  expenses: [{ category: 'Alimentação', type: 'fixed', qty: 1, unitValue: 2000 }],
+  capacity: 100, expectedAudience: 130,
+  ...extra,
+});
+function rodadas(participantes, mesas, rodadasN) {
+  const ev = {
+    modules: { networking: true },
+    participants: Array.from({ length: participantes }, (_, i) => ({ id: 'g' + i, code: 'C' + i, name: 'Pessoa ' + i, company: 'Empresa ' + i, status: 'Confirmado' })),
+    networking: { tables: mesas, rounds: rodadasN, capacityPerTable: Math.ceil(participantes / mesas) + 1, seedBase: 1 },
+  };
+  const gerado = generateNetworking(networkingInput(ev));
+  return { ev, gerado, salvo: { signature: networkingSignature(networkingInput(ev)), tab: gerado.tab, seed: gerado.seed } };
+}
+
+check('MCT-29: crítico que nasce por último aparece nos 4 primeiros (corte do Dashboard)', () => {
+  const lista = alerts(eventoCinco());
+  assert.ok(lista.length >= 5, 'o evento precisa ter mais de quatro alertas');
+  assert.ok(lista.some(a => a.level === 'critico' && a.to === 'capacidade'));
+  const quatro = lista.slice(0, 4);
+  assert.ok(quatro.some(a => a.to === 'capacidade' && a.level === 'critico'), 'capacidade crítica ficou fora do slice(0, 4)');
+  assert.deepEqual(nivelDe(quatro).slice(0, 2), ['critico', 'critico']);
+});
+check('MCT-29: ordem critico, atencao, ok; estável dentro do nível', () => {
+  const lista = alerts(eventoCinco({ capacity: 500 }));
+  const rank = { critico: 0, atencao: 1, ok: 2 };
+  assert.deepEqual(nivelDe(lista), [...nivelDe(lista)].sort((a, b) => rank[a] - rank[b]));
+  assert.equal(lista.at(-1).level, 'ok');
+  const atencao = lista.filter(a => a.level === 'atencao').map(a => a.to);
+  assert.deepEqual(atencao, ['tarefas', 'tarefas', 'financeiro']);
+});
+check('MCT-38: tarefa Crítica não concluída gera alerta atencao para tarefas, com concordância', () => {
+  const um = alerts({ tasks: [{ status: 'A fazer', priority: 'Crítica', owner: 'a' }] }).find(a => /crítica/.test(a.title));
+  assert.equal(um.level, 'atencao');
+  assert.equal(um.to, 'tarefas');
+  assert.equal(um.title, '1 tarefa crítica em aberto.');
+  const dois = alerts({ tasks: [{ status: 'A fazer', priority: 'Crítica', owner: 'a' }, { status: 'Em andamento', priority: 'Crítica', owner: 'a' }] }).find(a => /crítica/.test(a.title));
+  assert.equal(dois.title, '2 tarefas críticas em aberto.');
+  assert.ok(!alerts({ tasks: [{ status: 'Concluído', priority: 'Crítica', owner: 'a' }, { status: 'A fazer', priority: 'Alta', owner: 'a' }] }).some(a => /crítica/.test(a.title)));
+});
+check('MCT-36: módulo ligado sem distribuição salva diz que não foi gerada, sem número', () => {
+  const item = alerts({ modules: { networking: true } }).find(a => a.to === 'networking');
+  assert.equal(item.level, 'atencao');
+  assert.equal(item.title, 'As rodadas de negócio ainda não foram geradas.');
+  assert.ok(!/\d/.test(item.title));
+  assert.ok(!alerts({}).some(a => a.to === 'networking'), 'módulo desligado não gera item');
+});
+check('MCT-36: distribuição salva sem reencontro vira item ok', () => {
+  const { ev, salvo } = rodadas(6, 3, 2);
+  const item = alerts({ ...ev, networkingDistribution: salvo }).find(a => a.to === 'networking');
+  assert.equal(item.level, 'ok');
+  assert.equal(item.title, 'Nas rodadas de negócio, ninguém repete companhia.');
+});
+check('MCT-36: com reencontro, o número exibido é o que analyze() devolve para a grade salva', () => {
+  const { ev, salvo } = rodadas(4, 2, 3);
+  const esperado = analyze(salvo.tab, 4, 2, 3).pairs.length;
+  assert.ok(esperado > 0);
+  const item = alerts({ ...ev, networkingDistribution: salvo }).find(a => a.to === 'networking');
+  assert.equal(item.level, 'atencao');
+  assert.equal(item.title, `Nas rodadas de negócio, ${esperado} duplas se reencontram.`);
+});
+check('MCT-36: grade inconsistente com o cadastro não gera número', () => {
+  const { ev, salvo } = rodadas(4, 2, 3);
+  const outro = { ...ev, participants: ev.participants.slice(0, 3) };
+  const item = alerts({ ...outro, networkingDistribution: salvo }).find(a => a.to === 'networking');
+  assert.equal(item.level, 'atencao');
+  assert.ok(!/\d/.test(item.title));
+  const corrompida = alerts({ ...ev, networkingDistribution: { ...salvo, tab: [[9]] } }).find(a => a.to === 'networking');
+  assert.ok(!/\d/.test(corrompida.title));
+});
+check('MCT-36: o analyze() não roda de novo a cada chamada com a mesma distribuição', () => {
+  const { ev, salvo } = rodadas(4, 2, 3);
+  const entrada = { ...ev, networkingDistribution: salvo };
+  const primeira = alerts(entrada).find(a => a.to === 'networking').title;
+  const tabOriginal = salvo.tab;
+  salvo.tab = null; // se recalculasse, a grade inválida mudaria a resposta
+  assert.equal(alerts(entrada).find(a => a.to === 'networking').title, primeira);
+  salvo.tab = tabOriginal;
+});
