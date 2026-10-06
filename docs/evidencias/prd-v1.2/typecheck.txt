@@ -1,0 +1,5 @@
+﻿
+> base44-app@0.0.0 typecheck
+> tsc -p ./jsconfig.json
+
+EXIT_CODE=0

@@ -27,7 +27,7 @@ Decisão de unificação: **casca do Base44, miolo do motor real.**
 
 | Arquivo | O que é |
 |---|---|
-| `../PRD_Mesa_Certa_v1.1.md` | A especificação do produto. As issues citam seções dele. |
+| `docs/PRD_Mesa_Certa_v1.2.md` | A especificação atual do produto, consolidada com MCT-46–64 e o design aprovado. As seções 1–53 mantêm a numeração citada nas issues. A v1.1 em `docs/` é histórica. |
 | `docs/unificacao.md` | O que cada peça é, o que já foi feito, o que falta. |
 | `docs/jev-no-mesa-certa.md` | Onde o Jev entra e, principalmente, onde não entra. |
 
@@ -110,8 +110,8 @@ Gerar código não é concluir. Concluir é demonstrar os critérios.
 ## Comandos
 
 ```bash
-npm run dev          # frontend contra backend Base44 hospedado
-base44 dev           # backend local + frontend juntos
+npm run dev          # frontend; configurar Supabase em .env.local
+base44 dev           # comando histórico do scaffold, não o backend de dados atual
 npm run lint
 npm run typecheck
 npm run build
@@ -139,6 +139,10 @@ Reuse o cliente SDK e o padrão do plugin Vite que já existem antes de criar
 caminho novo de integração. Prefira o fluxo do CLI Base44 a inventar scripts npm
 para tarefas específicas do Base44.
 
-**Ponto em aberto:** o PRD §48 pede Supabase; o esqueleto veio amarrado ao SDK
-do Base44. A decisão de manter o Base44 como backend ou tratá-lo como andaime de
-UI ainda não foi tomada. Não a tome sozinho.
+**Estado atual:** a plataforma usa Supabase Auth e PostgreSQL para dados e
+controle de acesso, conforme PRD v1.2 §48 e as issues autorizadas. Base44 é a
+origem do esqueleto; dependências residuais não autorizam um segundo backend de
+dados reais. A evolução de acesso por evento está em PRs abertas: consultar o
+estado de entrega no PRD §57 antes de pressupor que suas migrações já foram
+aplicadas. Não alterar arquitetura, cadastro ou permissões além do escopo da
+issue.

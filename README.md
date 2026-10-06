@@ -1,4 +1,15 @@
-# Base44 Project
+# Mesa Certa
+
+Especificação atual: [PRD Mesa Certa v1.2](docs/PRD_Mesa_Certa_v1.2.md).
+Contrato de entrega: [AGENTS.md](AGENTS.md). A v1.2 consolida MCT-46–64,
+o design aprovado e o estado das PRs; [v1.1](docs/PRD_Mesa_Certa_v1.1.md)
+permanece como histórico.
+
+## Instruções originais do esqueleto Base44
+
+As instruções abaixo são do scaffold original. O backend de dados e Auth usado
+pela plataforma é Supabase; para a arquitetura atual e limites de publicação,
+consultar o PRD §§48 e 57 e o contrato de entrega.
 
 Use this repository to run and edit the app locally, then publish changes back through Base44.
 

@@ -1,5 +1,12 @@
 # Unificação: GitHub + Base44
 
+> Documento histórico da unificação. Para requisitos atuais, backend utilizado,
+> identidade visual e situação das 19 issues MCT-46–64, consultar o
+> [PRD Mesa Certa v1.2](PRD_Mesa_Certa_v1.2.md), atualizado em 06/10/2026.
+> Os itens “Falta” e o ponto de decisão de backend abaixo registram aquele
+> momento, não uma declaração atual de pendência. Os limites do motor e a
+> cautela de publicação continuam válidos.
+
 O que cada peça é, o que foi feito e o que falta.
 
 ## As três peças

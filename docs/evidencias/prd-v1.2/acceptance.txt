@@ -1,0 +1,8 @@
+PASS historico v1.1 preservado byte a byte; SHA256=2b489cc8e3486a225f62172435a9fec4228ae87ef5566b44fa3f9f7399edbcd2
+PASS 59 secoes unicas, sequenciais; referencias 1-53 preservadas
+PASS rastreabilidade 19/19 issues MCT-46 a MCT-64; snapshot 13 integradas / 6 PRs abertas
+PASS decisoes explicitas: Renan no legado; criador futuro; codigo staff; spike pendente; migracao historica pendente
+PASS 9 links locais resolvidos
+PASS exemplo financeiro via financialSummary (nao IA): {"receita":69850,"despesas":28800,"resultado":41050,"margem":"58.8","pontoEquilibrio":0}
+PASS diff somente documental; src/, supabase/ e package.json intactos
+EXIT_CODE=0
