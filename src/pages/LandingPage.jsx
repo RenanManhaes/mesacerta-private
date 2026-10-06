@@ -1,11 +1,15 @@
 // @ts-nocheck -- landing visual usa propriedades CSS customizadas em estilos inline.
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Armchair, ArrowRight, Briefcase, CalendarDays, Check, ClipboardCheck, FileText, Handshake, LayoutDashboard, ListChecks, Minus, Network, Shuffle, Truck, Users, Wallet, X } from 'lucide-react';
+import { Armchair, ArrowRight, Briefcase, CalendarDays, Check, ClipboardCheck, FileText, Handshake, LayoutDashboard, ListChecks, MessageCircle, Minus, Network, Shuffle, Truck, Users, Wallet, X } from 'lucide-react';
 import './landing/landing.css';
 import { initLanding } from './landing/landingEffects';
 import LogoutButton from '@/components/LogoutButton';
 import { useAuth } from '@/lib/AuthContext';
+
+// WhatsApp do time de vendas (somente dígitos, com DDI).
+const SALES_WHATSAPP = '5511970858297';
+const SALES_CONTACT_URL = SALES_WHATSAPP ? `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent('Olá! Quero um orçamento do Mesa Certa para um evento com mais de 100 pessoas.')}` : '#planos';
 
 export default function LandingPage() {
   const rootRef = useRef(null);
@@ -149,10 +153,12 @@ export default function LandingPage() {
 </div></section>
 
 <section className="sec" id="planos" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }} data-screen-label="06 Planos"><div className="wrap">
-<div className="sec-head c"><span className="eyebrow" data-reveal>Planos</span><h2 data-reveal style={{ '--d': '1' }}>Todos os módulos. Escolha como pagar.</h2></div>
+<div className="sec-head c"><span className="eyebrow" data-reveal>Planos</span><h2 data-reveal style={{ '--d': '1' }}>Todos os módulos. Você paga por evento.</h2><p className="sec-sub" data-reveal style={{ '--d': '2' }}>Escolha pelo tamanho do público. Sem mensalidade.</p></div>
 <div className="plans">
-<div className="plan" data-reveal><h3>Mensal</h3><div className="pr">R$ 97<small> /mês</small></div><p className="mut">Para começar sem compromisso.</p><ul><li><Check aria-hidden="true" />Até 3 eventos ativos</li><li><Check aria-hidden="true" />1 responsável</li><li><Check aria-hidden="true" />Todos os módulos</li></ul><Link className="btn" to="/register">Assinar mensal</Link></div>
-<div className="plan hl" data-reveal style={{ '--d': '1' }}><span className="tag">Economize R$ 367</span><h3>Anual</h3><div className="pr">R$ 797<small> /ano</small></div><p className="mut">Pagamento único, sem renovação automática.</p><ul><li><Check aria-hidden="true" />Até 3 eventos ativos</li><li><Check aria-hidden="true" />1 responsável</li><li><Check aria-hidden="true" />Todos os módulos</li></ul><Link className="btn btn-p" to="/register">Assinar anual</Link></div>
+<div className="plan" data-reveal><h3>Até 20 pessoas</h3><div className="pr">R$ 47,90<small> /evento</small></div><p className="mut">Para eventos pequenos.</p><ul><li><Check aria-hidden="true" />Todos os módulos</li><li><Check aria-hidden="true" />Equipe do evento: convide diretores e staff</li><li><Check aria-hidden="true" />Até 20 participantes</li></ul><Link className="btn" to="/register">Criar conta e começar</Link></div>
+<div className="plan hl" data-reveal style={{ '--d': '1' }}><span className="tag">Mais escolhido</span><h3>Até 50 pessoas</h3><div className="pr">R$ 97,90<small> /evento</small></div><p className="mut">Para eventos médios.</p><ul><li><Check aria-hidden="true" />Todos os módulos</li><li><Check aria-hidden="true" />Equipe do evento: convide diretores e staff</li><li><Check aria-hidden="true" />Até 50 participantes</li></ul><Link className="btn btn-p" to="/register">Criar conta e começar</Link></div>
+<div className="plan" data-reveal style={{ '--d': '2' }}><h3>Até 100 pessoas</h3><div className="pr">R$ 137,90<small> /evento</small></div><p className="mut">Para eventos maiores.</p><ul><li><Check aria-hidden="true" />Todos os módulos</li><li><Check aria-hidden="true" />Equipe do evento: convide diretores e staff</li><li><Check aria-hidden="true" />Até 100 participantes</li></ul><Link className="btn" to="/register">Criar conta e começar</Link></div>
+<div className="plan" data-reveal style={{ '--d': '3' }}><h3>Mais de 100 pessoas</h3><div className="pr pr-q">Sob consulta</div><p className="mut">Negociado com o time de vendas.</p><ul><li><Check aria-hidden="true" />Todos os módulos</li><li><Check aria-hidden="true" />Equipe do evento: convide diretores e staff</li><li><Check aria-hidden="true" />Mais de 100 participantes</li></ul><a className="btn" href={SALES_CONTACT_URL} target="_blank" rel="noopener noreferrer" aria-label="Falar com vendas pelo WhatsApp"><MessageCircle aria-hidden="true" />Falar com vendas</a></div>
 </div>
 </div></section>
 
@@ -161,7 +167,7 @@ export default function LandingPage() {
 <div className="faq" data-reveal>
 <div className="fq open"><button aria-expanded="true">Minha planilha já funciona. Por que mudar?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Se ela resolve tudo, talvez você não precise. O Mesa Certa faz sentido quando financeiro, participantes, fornecedores e tarefas começam a viver em lugares diferentes.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">Serve para evento sem networking?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. As rodadas de negócio são um módulo opcional. O núcleo é planejamento e operação, com o financeiro separado por evento.</p></div></div></div>
-<div className="fq"><button aria-expanded="false">Posso cuidar de vários eventos ao mesmo tempo?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. Cada evento tem seus próprios dados, números e pendências. Os planos incluem até três eventos ativos.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">Posso cuidar de vários eventos ao mesmo tempo?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. Cada evento tem seus próprios dados, números e pendências. Cada evento é contratado separadamente, pelo tamanho do público.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">Preciso instalar alguma coisa?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não. O Mesa Certa funciona direto no navegador, no computador ou no celular.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">O Mesa Certa vende ingressos?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não nesta versão. Você registra lotes e receitas para acompanhar o resultado; a venda continua na plataforma que você já usa.</p></div></div></div>
 </div>
