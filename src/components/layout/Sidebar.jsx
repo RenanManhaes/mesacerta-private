@@ -22,7 +22,7 @@ const sections = [
     items: [
       { to: 'programacao', label: 'Programação', icon: CalendarDays, module: 'schedule' },
       { to: 'tarefas', label: 'Tarefas', icon: ListChecks },
-      { to: 'diretores-staffs', label: 'Diretores e Staffs', icon: Users },
+      { to: 'equipe', label: 'Equipe do evento', icon: Users },
       { to: 'participantes', label: 'Participantes', icon: Users },
       { to: 'fornecedores', label: 'Fornecedores', icon: Truck, module: 'suppliers' }
     ]
