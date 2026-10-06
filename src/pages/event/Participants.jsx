@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Upload } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { uid } from '@/lib/format';
 
 const TYPES = ['Participante','Convidado','VIP','Palestrante','Equipe','Patrocinador','Expositor','Outro'];
 const STATUSES = ['Confirmado','Pendente','Cancelado','Check-in realizado'];
@@ -20,7 +18,6 @@ export default function Participants() {
   const [q, setQ] = useEventField('participants.query', params.get('q') || '');
   const [type, setType] = useEventField('participants.type', 'all');
   const [status, setStatus] = useEventField('participants.status', 'all');
-  const { toast } = useToast();
   const cap = capacitySummary(ev);
 
   const setTypeField = (id, t) => updateCurrent(e => ({ ...e, participants: e.participants.map(p => p.id === id ? { ...p, type: t } : p) }));
@@ -33,12 +30,6 @@ export default function Participants() {
     return true;
   }), [ev.participants, q, type, status]);
 
-  const mockImport = () => {
-    const names = ['Ana Prado','Bruno Castro','Carla Nunes','Daniel Faria','Eduarda Lima'];
-    updateCurrent(e => ({ ...e, participants: [...e.participants, ...names.map(n => ({ id: uid(), name: n, email: `${n.split(' ')[0].toLowerCase()}@email.com`, phone: '', company: '', type: 'Participante', status: 'Confirmado' }))], confirmed: e.confirmed + names.length }));
-    toast({ title: `${names.length} participantes importados`, duration: 1800 });
-  };
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -46,8 +37,9 @@ export default function Participants() {
           <h1 className="font-display text-[26px] tracking-tight">Participantes</h1>
           <p className="mt-1 text-[14px] text-muted-foreground">{ev.confirmed} confirmados · {ev.pending} pendentes · {cap.available} lugares restantes</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[13px]" onClick={mockImport}><Upload className="h-3.5 w-3.5" /> Importar</Button>
+        <div className="flex items-center gap-2">
+          <span className="text-[12px] text-muted-foreground">Importação de planilha em construção</span>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[13px]" disabled title="Importação de planilha em construção"><Upload className="h-3.5 w-3.5" /> Importar</Button>
         </div>
       </div>
 
