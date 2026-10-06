@@ -1,0 +1,4 @@
+$ node scripts/test-invite-ui.mjs
+CA1 UI PASS: actual EventInvites renders code, copies it, selects director, generates invitation through authenticated API, copies prefilled URL and revokes through the actual button.
+
+EXIT_CODE=0

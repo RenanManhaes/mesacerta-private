@@ -73,6 +73,7 @@ export default function Events() {
           <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
             <Plus className="h-3.5 w-3.5" /> Criar evento
           </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/entrar')}>Entrar em um evento</Button>
           <LogoutButton className="h-8 gap-1.5 text-[13px]" />
           </div>
         </div>
