@@ -1,0 +1,73 @@
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import {readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import React from 'react';
+import {act,create} from 'react-test-renderer';
+import {MemoryRouter} from 'react-router-dom';
+import ts from 'typescript';
+import {account,rpc,admin} from './local-api.mjs';
+const founder=await account('mct60-founder'),staff=await account('mct60-staff'),director=await account('mct60-director');
+await rpc(founder.client,'criar_organizacao',{p_nome:'Synthetic MCT60'});
+const org=await founder.client.from('memberships').select('organization_id').eq('user_id',founder.user.id).single();assert.ifError(org.error);
+let row=await rpc(founder.client,'event_create',{p_org:org.data.organization_id,p_document:{id:randomUUID(),name:'Synthetic role event',status:'planejamento',date:'2026-11-18',modules:{schedule:true,suppliers:true,tickets:true,sponsors:true,networking:true,capacity:true},expenses:[{id:'secret',description:'PRIVATE FINANCE'}],participants:[{id:'person',name:'Public participant'}],schedule:[],tasks:[]}});
+const id=row.document.id;
+await rpc(staff.client,'event_join',{p_code:row.code});
+const invitation=await rpc(founder.client,'event_invite',{p_event:id,p_role:'director'});
+await rpc(director.client,'event_join',{p_code:row.code,p_invitation:invitation});
+let team=await rpc(founder.client,'event_team',{p_event:id});
+const member=team.find(m=>m.user_id===staff.user.id);
+row.document.tasks=[{id:'mine',name:'Assigned to staff',ownerId:member.id,status:'A fazer'},{id:'other',name:'Private task',ownerId:team.find(m=>m.user_id===director.user.id).id,status:'A fazer'}];
+row.revision=await rpc(founder.client,'event_save',{p_event:id,p_revision:row.revision,p_document:row.document});
+let limited=(await rpc(staff.client,'event_list'))[0];
+assert.equal(limited.document.expenses,undefined);assert.equal(limited.document.tasks.length,1);assert.equal(limited.document.tasks[0].id,'mine');
+
+const directory=await mkdtemp(resolve('node_modules/.role-ui-'));let tree;
+globalThis.ResizeObserver=class {observe(){} disconnect(){}};
+try {
+ await writeFile(join(directory,'access.mjs'),await readFile('src/lib/eventAccess.js','utf8'));
+ await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const useEvent=()=>globalThis.__roleContext; export const LogoutButton=()=>null; export const formatDateFull=()=>''; export const daysUntil=()=>0; export const cn=(...x)=>x.filter(Boolean).join(' '); export const DropdownMenu=({children})=>React.createElement('div',null,children); export const DropdownMenuTrigger=DropdownMenu; export const DropdownMenuContent=DropdownMenu; export const DropdownMenuItem=({children,onClick})=>React.createElement('button',{onClick},children);`);
+ let source=await readFile('src/components/layout/Sidebar.jsx','utf8');
+ source=source.replaceAll("'@/lib/eventAccess'","'./access.mjs'");
+ for(const name of ['@/context/EventContext','@/components/LogoutButton','@/lib/format','@/lib/utils','@/components/ui/dropdown-menu'])source=source.replaceAll(`'${name}'`,"'./mocks.mjs'");
+ source=source.replace("import LogoutButton from './mocks.mjs'","import {LogoutButton} from './mocks.mjs'");
+ await writeFile(join(directory,'sidebar.mjs'),ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext}}).outputText);
+ const {SidebarContent}=await import(pathToFileURL(join(directory,'sidebar.mjs')));
+ const mount=access=>{globalThis.__roleContext={events:[access.document],currentEvent:access.document,access,eventAccess:{[id]:access},setCurrentEventId:()=>{}};act(()=>{tree=create(React.createElement(MemoryRouter,{initialEntries:[`/event/${id}/tarefas`],future:{v7_startTransition:true,v7_relativeSplatPath:true}},React.createElement(SidebarContent)),{createNodeMock:()=>({querySelector:()=>null,getBoundingClientRect:()=>({width:0}),style:{}})});});};
+ mount(limited);
+ assert.deepEqual(tree.root.findAllByType('a').map(a=>a.props.href.split('/').pop()).sort(),['participantes','programacao','tarefas']);
+ act(()=>tree.unmount());
+ console.log('CA1 UI PASS: actual SidebarContent with staff API projection renders exactly participantes, programacao and tarefas; projection contains only the assigned task and no expense field.');
+ const complete=(await rpc(director.client,'event_list'))[0];mount(complete);
+ const links=tree.root.findAllByType('a').map(a=>a.props.href.split('/').pop());
+ for(const module of ['dashboard','programacao','tarefas','diretores-staffs','participantes','fornecedores','financeiro','receitas','despesas','patrocinios','capacidade','networking','simulador','configuracoes'])assert.ok(links.includes(module));
+ assert.equal(complete.document.expenses[0].description,'PRIVATE FINANCE');
+ console.log('CA3 UI/API PASS: director sees all 14 module links and the full event including financial data.');
+} finally {if(tree)act(()=>tree.unmount());delete globalThis.__roleContext;await rm(directory,{recursive:true,force:true});}
+
+// Actual domain fixture, created by local admin solely to exercise direct RLS paths.
+let inserted=await admin.from('events').insert({id,organization_id:org.data.organization_id,nome:'Synthetic normalized event'});assert.ifError(inserted.error);
+inserted=await admin.from('expenses').insert({event_id:id,descricao:'Synthetic private expense'});assert.ifError(inserted.error);
+let denial=await staff.request(`expenses?event_id=eq.${id}&select=id,descricao`);assert.equal(denial.status,200);assert.deepEqual(denial.body,[]);
+console.log('CA2 direct financial GET with staff JWT: HTTP 200 [] (RLS returns zero authorized rows).');
+denial=await staff.request('expenses','POST',{event_id:id,descricao:'Forbidden write'});assert.equal(denial.status,403);assert.equal(denial.body.code,'42501');
+console.log(`CA2 direct financial POST with staff JWT: HTTP ${denial.status}, SQLSTATE ${denial.body.code}, message=${denial.body.message}`);
+denial=await staff.request(`platform_events?id=eq.${id}&select=document`);assert.equal(denial.status,200);assert.deepEqual(denial.body,[]);
+denial=await staff.request('platform_workspaces?select=events');assert.equal(denial.status,403);
+denial=await staff.request(`events?id=eq.${id}&select=*`);assert.deepEqual(denial.body,[]);
+console.log('CA2 bypass checks: full event document HTTP 200 []; legacy organization workspace HTTP 403; normalized capacity-bearing event HTTP 200 [].');
+for(const table of ['revenues','suppliers','sponsors','networking_tables','simulations','locations','tickets','payments']){denial=await staff.request(`${table}?event_id=eq.${id}&select=id`);assert.equal(denial.status,200);assert.deepEqual(denial.body,[]);}
+console.log('CA2 remaining forbidden API modules: revenues/suppliers/sponsors/networking/simulations/locations/tickets/payments all return zero authorized rows.');
+denial=await staff.request('rpc/event_save','POST',{p_event:id,p_revision:limited.revision,p_document:{...limited.document,expenses:[]}});assert.equal(denial.status,403);assert.equal(denial.body.code,'42501');
+console.log(`CA2 financial document injection: HTTP ${denial.status}, SQLSTATE ${denial.body.code}, message=${denial.body.message}`);
+limited.document.tasks[0].status='Concluído';
+limited.revision=await rpc(staff.client,'event_save',{p_event:id,p_revision:limited.revision,p_document:limited.document});
+const full=(await rpc(founder.client,'event_list'))[0];assert.equal(full.document.tasks.find(t=>t.id==='mine').status,'Concluído');assert.equal(full.document.tasks.find(t=>t.id==='other').status,'A fazer');assert.equal(full.document.expenses[0].description,'PRIVATE FINANCE');
+console.log('CA1 mutation PASS: staff updates own task status; other task and private expense remain unchanged.');
+denial=await director.request('rpc/event_change_role','POST',{p_member:member.id,p_role:'director'});assert.equal(denial.status,403);
+await rpc(founder.client,'event_change_role',{p_member:member.id,p_role:'director'});assert.equal((await rpc(staff.client,'event_list'))[0].role,'director');
+assert.equal((await rpc(staff.client,'event_list'))[0].document.expenses[0].description,'PRIVATE FINANCE');
+await rpc(founder.client,'event_change_role',{p_member:member.id,p_role:'staff'});assert.equal((await rpc(staff.client,'event_list'))[0].document.expenses,undefined);
+console.log('CA4 PASS: founder promotes/demotes via API; next authenticated event_list reflects role and projection. Director role change denied HTTP 403.');
+console.log('Local synthetic records retained; no customer data deleted, no remote migrations applied.');

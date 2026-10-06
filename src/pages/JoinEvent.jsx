@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import {eventHome} from '@/lib/eventAccess';
 import { useAuth } from '@/lib/AuthContext';
 import { useEvent } from '@/context/EventContext';
 import { supabase } from '@/api/supabaseClient';
@@ -21,7 +22,7 @@ export default function JoinEvent() {
     try {
       const {data, error: failure} = await supabase.rpc('event_join', {p_code: code, p_invitation: invitation});
       if (failure) throw failure;
-      reloadEvents(); navigate(`/event/${data.id}/dashboard`);
+      reloadEvents(); navigate(eventHome(data.id,data));
     } catch (err) {setError(err.message);} finally {setPending(false);}
   };
   return <main className="platform-ui max-w-lg mx-auto p-8 space-y-5">

@@ -9,7 +9,7 @@ import NotificationsMenu from './NotificationsMenu';
 
 
 export default function TopBar() {
-  const { currentEvent, saveStatus } = useEvent();
+  const { currentEvent, saveStatus, access } = useEvent();
   const navigate = useNavigate();
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
@@ -31,7 +31,7 @@ export default function TopBar() {
 
         <NotificationsMenu />
 
-        <AddMenu />
+        {access?.role !== 'staff' && <AddMenu />}
         <LogoutButton className="h-8 gap-1.5 text-[13px] shrink-0" />
       </div>
     </header>

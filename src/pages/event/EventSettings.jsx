@@ -2,6 +2,7 @@ import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
+import EventRoles from '@/components/EventRoles';
 import EventInvites from '@/components/EventInvites';
 import {
   PageHeader,
@@ -200,6 +201,7 @@ export default function EventSettings() {
           ))}
         </Panel>
         <EventInvites />
+        <EventRoles />
         <Panel title="Zona de risco">
           <p className="text-muted-foreground text-sm mb-4">
             Arquivar remove o evento da lista principal, mas mantém os dados.
