@@ -20,7 +20,7 @@ function Choice({ value, selected, onClick, label }) {
 }
 
 export default function CreateEvent() {
-  const { addEvent, canCreateEvent } = useEvent();
+  const { addEvent, canCreateEvent, eventLimit } = useEvent();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [data, setData] = useState({
@@ -60,7 +60,8 @@ export default function CreateEvent() {
     } catch (err) {setError(err.message);} finally {setPending(false);}
   };
 
-  if (!canCreateEvent) return <main className="p-8"><p role="alert">Sua conta tem limite de um evento. Solicite a liberação de múltiplos eventos.</p><Button variant="outline" onClick={()=>navigate('/eventos')}>Voltar para meus eventos</Button></main>;
+  // O limite vem do banco (event_limit), para a tela nao divergir da regra.
+  if (!canCreateEvent) return <main className="p-8"><p role="alert">Sua conta pode manter até {eventLimit} evento{eventLimit > 1 ? 's' : ''}. Para criar mais, solicite a liberação.</p><Button variant="outline" onClick={()=>navigate('/eventos')}>Voltar para meus eventos</Button></main>;
   return (
     <div className="platform-ui min-h-screen bg-background">
       <header className="border-b border-border">

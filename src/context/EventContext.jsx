@@ -29,7 +29,7 @@ export function EventProvider({ children }) {
   const identity = useRef('');
   const revision = useRef({});
   const [eventAccess, setEventAccess] = useState({});
-  const [creationPermission, setCreationPermission] = useState({canCreate:false,multiEvent:false});
+  const [creationPermission, setCreationPermission] = useState({canCreate:false,multiEvent:false,eventLimit:0});
   const acknowledged = useRef('');
   const latest = useRef(state.events);
   const writing = useRef(null);
@@ -263,6 +263,7 @@ export function EventProvider({ children }) {
     events,
     eventAccess,
     canCreateEvent: creationPermission.canCreate,
+    eventLimit: creationPermission.eventLimit,
     access: eventAccess[currentEvent?.id],
     reloadEvents: () => setLoadAttempt(n => n + 1),
     currentEvent,
