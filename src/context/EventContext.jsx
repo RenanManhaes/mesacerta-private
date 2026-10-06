@@ -11,6 +11,8 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/api/supabaseClient';
 import { emptyEventTemplate } from '@/lib/demoData';
+import { mergeEventDocument } from '@/lib/mergeEventDocument';
+import { saveEventWithMerge } from '@/lib/eventSync';
 
 const EventContext = createContext(null);
 function seed() { return {events: [], currentEventId: ''}; }
@@ -33,6 +35,8 @@ export function EventProvider({ children }) {
   const acknowledged = useRef('');
   const latest = useRef(state.events);
   const writing = useRef(null);
+  const refreshing = useRef(false);
+  const [mergeNotice, setMergeNotice] = useState('');
 
   latest.current = state.events;
   const scope = user?.id || '';
@@ -101,19 +105,33 @@ export function EventProvider({ children }) {
     setSaveError('');
     const operation = (async () => {
       const previous = JSON.parse(acknowledged.current || '[]');
+      let merged = false, conflictCount = 0;
       for (const document of JSON.parse(snapshot)) {
         if (JSON.stringify(document) === JSON.stringify(previous.find(e => e.id === document.id))) continue;
-        const {data, error} = await supabase.rpc('event_save', {
-          p_event: document.id, p_revision: revision.current[document.id], p_document: document,
-        }).abortSignal(AbortSignal.timeout(15000));
+        // Em conflito de revisão (40001) junta com a versão do servidor e tenta de novo, até 3 vezes.
+        const saved = await saveEventWithMerge({
+          client: supabase, base: previous.find(e => e.id === document.id), document, revision: revision.current[document.id],
+        });
         if (identity.current !== startedScope) return;
-        if (error) throw new Error(error.message);
-        revision.current[document.id] = data;
+        revision.current[document.id] = saved.revision;
+        if (saved.merged) {
+          merged = true;
+          conflictCount += saved.conflicts.length;
+          // Mostra no app o que a outra pessoa alterou, preservando o que foi digitado durante a gravação.
+          const applyMerged = (events) => events.map(e => e.id !== document.id || JSON.stringify(e) === JSON.stringify(saved.document)
+            ? e
+            : JSON.stringify(e) === JSON.stringify(document) ? saved.document : mergeEventDocument(document, e, saved.document).document);
+          latest.current = applyMerged(latest.current);
+          setState(s => { const events = applyMerged(s.events); latest.current = events; return {...s, events}; });
+        }
         const index = previous.findIndex(e => e.id === document.id);
-        if (index >= 0) previous[index] = document; else previous.push(document);
+        if (index >= 0) previous[index] = saved.document; else previous.push(saved.document);
         acknowledged.current = JSON.stringify(previous);
       }
-      acknowledged.current = snapshot;
+      if (!merged) acknowledged.current = snapshot;
+      if (conflictCount > 0) setMergeNotice(conflictCount === 1
+        ? '1 alteração feita por outra pessoa foi substituída pela sua.'
+        : `${conflictCount} alterações feitas por outra pessoa foram substituídas pelas suas.`);
       setSaveStatus(snapshot === JSON.stringify(latest.current) ? 'saved' : 'saving');
     })();
     writing.current = operation;
@@ -149,6 +167,44 @@ export function EventProvider({ children }) {
     }, 300);
     return () => clearTimeout(timer);
   }, [state.events, loading, ready, user?.id, flush]);
+  // Ao voltar para a aba, sem nada pendente e sem gravação em curso, traz em silêncio o que outras pessoas salvaram.
+  // Só troca documentos e revisões: não recarrega o app nem remonta rotas.
+  useEffect(() => {
+    if (!user || !ready) return;
+    const clean = () => !writing.current && JSON.stringify(latest.current) === acknowledged.current;
+    const refresh = async () => {
+      if (document.visibilityState === 'hidden' || refreshing.current || !clean()) return;
+      const startedScope = identity.current;
+      refreshing.current = true;
+      try {
+        const {data, error} = await supabase.rpc('event_list').abortSignal(AbortSignal.timeout(15000));
+        if (error || identity.current !== startedScope || !clean()) return;
+        const events = data.map(row => row.document);
+        revision.current = Object.fromEntries(data.map(row => [row.document.id, row.revision]));
+        setEventAccess(Object.fromEntries(data.map(row => [row.document.id, row])));
+        const serialized = JSON.stringify(events);
+        if (serialized === acknowledged.current) return;
+        acknowledged.current = serialized;
+        latest.current = events;
+        setState(s => ({events, currentEventId: events.some(e => e.id === s.currentEventId) ? s.currentEventId : events[0]?.id || ''}));
+      } catch {
+        // Atualização silenciosa: falha de rede aqui não deve incomodar; a próxima tentativa acontece no próximo foco.
+      } finally {
+        refreshing.current = false;
+      }
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [user?.id, ready]);
+  useEffect(() => {
+    if (!mergeNotice) return;
+    const timer = setTimeout(() => setMergeNotice(''), 10000);
+    return () => clearTimeout(timer);
+  }, [mergeNotice]);
   useEffect(() => {
     const guard = (e) => {
       if (
@@ -282,6 +338,17 @@ export function EventProvider({ children }) {
   };
   return (
     <EventContext.Provider value={value}>
+      {privatePage && user && mergeNotice && !saveError && (
+        <div
+          className="fixed bottom-4 left-4 right-4 z-50 bg-card border border-border rounded-xl p-4 text-sm shadow-lg"
+          role="status"
+        >
+          <p>{mergeNotice}</p>
+          <div className="flex gap-4 mt-2">
+            <button onClick={() => setMergeNotice('')}>Entendi</button>
+          </div>
+        </div>
+      )}
       {privatePage && user && saveError && (
         <div
           className="fixed bottom-4 left-4 right-4 z-50 bg-card border border-danger rounded-xl p-4 text-sm shadow-lg"
