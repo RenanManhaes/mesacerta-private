@@ -17,8 +17,9 @@ export default function LogoutButton({ className }) {
     try {
       try { await event?.flush(); } catch { event?.exportBackup(); }
       await signOut();
-      // A fresh public page also discards private data held in memory.
-      window.location.replace('/');
+      // Recarrega de verdade para descartar dado privado em memoria, e cai na
+      // tela de login, que e onde a pessoa espera chegar depois de sair.
+      window.location.replace('/login');
     } catch {
       setPending(false);
       toast({ title: 'Não foi possível sair', description: 'Confira o salvamento dos eventos e tente novamente.', variant: 'destructive' });
