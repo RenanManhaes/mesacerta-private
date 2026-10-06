@@ -17,7 +17,8 @@ export async function account(label, specifiedEmail) {
   assert.ifError(login.error);
   const request = async (path, method='GET', body) => {
     const response = await fetch(`${config.API_URL}/rest/v1/${path}`, {method, headers: {apikey: config.ANON_KEY, Authorization: `Bearer ${login.data.session.access_token}`, 'Content-Type': 'application/json'}, ...(body === undefined ? {} : {body: JSON.stringify(body)})});
-    return {status: response.status, body: await response.json()};
+    const responseBody=await response.text();
+    return {status: response.status, body: responseBody ? JSON.parse(responseBody) : null};
   };
   return {client, user: created.data.user, request};
 }
