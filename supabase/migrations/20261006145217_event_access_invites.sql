@@ -23,19 +23,25 @@ create table public.event_join_log (
  user_id uuid not null references auth.users(id), invitation_id uuid references public.event_invitations(id),
  role text not null, joined_at timestamptz not null default now(), entry_kind text not null check(entry_kind in ('code','link'))
 );
--- Legacy records have no authenticated creator field. Approved fallback: oldest org owner.
+-- Confirmed by the product owner on 2026-10-06: all existing real events
+-- belong to Renan. Fail closed instead of inferring authorship from org age.
 do $$ begin
- if exists(select 1 from public.platform_workspaces w where jsonb_array_length(w.events)>0 and not exists(select 1 from public.memberships m where m.organization_id=w.organization_id and m.role='owner')) then
-  raise exception 'Migração interrompida: organização com eventos sem proprietário. Identifique o fundador antes de continuar.';
+ if exists(select 1 from public.platform_workspaces where jsonb_array_length(events)>0)
+ and ((select count(*) from auth.users where lower(email)='renannascimento0304@gmail.com') <> 1
+ or not exists(select 1 from auth.users where lower(email)='renannascimento0304@gmail.com' and email_confirmed_at is not null)) then
+  raise exception 'Migração interrompida: confirme a conta única e verificada de Renan antes de migrar os eventos existentes.';
  end if;
 end $$;
 insert into public.platform_events(id,organization_id,founder_id,document)
-select e->>'id',w.organization_id,m.user_id,e from public.platform_workspaces w
+select e->>'id',w.organization_id,u.id,e from public.platform_workspaces w
 cross join lateral jsonb_array_elements(w.events) e
-cross join lateral (select user_id from public.memberships where organization_id=w.organization_id and role='owner' order by created_at,id limit 1) m;
+cross join auth.users u where lower(u.email)='renannascimento0304@gmail.com' and u.email_confirmed_at is not null;
 insert into public.event_members(event_id,user_id,role)
 select e.id,m.user_id,case when m.user_id=e.founder_id then 'founder' when m.role in ('owner','admin') then 'director' else 'staff' end
 from public.platform_events e join public.memberships m on m.organization_id=e.organization_id;
+insert into public.event_members(event_id,user_id,role)
+select id,founder_id,'founder' from public.platform_events
+on conflict(event_id,user_id) do nothing;
 
 create function private.event_role(p_event text) returns text
 language sql stable security definer set search_path='' as $$
