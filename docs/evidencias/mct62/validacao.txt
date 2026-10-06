@@ -1,0 +1,38 @@
+$ npm run lint
+
+> base44-app@0.0.0 lint
+> eslint . --quiet
+
+$ npm run typecheck
+
+> base44-app@0.0.0 typecheck
+> tsc -p ./jsconfig.json
+
+$ npm run build
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+[39m
+$ node src/lib/networking/engine.test.mjs
+  contatos por pessoa:       53.5
+
+Motor portado preserva as garantias do cenario real.
+$ npm test
+$ node src/lib/schedule.test.mjs
+PASS atividade das 14h entra entre as de 13h e 15h
+PASS mesmo horario entra depois da que ja existia
+PASS arrastar muda o horario e reordena (encaixe de 5 em 5 min)
+PASS arrastar respeita os limites do dia
+PASS conflito: sobreposicao sinaliza, encostar nao
+PASS validacao exige titulo, horario e duracao
+PASS cor invalida cai no padrao; paleta so tem tons frios (sem vermelho/laranja/amarelo)
+PASS raias: sobrepostas ficam lado a lado
+PASS scheduleSummary usa o horario proprio de cada atividade e marca conflitos
+PASS scheduleSummary de lista vazia nao quebra
+
+10 verificacoes passaram
+
+$ npm run build (resumo)
+built in OK
+$ npm test  (main: 17 pass / esta branch: 18 pass, 0 fail)
+ℹ tests 18
+ℹ pass 18
+ℹ fail 0
