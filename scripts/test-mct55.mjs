@@ -143,7 +143,9 @@ try {
   await act(async () => {await event.flush();});
   const imported = await thirdClient.rpc('event_list');
   assert.ifError(imported.error);
-  assert.deepEqual(imported.data.find(e => e.document.id === legacy.id).document, legacy);
+  const recovered = imported.data.find(e => e.document.id === legacy.id).document;
+  for (const key of Object.keys(legacy)) assert.deepEqual(recovered[key], legacy[key]);
+  assert.ok(recovered.staffMembers.some(person => person.accessRole === 'founder'));
   await assert.rejects(() => event.importBackup({events: [legacy]}), /IDs de eventos repetidos/);
   console.log('MIGRATION PASS: explicit JSON backup import persists all legacy fields; duplicate IDs rejected without overwriting existing events.');
 
