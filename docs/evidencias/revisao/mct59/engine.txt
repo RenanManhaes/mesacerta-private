@@ -12,7 +12,7 @@ Cenario real: 76 convidados, 14 mesas, 14 rodadas, 7 por mesa
   ok   reanalisar a grade da os mesmos numeros
 
   seed escolhida:            1
-  tempo de geracao:          286ms
+  tempo de geracao:          220ms
   duplas que se encontram:   2034 de 2850 possiveis (71.4%)
   encontram-se so uma vez:   1688
   reencontros:               346

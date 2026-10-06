@@ -1,0 +1,16 @@
+$ npm run build
+
+> base44-app@0.0.0 build
+> vite build
+
+[base44] Warning: VITE_BASE44_APP_ID is not set — this build
+[base44] will not know its app id and its API calls will fail.
+[base44] Build with:  base44 build   (or base44 deploy --build)
+[base44] Proxy not enabled (VITE_BASE44_APP_BASE_URL not set)
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 2049 modules transformed.
+memory allocation of 1131048 bytes failed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+EXIT_CODE=3221226505
