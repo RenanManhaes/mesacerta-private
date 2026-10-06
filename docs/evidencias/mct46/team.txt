@@ -1,0 +1,8 @@
+$ node scripts/test-mct58.mjs
+CA1 UI PASS: actual team heading is Equipe do evento; founder card is Diretor / Fundador; + Nova pessoa opens code/link/role invitation with no name/email/phone fields.
+CA2 UI/API PASS: actual editor submits name/email/phone/function to authenticated RPC; event_list restores all four fields and clears saved editor; contact email does not change Auth login.
+CA3 UI/API PASS: actual confirmation removes membership from active team; removed JWT has zero events; event_save HTTP 403, SQLSTATE 42501, message=Sem acesso ao evento
+CA3 bypass/audit PASS: removed account cannot restore via code or old invitation; join history remains in database.
+RLS PASS: removed/restricted JWT profile mutation denied HTTP 403. Synthetic records retained locally.
+
+EXIT_CODE=0

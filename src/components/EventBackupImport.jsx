@@ -10,7 +10,7 @@ export default function EventBackupImport() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      importBackup(JSON.parse(await file.text()));
+      await importBackup(JSON.parse(await file.text()));
       setError(false);
       setMessage('Backup importado. Aguarde o salvamento; uma falha aparecerá com a opção de tentar novamente.');
     } catch (err) {

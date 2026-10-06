@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {randomUUID} from 'node:crypto';
+import React from 'react';
+import {create,act} from 'react-test-renderer';
+import ts from 'typescript';
+import {account,rpc} from './local-api.mjs';
+const founder = await account('mct57-ui');
+await rpc(founder.client,'criar_organizacao',{p_nome:'Synthetic invite UI'});
+const memberships = await founder.client.from('memberships').select('organization_id').eq('user_id',founder.user.id).single(); assert.ifError(memberships.error);
+const row = await rpc(founder.client,'event_create',{p_org:memberships.data.organization_id,p_document:{id:randomUUID(),name:'Synthetic UI event'}});
+let copied='';
+globalThis.window={location:{origin:'http://localhost:5173'}};
+Object.defineProperty(globalThis.navigator,'clipboard',{value:{writeText:async value=>{copied=value;}},configurable:true});
+const directory=await mkdtemp(resolve('node_modules/.invite-ui-'));
+let tree;
+try {
+ await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const supabase=globalThis.__inviteClient; export const useEvent=()=>globalThis.__inviteContext; export const Panel=({children})=>React.createElement('section',null,children); export const Button=({children,variant,...props})=>React.createElement('button',props,children);`);
+ globalThis.__inviteClient=founder.client;
+ globalThis.__inviteContext={currentEvent:row.document,access:row,flush:async()=>{},reloadEvents:()=>{}};
+ let source=await readFile('src/components/EventInvites.jsx','utf8');
+ source=source.replaceAll("'@/context/EventContext'","'./mocks.mjs'").replaceAll("'@/api/supabaseClient'","'./mocks.mjs'").replaceAll("'@/components/common/ReferenceUI'","'./mocks.mjs'").replaceAll("'@/components/ui/button'","'./mocks.mjs'");
+ await writeFile(join(directory,'component.mjs'),ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext}}).outputText);
+ const {default:Invites}=await import(pathToFileURL(join(directory,'component.mjs')));
+ await act(async()=>{tree=create(React.createElement(Invites)); await new Promise(r=>setTimeout(r,120));});
+ const button=label=>tree.root.findAllByType('button').find(b=>b.children.join('')===label);
+ await act(async()=>{await button('Copiar código').props.onClick();}); assert.equal(copied,row.code);
+ act(()=>tree.root.findByProps({'aria-label':'Papel do convite'}).props.onChange({target:{value:'director'}}));
+ await act(async()=>{await button('Gerar e copiar link de convite').props.onClick();});
+ const url=new URL(copied); assert.equal(url.pathname,'/entrar'); assert.equal(url.searchParams.get('codigo'),row.code);
+ const invites=await founder.client.from('event_invitations').select('id,role').eq('event_id',row.document.id); assert.ifError(invites.error);
+ assert.equal(invites.data.length,1); assert.equal(invites.data[0].role,'director'); assert.equal(url.searchParams.get('convite'),invites.data[0].id);
+ await act(async()=>{await button('Revogar convite').props.onClick();});
+ const rejected=await founder.client.rpc('event_join',{p_code:row.code,p_invitation:invites.data[0].id}); assert.match(rejected.error.message,/revogado/);
+ console.log('CA1 UI PASS: actual EventInvites renders code, copies it, selects director, generates invitation through authenticated API, copies prefilled URL and revokes through the actual button.');
+} finally {if(tree)act(()=>tree.unmount());delete globalThis.__inviteClient;delete globalThis.__inviteContext;await rm(directory,{recursive:true,force:true});}

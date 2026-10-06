@@ -1,5 +1,6 @@
 import React from 'react';
 import EventBackupImport from '@/components/EventBackupImport';
+import {eventHome} from '@/lib/eventAccess';
 import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
@@ -13,8 +14,9 @@ const statusLabel = { planejamento: 'Planejamento', confirmado: 'Confirmado', an
 
 function EventRow({ ev }) {
   const navigate = useNavigate();
+  const {eventAccess} = useEvent();
   return (
-    <button onClick={() => navigate(`/event/${ev.id}/dashboard`)} className="platform-event group w-full">
+    <button onClick={() => navigate(eventHome(ev.id,eventAccess[ev.id]))} className="platform-event group w-full">
       <div className="platform-event-cover">{statusLabel[ev.status] || ev.status}</div>
       <div className="platform-event-body">
       <div className="min-w-0">
@@ -55,7 +57,7 @@ function Group({ title, hint, events }) {
 }
 
 export default function Events() {
-  const { events, updateEventById } = useEvent();
+  const { events, updateEventById, canCreateEvent } = useEvent();
   const navigate = useNavigate();
   const planning = events.filter(e => !e.archived && ['planejamento', 'confirmado'].includes(e.status));
   const upcoming = events.filter(e => !e.archived && e.status === 'andamento');
@@ -70,9 +72,10 @@ export default function Events() {
             <span className="font-display font-bold text-[18px] tracking-tight">Mesa Certa</span>
           </div>
           <div className="flex items-center gap-2">
-          <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
+          {canCreateEvent && <Button size="sm" className="h-8 gap-1.5 text-[13px]" onClick={() => navigate('/novo')}>
             <Plus className="h-3.5 w-3.5" /> Criar evento
-          </Button>
+          </Button>}
+          <Button variant="outline" size="sm" onClick={() => navigate('/entrar')}>Entrar em um evento</Button>
           <LogoutButton className="h-8 gap-1.5 text-[13px]" />
           </div>
         </div>
@@ -89,7 +92,7 @@ export default function Events() {
         <Group title="Próximos" hint={`${upcoming.length} evento${upcoming.length !== 1 ? 's' : ''}`} events={upcoming} />
         <Group title="Finalizados" hint={`${finished.length} evento${finished.length !== 1 ? 's' : ''}`} events={finished} />
         {events.some(e=>e.archived) && <details className="platform-panel"><summary className="cursor-pointer">Eventos arquivados</summary>{events.filter(e=>e.archived).map(e=><div key={e.id} className="flex justify-between items-center gap-4 py-3"><span>{e.name}</span><Button variant="outline" onClick={()=>updateEventById(e.id,x=>({...x,archived:false}))}>Restaurar</Button></div>)}</details>}
-        <EventBackupImport />
+        {canCreateEvent && <EventBackupImport />}
       </main>
     </div>
   );

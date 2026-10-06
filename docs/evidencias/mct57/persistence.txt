@@ -1,0 +1,11 @@
+$ node scripts/test-mct55.mjs
+CA1 PASS: second independent Auth client + provider reads all event modules, networking and unfinished draft from local Supabase API.
+CA2 PASS: fresh client with persistSession=false and storage methods that throw restores identical event without browser cache.
+CA3 PASS: network failure produces visible alert and saveStatus=error; retry button persists retained draft through authenticated API.
+CA4 PASS: production EventContext contains no localStorage reference; runtime storage traps were never called.
+RLS PASS: REST request with outsider JWT returns HTTP 200 [] (zero authorized rows); legacy organization backup denied by database policy.
+MIGRATION PASS: explicit JSON backup import persists all legacy fields; duplicate IDs rejected without overwriting existing events.
+REGRESSION PASS: stale revision is rejected; concurrent document is never silently overwritten.
+TEST_DATA: synthetic users and organization retained locally; no customer data deleted or remote project accessed.
+
+EXIT_CODE=0

@@ -1,0 +1,17 @@
+$ node docs/evidencias/mct64/check.mjs
+CA1 docs/spike-cadastro-mct64.md:15: | Código do evento | Evento existente, código ativo, limite de tentativas e e-mail informado pelo próprio interessado | Liberação de cadastro vinculada ao evento, com papel staff | Código curto compartilhável e sujeito a tentativa automatizada: limitar tentativas por origem e código, não revelar dados de evento em erro |
+CA1 docs/spike-cadastro-mct64.md:17: | Compra aprovada | Evento de aprovação recebido e verificado exclusivamente pelo backend | Liberação para a identidade da compra; permitir primeiro evento conforme MCT-46 | Retorno do navegador pode ser falsificado: nunca aprovar pelo redirecionamento; validar origem, assinatura, estado e idempotência no backend |
+CA1 docs/spike-cadastro-mct64.md:18: | Liberação manual pelo fundador da plataforma | Operador administrativo autenticado, destinatário conferido, motivo e prazo | Mesma liberação, origem manual, auditada | Engano de identidade e concessões sem rastreio: registrar quem aprovou, a justificativa e validade; limitar o endpoint ao operador autorizado |
+CA1 docs/spike-cadastro-mct64.md:26: Tabela `account_releases` no Supabase, criada futuramente por migração versionada. O modelo abaixo é proposta, não SQL executado:
+CA1 docs/spike-cadastro-mct64.md:42: | `expires_at` | Timestamp obrigatório | Validade da concessão ainda não consumida |
+CA1 docs/spike-cadastro-mct64.md:32: | `state` | Enum `pendente`, `autorizada`, `reservada`, `consumida`, `revogada`, `expirada` | Ciclo de vida explícito |
+CA1 docs/spike-cadastro-mct64.md:72: | Pedido de acesso — recomendado | Recusa criação Auth, oferece formulário mínimo; operador aprova ou recusa depois | Mantém controle e caminho claro para interessados | Exige fila e responsabilidade de atendimento; spam, expectativas e dados de contato precisam ser tratados |
+CA2 docs/spike-cadastro-mct64.md:5: ## Recomendação explícita
+CA2 docs/spike-cadastro-mct64.md:86: ## Custo da recomendação
+CA2 docs/spike-cadastro-mct64.md:88: Esta entrega documental não contrata serviço: **R$ 0 de contratação nesta spike**. Estimativa técnica preliminar para uma implementação futura, incluindo pedido de acesso e os dois caminhos iniciais, mas excluindo integração de pagamento:
+CA2 docs/spike-cadastro-mct64.md:98: Total estimado: **30–46 horas de desenvolvimento**. É estimativa do escopo proposto, não orçamento contratado. O total é calculado pelo comando registrado em `docs/evidencias/mct64/acceptance.txt`. Custo de mão de obra é esse esforço multiplicado pelo valor/hora acordado; nenhum valor/hora foi fornecido. Revisar a estimativa após validar o hook e a operação de pedidos.
+CA2 COST_CALCULATION: 5 work items; sum(min)=30 hours; sum(max)=46 hours; documentary spike contracts R$0.
+CA3 $ git diff --name-only origin/main -- src supabase package.json package-lock.json vite.config.js vercel.json .github
+CA3 OUTPUT: <empty>; zero application/Auth/database/configuration/dependency changes. No production deployment or Auth configuration command executed.
+CA3 $ git diff --exit-code origin/main -- src/pages/Register.jsx src/lib/AuthContext.jsx src/api/supabaseClient.js => EXIT_CODE=0
+EXIT_CODE=0

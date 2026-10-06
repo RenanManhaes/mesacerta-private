@@ -1,0 +1,10 @@
+$ node scripts/test-mct59.mjs
+CA1 UI PASS: actual CatalogField shows no suggestions at two letters; three letters seg return Segurança from organization starter catalog.
+CA2 UI/API PASS: actual confirmation creates new function through authenticated API and immediately exposes it in suggestions.
+CA3 UI/API PASS: fresh field/hook for second event reads same organization catalog and suggests previously created function.
+CA4 UI/API PASS: real manager displays one person using value across two events, requires confirmation; API rejects missing confirmation; confirmed removal hides suggestion and preserves both profiles.
+SCOPE UI/API PASS: real manager creates reusable area and title; profile saves both while retaining archived function text and staff access role.
+RLS PASS: staff catalog mutation HTTP 403, SQLSTATE 42501; direct catalog read HTTP 200 []; function/title never change access role.
+MANAGER PASS: manager action is adjacent to + Nova pessoa in EventTeam actions; functions, areas and titles handled by common catalog. Local fixtures retained.
+
+EXIT_CODE=0

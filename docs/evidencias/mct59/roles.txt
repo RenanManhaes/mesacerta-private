@@ -1,0 +1,13 @@
+$ node scripts/test-mct60.mjs
+CA1 UI PASS: actual SidebarContent with staff API projection renders exactly participantes, programacao and tarefas; projection contains only the assigned task and no expense field.
+CA3 UI/API PASS: director sees all 14 module links and the full event including financial data.
+CA2 direct financial GET with staff JWT: HTTP 200 [] (RLS returns zero authorized rows).
+CA2 direct financial POST with staff JWT: HTTP 403, SQLSTATE 42501, message=new row violates row-level security policy for table "expenses"
+CA2 bypass checks: full event document HTTP 200 []; legacy organization workspace HTTP 403; normalized capacity-bearing event HTTP 200 [].
+CA2 remaining forbidden API modules: revenues/suppliers/sponsors/networking/simulations/locations/tickets/payments all return zero authorized rows.
+CA2 financial document injection: HTTP 403, SQLSTATE 42501, message=Staff só pode acessar participantes, programação e suas tarefas
+CA1 mutation PASS: staff updates own task status; other task and private expense remain unchanged.
+CA4 PASS: founder promotes/demotes via API; next authenticated event_list reflects role and projection. Director role change denied HTTP 403.
+Local synthetic records retained; no customer data deleted, no remote migrations applied.
+
+EXIT_CODE=0
