@@ -2,12 +2,10 @@ import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
 import { formatDateFull } from '@/lib/format';
-import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import AddMenu from './AddMenu';
 import HeaderSearch from './HeaderSearch';
 import LogoutButton from '@/components/LogoutButton';
-import { alerts as alertsFn } from '@/lib/selectors';
+import NotificationsMenu from './NotificationsMenu';
 
 
 export default function TopBar() {
@@ -15,7 +13,6 @@ export default function TopBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const labels = { dashboard: 'Visão geral', programacao: 'Programação', tarefas: 'Tarefas', 'diretores-staffs': 'Diretores e Staffs', participantes: 'Participantes', fornecedores: 'Fornecedores', financeiro: 'Financeiro', receitas: 'Receitas', despesas: 'Despesas', patrocinios: 'Patrocínios', capacidade: 'Capacidade', networking: 'Networking', simulador: 'Simulador', configuracoes: 'Configurações' };
-  const attention = currentEvent ? alertsFn(currentEvent).filter(a => a.level !== 'ok').length : 0;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -32,10 +29,7 @@ export default function TopBar() {
 
         <HeaderSearch />
 
-        <Button variant="ghost" size="icon" className="h-8 w-8 relative" aria-label="Notificações" onClick={() => navigate(`/event/${currentEvent.id}/dashboard`)}>
-          <Bell className="h-4 w-4" />
-          {attention > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-danger" />}
-        </Button>
+        <NotificationsMenu />
 
         <AddMenu />
         <LogoutButton className="h-8 gap-1.5 text-[13px] shrink-0" />
