@@ -214,7 +214,7 @@
 }
 @media (max-width:1080px){.mc-landing .plans{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media (max-width:640px){.mc-landing .plans{grid-template-columns:1fr}
+@media (max-width:640px){.mc-landing .plans{grid-template-columns:1fr}.mc-landing .plan>p{min-height:0}
 }
 @media (max-width:1080px){.mc-landing .nav-l{display:none}
 }

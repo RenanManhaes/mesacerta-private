@@ -3,7 +3,8 @@ import {Button} from '@/components/ui/button';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {AlertDialog,AlertDialogContent,AlertDialogHeader,AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction} from '@/components/ui/alert-dialog';
 import SearchSuggestions,{normalizeSearch} from '@/components/common/SearchSuggestions';
-const labels={function:'Funções',area:'Áreas'};
+const labels={function:'Funções',area:'Áreas'}, kindName={function:'Função',area:'Área'};
+const peopleLabel=count=>count===0?'nenhuma pessoa':`${count} pessoa${count!==1?'s':''}`;
 
 export function CatalogField({label,kind,value,onChange,catalog,disabled=false}) {
   const [error,setError]=useState(''),[pending,setPending]=useState(false);
@@ -32,7 +33,7 @@ export function TeamCatalogManager({open,onOpenChange,catalog}) {
   };
   const visible=catalog.items.filter(item=>item.kind!=='title' && (filter==='all' || item.kind===filter));
   return <>
-    <Dialog open={open} onOpenChange={value=>{setFilter('all');onOpenChange(value);}}><DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Funções e áreas</DialogTitle><DialogDescription>Função é o que a pessoa faz. Área é o setor em que trabalha.</DialogDescription></DialogHeader>
+    <Dialog open={open} onOpenChange={value=>{setFilter('all');onOpenChange(value);}}><DialogContent className="max-w-xl max-h-[90dvh] overflow-y-auto grid-cols-[minmax(0,1fr)]"><DialogHeader><DialogTitle>Funções e áreas</DialogTitle><DialogDescription>Função é o que a pessoa faz. Área é o setor em que trabalha.</DialogDescription></DialogHeader>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-xl bg-secondary p-3"><strong>Função</strong><p className="text-muted-foreground">Ex.: recepcionar convidados</p></div>
         <div className="rounded-xl bg-secondary p-3"><strong>Área</strong><p className="text-muted-foreground">Ex.: credenciamento</p></div>
@@ -42,11 +43,11 @@ export function TeamCatalogManager({open,onOpenChange,catalog}) {
         <div className="flex gap-2"><input required maxLength={80} aria-label="Nome do novo cadastro" placeholder={kind==='function'?'Ex.: operar som':'Ex.: audiovisual'} value={name} onChange={event=>setName(event.target.value)} className="min-w-0 flex-1 border rounded-lg p-2" /><Button disabled={pending || !name.trim()} type="submit">Adicionar</Button></div>
       </form>
       <label className="text-sm">Mostrar <select aria-label="Filtrar catálogo" value={filter} onChange={event=>setFilter(event.target.value)} className="ml-2 rounded-lg border p-2"><option value="all">Tudo</option>{Object.entries(labels).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
-      <ul className="max-h-64 overflow-auto divide-y">{visible.map(item=><li key={item.id} className="flex justify-between items-center gap-4 py-3"><span><strong className="block text-sm font-medium">{item.name}</strong><small className="text-muted-foreground">{labels[item.kind]} · {item.people_count} pessoa{item.people_count!==1?'s':''}</small></span><Button type="button" size="sm" variant="outline" aria-label={`Excluir ${item.name}`} onClick={()=>{setError('');setRemoval(item);}}>Excluir</Button></li>)}</ul>
+      <ul className="max-h-64 overflow-auto divide-y">{visible.map(item=><li key={item.id} className="flex justify-between items-center gap-4 py-3"><span><strong className="block text-sm font-medium">{item.name}</strong><small className="text-muted-foreground">{kindName[item.kind]} · {peopleLabel(item.people_count)}</small></span><Button type="button" size="sm" variant="outline" aria-label={`Excluir ${item.name}`} onClick={()=>{setError('');setRemoval(item);}}>Excluir</Button></li>)}</ul>
       {!visible.length && <p className="text-sm text-muted-foreground">Nenhum cadastro nesta categoria.</p>}
       {(error || catalog.error) && <p role="alert" className="text-sm text-destructive">{error || catalog.error}</p>}
     </DialogContent></Dialog>
-    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. Os dados das {removal?.people_count || 0} pessoas que o utilizam serão preservados.</AlertDialogDescription></AlertDialogHeader>
+    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. {removal?.people_count ? `Os dados ${removal.people_count===1?'da pessoa que o utiliza serão preservados':`das ${removal.people_count} pessoas que o utilizam serão preservados`}.` : 'Nenhuma pessoa o utiliza hoje.'}</AlertDialogDescription></AlertDialogHeader>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <AlertDialogFooter><AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel><AlertDialogAction disabled={pending} onClick={event=>{event.preventDefault();remove();}}>{pending?'Excluindo…':'Excluir'}</AlertDialogAction></AlertDialogFooter>
     </AlertDialogContent></AlertDialog>
