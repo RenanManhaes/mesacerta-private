@@ -542,6 +542,36 @@ await item(7,'MCT-76 patrocínios: Diamante/Ouro/Prata com ícones; Master/Apoio
   await page.waitForTimeout(1200);
   const afterEdit=(await eventDoc()).document;
   assert.equal(afterEdit.sponsors.find(s=>s.id==='sp-1').plan,'Master','editar sem mexer na cota alterou o vínculo');
+  // Campo "Cota" não briga com a digitação: o texto cru fica como digitado e só ao salvar vira o nome da cota.
+  await page.locator('button.reference-sponsor').filter({hasText:'Café Montanha'}).click();
+  const typing=page.getByRole('dialog');
+  await typing.waitFor();
+  const cota=typing.getByLabel('Cota',{exact:true});
+  await cota.fill('');
+  await cota.pressSequentially('Cota ',{delay:40});
+  assert.equal(await cota.inputValue(),'Cota ','o espaço digitado não pode sumir enquanto a pessoa escreve');
+  await cota.pressSequentially('Especial',{delay:40});
+  assert.equal(await cota.inputValue(),'Cota Especial','"Cota Especial" deveria ficar como digitado');
+  await typing.getByRole('button',{name:/Salvar/}).click();
+  await typing.waitFor({state:'detached',timeout:4000});
+  await page.waitForTimeout(1200);
+  assert.equal((await eventDoc()).document.sponsors.find(s=>s.id==='sp-4').plan,'Cota Especial','texto livre deveria ser gravado como digitado');
+  await page.locator('button.reference-sponsor').filter({hasText:'Banco Meridiano'}).click();
+  const lower=page.getByRole('dialog');
+  await lower.waitFor();
+  const cota2=lower.getByLabel('Cota',{exact:true});
+  await cota2.fill('');
+  await cota2.pressSequentially('diamante',{delay:40});
+  assert.equal(await cota2.inputValue(),'diamante','o campo mostra o cru; a troca de maiúscula só acontece ao salvar');
+  await lower.getByRole('button',{name:/Salvar/}).click();
+  await lower.waitFor({state:'detached',timeout:4000});
+  await page.waitForTimeout(1200);
+  assert.equal((await eventDoc()).document.sponsors.find(s=>s.id==='sp-2').plan,'Master','"diamante" deveria casar com a cota Diamante (plano legado Master) ao salvar');
+  const plansAfterTyping=await page.locator('section.platform-panel').filter({hasText:'Planos de patrocínio'}).locator('.border.rounded-md').allInnerTexts();
+  const flatPlan=name=>plansAfterTyping.find(t=>t.includes(name)).replace(/\n/g,' ');
+  assert.ok(/2\s+vendidos \/ 1 disponíveis/.test(flatPlan('Diamante')),`Diamante deveria contar Master + "diamante" (2): ${flatPlan('Diamante')}`);
+  assert.ok(/0\s+vendidos \/ 2 disponíveis/.test(flatPlan('Ouro')),`Ouro: ${flatPlan('Ouro')}`);
+  notes.push('campo Cota: "Cota Especial" gravado como digitado; "diamante" gravado ligado a Diamante/Master; vendidos por nome normalizado (Diamante 2, Ouro 0)');
   // nova cota usa nomenclatura nova
   await page.getByRole('button',{name:/Plano/}).click();
   const planModal=page.getByRole('dialog');
