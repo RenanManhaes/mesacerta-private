@@ -308,6 +308,23 @@ export default function Networking() {
           onClick={result ? goToRepeats : undefined}
         />
       </div>
+      {input.errors.length > 0 && (
+        <div
+          role="alert"
+          data-testid="networking-config-errors"
+          className="platform-panel flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <p>
+            <b className="text-destructive">Ajuste a configuração antes de gerar:</b>{' '}
+            {input.errors[0]}
+            {input.errors.length > 1 &&
+              ` (e mais ${input.errors.length - 1} ${input.errors.length - 1 === 1 ? 'ajuste' : 'ajustes'})`}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => setConfigOpen(true)}>
+            Corrigir configuração
+          </Button>
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-danger">
           {error}

@@ -478,6 +478,28 @@ await item(6,'MCT-75 Networking: "Configurar rodadas" no topo, modal completo, g
   assert.ok(kpis.includes('15 min cada'),`KPI de duração: ${kpis.replace(/\n+/g,' | ')}`);
   // Escape também fecha
   await button.click();await dialog.waitFor();await page.keyboard.press('Escape');await dialog.waitFor({state:'detached',timeout:3000});
+  // erro de configuração fica visível FORA do modal, com o botão que leva até ele
+  await button.click();await dialog.waitFor();
+  await dialog.getByLabel('Rodadas',{exact:true}).fill('99');
+  await sleep(500);
+  await dialog.getByRole('button',{name:'Concluir configuração'}).click();
+  await dialog.waitFor({state:'detached',timeout:3000});
+  const configErrors=page.getByTestId('networking-config-errors');
+  await configErrors.waitFor({timeout:3000});
+  const errorText=await configErrors.innerText();
+  assert.ok(errorText.includes('Ajuste a configuração antes de gerar'),`aviso: ${errorText}`);
+  assert.ok(errorText.includes('Configure de 1 a 60 rodadas.'),`primeiro erro ausente: ${errorText}`);
+  assert.equal(await page.getByRole('button',{name:'Gerar distribuição'}).isDisabled(),true,'Gerar deveria estar desabilitado com erro');
+  await shot(page,'mct75-erro-configuracao');
+  await configErrors.getByRole('button',{name:'Corrigir configuração'}).click();
+  await dialog.waitFor();
+  await dialog.getByLabel('Rodadas',{exact:true}).fill('4');
+  await sleep(700);
+  await dialog.getByRole('button',{name:'Concluir configuração'}).click();
+  await dialog.waitFor({state:'detached',timeout:3000});
+  await configErrors.waitFor({state:'detached',timeout:3000});
+  assert.equal(await page.getByRole('button',{name:'Gerar distribuição'}).isDisabled(),false,'Gerar deveria voltar a funcionar');
+  notes.push('rodadas=99 mostra "Ajuste a configuração antes de gerar: Configure de 1 a 60 rodadas." fora do modal; o botão do aviso abre a configuração; corrigido, o aviso some e Gerar volta');
   // gerar
   await page.getByRole('button',{name:'Gerar distribuição'}).click();
   await page.waitForFunction(()=>{const t=document.querySelector('.platform-kpis')?.innerText||'';return !/Encontros únicos\s*\n?\s*—/.test(t);},null,{timeout:15000});
