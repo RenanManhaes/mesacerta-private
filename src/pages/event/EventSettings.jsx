@@ -11,13 +11,7 @@ import {
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import {
   CalendarDays,
   Truck,
@@ -216,30 +210,17 @@ export default function EventSettings() {
           </Button>
         </Panel>
       </div>
-      <Dialog open={archive} onOpenChange={setArchive}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Arquivar {ev.name}?</DialogTitle>
-          </DialogHeader>
-          <p>
-            Os dados serão mantidos. Você pode restaurar o evento na lista de
-            arquivados.
-          </p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setArchive(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                updateCurrent((e) => ({ ...e, archived: true }));
-                navigate('/eventos');
-              }}
-            >
-              Arquivar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={archive}
+        onOpenChange={setArchive}
+        title={`Arquivar ${ev.name}?`}
+        description="Os dados serão mantidos. Você pode restaurar o evento na lista de arquivados."
+        confirmLabel="Arquivar"
+        onConfirm={() => {
+          updateCurrent((e) => ({ ...e, archived: true }));
+          navigate('/eventos');
+        }}
+      />
     </div>
   );
 }
