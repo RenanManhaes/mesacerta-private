@@ -35,6 +35,20 @@ export const assignableMembers = (staffMembers) => realMembers(staffMembers).fil
 
 export const findMember = (staffMembers, id) => realMembers(staffMembers).find((p) => p.id === id) || null;
 
+// Rótulos dos responsáveis para mostrar na tela, um por ID.
+// Quem edita tem a equipe e vê o nome atual de cada pessoa. O staff NÃO recebe a equipe (a projeção dele
+// traz só as próprias tarefas), então os IDs não resolvem; nesse caso usa o texto "owner" já gravado na tarefa.
+// Se a equipe existe e o ID não está nela, é de fato alguém fora da equipe.
+export function ownerChips(task, ids, members) {
+  const hasTeam = realMembers(members).length > 0;
+  if (hasTeam) return ids.map((id) => ({ id, label: findMember(members, id)?.name || 'Pessoa fora da equipe' }));
+  const names = String(task?.owner || '').split(',').map((part) => part.trim()).filter(Boolean);
+  if (!names.length) return ids.map((id) => ({ id, label: 'Pessoa fora da equipe' }));
+  // Um nome por ID quando os números batem; senão, um único rótulo com o texto inteiro (sem adivinhar quem é quem).
+  if (names.length === ids.length) return ids.map((id, index) => ({ id, label: names[index] }));
+  return [{ id: ids[0] || names.join(', '), label: names.join(', ') }];
+}
+
 export function memberLabel(person) {
   const detail = person.jobTitle || person.function || person.role;
   return detail ? `${person.name} · ${detail}` : person.name;

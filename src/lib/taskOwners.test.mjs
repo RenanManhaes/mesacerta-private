@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyTaskEdit, legacyOwnerMatches, realMembers, searchMembers, taskOwnerIds } from './taskOwners.js';
+import { applyTaskEdit, legacyOwnerMatches, ownerChips, realMembers, searchMembers, taskOwnerIds } from './taskOwners.js';
 import { assignTask } from './staff.js';
 
 const team = [
