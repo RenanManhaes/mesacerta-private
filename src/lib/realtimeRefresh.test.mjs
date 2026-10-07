@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { recordSignal, hasNewerSignal, decideRefresh, reconcileRemote } from './realtimeRefresh.js';
+import { recordSignal, hasNewerSignal, decideRefresh, reconcileRemote, createMutationTracker } from './realtimeRefresh.js';
 
 const row = (document, revision) => ({ document, revision });
 const doc = (extra = {}) => ({ id: 'ev', name: 'Evento', tasks: [{ id: 't', status: 'A fazer' }], participants: [{ id: 'p', name: 'Ana' }], ...extra });
@@ -89,4 +89,53 @@ test('não altera as entradas', () => {
   const copy = structuredClone({ ack, local, remote });
   reconcileRemote({ acknowledged: ack, local, remote });
   assert.deepEqual({ ack, local, remote }, copy);
+});
+
+// Rebusca em voo + criação local: a resposta antiga não traz o evento novo.
+test('criar evento durante a rebusca: a resposta velha seria tratada como "perdi o acesso" e é descartada', async () => {
+  const tracker = createMutationTracker();
+  const old = [doc()];
+  let local = [doc()];
+  let acknowledged = [doc()];
+  const startedEpoch = tracker.snapshot(); // a rebusca começa aqui e fica em voo
+  await tracker.track(async () => { // o usuário cria um evento (addEvent) e o servidor confirma
+    const created = { id: 'novo', name: 'Criado agora' };
+    local = [...local, created];
+    acknowledged = [...acknowledged, created];
+  });
+  // Sem a guarda, aplicar a resposta velha removeria o evento recém-criado:
+  const unguarded = reconcileRemote({ acknowledged, local, remote: old.map((d) => row(d, 1)) });
+  assert.deepEqual(unguarded.events.map((e) => e.id), ['ev'], 'este é o defeito que a guarda evita');
+  // Com a guarda, a rebusca percebe que algo mudou no meio, descarta e busca de novo:
+  assert.equal(tracker.changedSince(startedEpoch), true);
+  // A nova rebusca (começa depois) vê o servidor já com o evento e não descarta:
+  const secondEpoch = tracker.snapshot();
+  const fresh = reconcileRemote({ acknowledged, local, remote: [row(doc(), 1), row({ id: 'novo', name: 'Criado agora' }, 1)] });
+  assert.equal(tracker.changedSince(secondEpoch), false);
+  assert.deepEqual(fresh.events.map((e) => e.id).sort(), ['ev', 'novo']);
+});
+
+test('operação em andamento conta como mudança e como ocupado; falha também encerra a operação', async () => {
+  const tracker = createMutationTracker();
+  const snap = tracker.snapshot();
+  assert.equal(tracker.busy(), false);
+  assert.equal(tracker.changedSince(snap), false);
+  let release;
+  const running = tracker.track(() => new Promise((resolve) => { release = resolve; }));
+  assert.equal(tracker.busy(), true);
+  const during = tracker.snapshot();
+  assert.equal(tracker.changedSince(during), true, 'enquanto há operação, nenhuma resposta é confiável');
+  release();
+  await running;
+  assert.equal(tracker.busy(), false);
+  assert.equal(tracker.changedSince(during), true, 'a operação terminou depois do início da rebusca');
+  await assert.rejects(tracker.track(async () => { throw new Error('limite'); }), /limite/);
+  assert.equal(tracker.busy(), false, 'erro não deixa o contador preso');
+});
+
+test('gravação durante a rebusca também invalida a resposta (não desfaz a mudança recém-salva)', async () => {
+  const tracker = createMutationTracker();
+  const startedEpoch = tracker.snapshot();
+  await tracker.track(async () => {}); // um save começou e terminou enquanto a rebusca estava em voo
+  assert.equal(tracker.changedSince(startedEpoch), true);
 });

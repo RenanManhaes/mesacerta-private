@@ -86,6 +86,37 @@ t1=(await load(founder.client)).document.tasks.find(t=>t.id==='t1');
 assert.equal(t1.status,'Em andamento');assert.equal(t1.description,'Chegar às 8h e conferir o som.');assert.deepEqual(t1.ownerIds,[staffMember.id,staff2Member.id]);
 console.log('CA4 PASS: staff mudou o status e nada mais (descrição e responsáveis intactos para o fundador).');
 
+// --- Renomear membro com tarefa de vários responsáveis não corrompe o texto "owner" ---
+const rename=async(member,name)=>{
+  const current=(await rpc(founder.client,'event_team',{p_event:eventId})).find(m=>m.id===member.id);
+  assert.ok(current,'membro não encontrado na equipe');
+  await rpc(founder.client,'event_edit_person',{p_member:member.id,p_name:name,p_email:current.email||'',p_phone:current.phone||'',p_function:current.function||'',p_area:current.area||'',p_job_title:current.jobTitle||''});
+};
+const ownerSeenBy=async(client,taskId='t1')=>(await load(client)).document.tasks.find(t=>t.id===taskId)?.owner;
+// Tarefa antiga: só ownerId (sem ownerIds); e uma tarefa de outra pessoa, que não pode mudar.
+const beforeRename=await load(founder.client);
+const legacyDoc=structuredClone(beforeRename.document);
+legacyDoc.tasks.push({id:'t-legacy',name:'Tarefa antiga',status:'A fazer',ownerId:staffMember.id,owner:'Nome velho'});
+saved=await save(founder.client,beforeRename,legacyDoc);assert.ifError(saved.error);
+const directorTaskOwner=await ownerSeenBy(founder.client,'t2');
+const staff2Name=(await rpc(founder.client,'event_team',{p_event:eventId})).find(m=>m.id===staff2Member.id).name;
+
+await rename(staffMember,'João P.');
+assert.equal(await ownerSeenBy(founder.client),`João P., ${staff2Name}`);
+assert.equal(await ownerSeenBy(staff.client),`João P., ${staff2Name}`);
+assert.equal(await ownerSeenBy(staff2.client),`João P., ${staff2Name}`);
+assert.equal(await ownerSeenBy(founder.client,'t-legacy'),'João P.');
+assert.equal(await ownerSeenBy(founder.client,'t2'),directorTaskOwner);
+console.log(`CA5 PASS: renomear o 1º responsável (João P.) mantém o 2º no texto: "${await ownerSeenBy(founder.client)}"; tarefa antiga só com ownerId vira "João P."; tarefa de outra pessoa não muda.`);
+
+await rename(staff2Member,'Marina Lima');
+assert.equal(await ownerSeenBy(founder.client),'João P., Marina Lima');
+assert.equal(await ownerSeenBy(staff.client),'João P., Marina Lima');
+assert.equal(await ownerSeenBy(staff2.client),'João P., Marina Lima');
+t1=(await load(founder.client)).document.tasks.find(t=>t.id==='t1');
+assert.deepEqual(t1.ownerIds,[staffMember.id,staff2Member.id]);assert.equal(t1.ownerId,staffMember.id);
+console.log('CA5b PASS: renomear o 2º responsável (Marina Lima) também atualiza; ownerIds/ownerId intactos; o staff (projeção sem equipe) vê "João P., Marina Lima".');
+
 // --- Acesso direto às tabelas normalizadas (mesmas regras do MCT-60) ---
 const ins=await admin.from('events').insert({id:eventId,organization_id:org.data.organization_id,nome:'Synthetic normalized MCT86'});
 if(ins.error&&ins.error.code!=='23505')assert.ifError(ins.error);

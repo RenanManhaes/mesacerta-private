@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SearchSuggestions from '@/components/common/SearchSuggestions';
-import { MAX_DESCRIPTION, findMember, legacyOwnerMatches, memberLabel, searchMembers, taskOwnerIds } from '@/lib/taskOwners';
+import { MAX_DESCRIPTION, findMember, legacyOwnerMatches, memberLabel, ownerChips, searchMembers, taskOwnerIds } from '@/lib/taskOwners';
 
 const sameList = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
@@ -74,15 +74,12 @@ export default function TaskEditDialog({ task, members, statuses, canEdit, onClo
             <div className="space-y-1.5">
               <Label className="text-[12px] font-medium">Responsáveis</Label>
               <div className="flex flex-wrap gap-1.5" data-testid="task-owners">
-                {ownerIds.map((id) => {
-                  const person = findMember(members, id);
-                  return (
-                    <span key={id} className={chip} data-owner-id={id}>
-                      {person ? person.name : 'Pessoa fora da equipe'}
-                      {canEdit && <button type="button" aria-label={`Tirar ${person ? person.name : 'responsável'}`} onClick={() => remove(id)} className="rounded-full p-0.5 hover:bg-accent"><X className="h-3 w-3" /></button>}
-                    </span>
-                  );
-                })}
+                {ownerChips(task, ownerIds, members).map(({ id, label }) => (
+                  <span key={id} className={chip} data-owner-id={id}>
+                    {label}
+                    {canEdit && <button type="button" aria-label={`Tirar ${findMember(members, id) ? label : 'responsável'}`} onClick={() => remove(id)} className="rounded-full p-0.5 hover:bg-accent"><X className="h-3 w-3" /></button>}
+                  </span>
+                ))}
                 {legacyOwner && (
                   <span className={chip}>{legacyOwner} (cadastro anterior)
                     {canEdit && <button type="button" aria-label={`Tirar ${legacyOwner}`} onClick={() => setLegacyOwner('')} className="rounded-full p-0.5 hover:bg-accent"><X className="h-3 w-3" /></button>}

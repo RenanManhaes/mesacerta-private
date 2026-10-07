@@ -25,7 +25,7 @@ import {
 } from '@/components/common/ReferenceUI';
 import { useToast } from '@/components/ui/use-toast';
 import SponsorTier from '@/components/common/SponsorTier';
-import {sponsorTierName} from '@/lib/sponsorTier';
+import {resolveSponsorPlan, soldForPlan, sponsorTierName} from '@/lib/sponsorTier';
 
 export default function Sponsors() {
   const { currentEvent: ev, updateCurrent } = useEvent();
@@ -66,8 +66,11 @@ export default function Sponsors() {
       draft.negotiated < draft.received
     )
       return;
+    const original = ev.sponsors.find((s) => s.id === draft.id);
     const next = {
       ...draft,
+      // O campo guarda o texto cru; só ao salvar vira o nome da cota (ver sponsorTier.js).
+      plan: resolveSponsorPlan(draft.plan, ev.sponsorPlans, original?.plan),
       status:
         draft.status === 'negociacao'
           ? 'negociacao'
@@ -109,7 +112,7 @@ export default function Sponsors() {
                 id: uid(),
                 company: '',
                 contact: '',
-                plan: ev.sponsorPlans[0]?.name || '',
+                plan: sponsorTierName(ev.sponsorPlans[0]?.name),
                 negotiated: 0,
                 received: 0,
                 dueDate: '',
@@ -163,7 +166,7 @@ export default function Sponsors() {
           <button
             key={s.id}
             className="platform-panel reference-sponsor"
-            onClick={() => setDraft({ ...s })}
+            onClick={() => setDraft({ ...s, plan: sponsorTierName(s.plan) })}
           >
             <span className="reference-avatar">{initials(s.company)}</span>
             <span>
@@ -202,11 +205,7 @@ export default function Sponsors() {
                 <span className="tnum text-[15px]">{formatBRL(p.price)}</span>
               </div>
               <div className="mt-1 text-[12px] text-muted-foreground">
-                {
-                  ev.sponsors.filter(
-                    (s) => s.plan === p.name && s.status !== 'negociacao',
-                  ).length
-                }{' '}
+                {soldForPlan(p, ev.sponsorPlans, ev.sponsors)}{' '}
                 vendidos / {p.available} disponíveis · {p.complimentary}{' '}
                 cortesias
               </div>
@@ -246,7 +245,7 @@ export default function Sponsors() {
                 />
                 <Field
                   label="Cota"
-                  value={sponsorTierName(draft.plan)}
+                  value={draft.plan ?? ''}
                   onChange={(plan) => patch({ plan })}
                 />
                 <Field

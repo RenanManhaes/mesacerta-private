@@ -101,3 +101,88 @@ test('chaves que não são a sessão (ex.: verificador PKCE) ficam compartilhada
 test('storageKey é único por carregamento (canal de broadcast não é compartilhado)', () => {
   assert.notEqual(tabAuthStorageKey(BASE), tabAuthStorageKey(BASE));
 });
+
+// O navegador dispara `storage` nas OUTRAS abas quando uma aba muda o localStorage. Simulamos isso.
+const watch = (tab, shared) => {
+  const target = new EventTarget();
+  const calls = [];
+  tab.storage.onAccountRemoved(info => calls.push(info), target);
+  const emit = fields => { const event = new Event('storage'); Object.assign(event, { storageArea: shared, ...fields }); target.dispatchEvent(event); };
+  return { calls, emit };
+};
+
+test('sair em A avisa B (mesma conta) com "de propósito"; conta diferente em C não é afetada', () => {
+  const shared = fake();
+  const a = openTab(shared), b = openTab(shared), c = openTab(shared);
+  a.storage.setItem(a.key, session('u1'));
+  b.storage.setItem(b.key, session('u1')); // mesma conta, mesma entrada
+  c.storage.setItem(c.key, session('u2'));
+  const onB = watch(b, shared), onC = watch(c, shared);
+  // O que o AuthContext faz em A: marca, a SDK remove a entrada, solta a aba.
+  a.storage.announceSignOut();
+  a.storage.removeItem(a.key);
+  a.storage.release();
+  onB.emit({ key: `${BASE}:u:u1`, newValue: null });
+  onC.emit({ key: `${BASE}:u:u1`, newValue: null });
+  assert.deepEqual(onB.calls, [{ deliberate: true }]);
+  assert.deepEqual(onC.calls, [], 'a conta de C é outra: não pode ser afetada');
+  assert.equal(idOf(c), 'u2');
+});
+
+test('entrada removida sem aviso de saída (sessão expirou) chega como não deliberada', () => {
+  const shared = fake();
+  const a = openTab(shared), b = openTab(shared);
+  a.storage.setItem(a.key, session('u1'));
+  b.storage.setItem(b.key, session('u1'));
+  const onB = watch(b, shared);
+  a.storage.removeItem(a.key);
+  onB.emit({ key: `${BASE}:u:u1`, newValue: null });
+  assert.deepEqual(onB.calls, [{ deliberate: false }]);
+});
+
+test('renovar o token em outra aba (entrada reescrita) ou mexer em outras chaves não conta como sair', () => {
+  const shared = fake();
+  const a = openTab(shared), b = openTab(shared);
+  a.storage.setItem(a.key, session('u1', 'old'));
+  b.storage.setItem(b.key, session('u1', 'old'));
+  const onB = watch(b, shared);
+  onB.emit({ key: `${BASE}:u:u1`, newValue: session('u1', 'new') });
+  onB.emit({ key: `${BASE}:last`, newValue: null });
+  onB.emit({ key: `${BASE}-code-verifier`, newValue: null });
+  onB.emit({ key: `${BASE}:u:u1`, newValue: null, storageArea: fake() }); // outro storage (ex.: sessionStorage)
+  assert.deepEqual(onB.calls, []);
+});
+
+test('mesma conta voltou a entrar logo depois: a aba não é derrubada; aba que já saiu não é avisada', () => {
+  const shared = fake();
+  const a = openTab(shared), b = openTab(shared), idle = openTab(shared);
+  a.storage.setItem(a.key, session('u1'));
+  b.storage.setItem(b.key, session('u1'));
+  const onB = watch(b, shared), onIdle = watch(idle, shared);
+  a.storage.removeItem(a.key);
+  a.storage.setItem(a.key, session('u1', 'novo')); // novo login antes de o aviso chegar
+  onB.emit({ key: `${BASE}:u:u1`, newValue: null });
+  assert.deepEqual(onB.calls, []);
+  b.storage.release();
+  a.storage.removeItem(a.key);
+  onB.emit({ key: `${BASE}:u:u1`, newValue: null });
+  onIdle.emit({ key: `${BASE}:u:u1`, newValue: null });
+  assert.deepEqual(onB.calls, [], 'aba que já saiu não é avisada de novo');
+  assert.deepEqual(onIdle.calls, []);
+});
+
+test('localStorage.clear() em outra aba (key null) avisa a aba cuja entrada sumiu; cancelar remove o ouvinte', () => {
+  const shared = fake();
+  const b = openTab(shared);
+  b.storage.setItem(b.key, session('u1'));
+  const target = new EventTarget();
+  const calls = [];
+  const off = b.storage.onAccountRemoved(info => calls.push(info), target);
+  shared.removeItem(`${BASE}:u:u1`);
+  const event = new Event('storage'); Object.assign(event, { key: null, newValue: null, storageArea: shared });
+  target.dispatchEvent(event);
+  assert.equal(calls.length, 1);
+  off();
+  target.dispatchEvent(event);
+  assert.equal(calls.length, 1);
+});
