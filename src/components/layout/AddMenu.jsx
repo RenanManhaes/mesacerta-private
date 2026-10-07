@@ -57,7 +57,7 @@ export default function AddMenu() {
         case 'participante':
           return { ...ev, participants: [{ id: uid(), name: form.name || 'Sem nome', email: form.email || '', phone: '', company: form.company || '', type: form.type || 'Participante', status: 'Pendente' }, ...ev.participants] };
         case 'tarefa':
-          return { ...ev, tasks: [{ id: uid(), name: form.name || 'Nova tarefa', ownerId: form.ownerId || '', owner: (ev.staffMembers || []).find(p=>p.id===form.ownerId && p.active!==false)?.name || '', date: form.date || '', category: form.category || 'Operação', priority: form.priority || 'Normal', status: 'A fazer' }, ...ev.tasks] };
+          return { ...ev, tasks: [{ id: uid(), name: form.name || 'Nova tarefa', description: '', ownerId: form.ownerId || '', ownerIds: form.ownerId ? [form.ownerId] : [], owner: (ev.staffMembers || []).find(p=>p.id===form.ownerId && p.active!==false)?.name || '', date: form.date || '', category: form.category || 'Operação', priority: form.priority || 'Normal', status: 'A fazer' }, ...ev.tasks] };
         case 'despesa':
           return { ...ev, expenses: [{ id: uid(), description: form.description || 'Despesa', category: form.category || 'Outros', type: form.type || 'fixed', revenueBase: form.revenueBase || 'total', qty: Number(form.qty ?? 1), unitValue: Number(form.unitValue) || 0, dueDate: form.dueDate || '', status: 'pendente', note: '' }, ...ev.expenses] };
         case 'receita':

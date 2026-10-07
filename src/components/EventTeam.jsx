@@ -4,6 +4,7 @@ import {useEvent} from '@/context/EventContext';
 import {supabase} from '@/api/supabaseClient';
 import EventInvites from '@/components/EventInvites';
 import {useTeamCatalog} from '@/hooks/useTeamCatalog';
+import {taskOwnerIds} from '@/lib/taskOwners';
 import {CatalogField,TeamCatalogManager} from '@/components/TeamCatalog';
 import {PageHeader,Panel,Field,initials} from '@/components/common/ReferenceUI';
 import {Button} from '@/components/ui/button';
@@ -45,7 +46,7 @@ export default function EventTeam() {
         <span>{initials(person.name)}</span><strong className="block">{person.name}</strong>
         <p>{person.role}{person.jobTitle ? ` · ${person.jobTitle}` : ''}{person.function ? ` · ${person.function}` : ''}</p>
         <p className="text-sm">{person.email} {person.phone}</p>
-        <p className="text-xs">{(ev.tasks || []).filter(task=>task.ownerId===person.id && task.status!=='Concluído').length} tarefas pendentes</p>
+        <p className="text-xs">{(ev.tasks || []).filter(task=>taskOwnerIds(task).includes(person.id) && task.status!=='Concluído').length} tarefas pendentes</p>
       </button>)}</div>
       {!filtered.length && <p>Nenhuma pessoa encontrada.</p>}
     </Panel>

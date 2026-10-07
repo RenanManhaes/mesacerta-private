@@ -4,10 +4,10 @@ import {Input} from '@/components/ui/input';
 export const normalizeSearch = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
 
 // One editable value, with optional suggestions. Unlisted text remains valid.
-export default function SearchSuggestions({label,value,onChange,options,disabled=false,placeholder='',className='',onFocus=()=>{}}) {
+export default function SearchSuggestions({label,value,onChange,options,disabled=false,placeholder='',className='',onFocus=()=>{},onSelect=null}) {
   const id=useId(), box=useRef(null);
   const [open,setOpen]=useState(false),[active,setActive]=useState(-1);
-  const select=option=>{onChange(option.value);setOpen(false);setActive(-1);};
+  const select=option=>{(onSelect||(o=>onChange(o.value)))(option);setOpen(false);setActive(-1);};
   return <div ref={box} className={`relative ${className}`} onBlur={event=>{if(!box.current?.contains(event.relatedTarget))setOpen(false);}}>
     <Input aria-label={label} role="combobox" aria-autocomplete="list" aria-expanded={open && options.length>0} aria-controls={`${id}-list`} aria-activedescendant={open && active>=0 && options[active]?`${id}-${active}`:undefined}
       disabled={disabled} value={value || ''} placeholder={placeholder}
