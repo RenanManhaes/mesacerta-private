@@ -53,11 +53,11 @@ function Row({ item, index, isLast, typeNames, canEdit, onEdit, onDuplicate, onD
       >
         <div className="flex items-center gap-1">
           {canEdit && (
-            <button type="button" {...drag.dragHandleProps} data-drag-handle={item.id}
+            <div {...drag.dragHandleProps} data-drag-handle={item.id}
               aria-label={`Mover ${item.title}. Espaço para pegar, setas para cima e para baixo para mover, Espaço para soltar.`}
               className="platform-schedule-handle shrink-0 h-8 w-6 -ml-1 flex items-center justify-center rounded text-muted-foreground hover:text-foreground">
               <GripVertical className="h-4 w-4" />
-            </button>
+            </div>
           )}
           <div className="grid grid-cols-12 gap-3 items-center py-3 px-1 flex-1 min-w-0">
             <div className="col-span-2 sm:col-span-1 tnum text-[13px] text-muted-foreground">{item.computedStart}</div>
