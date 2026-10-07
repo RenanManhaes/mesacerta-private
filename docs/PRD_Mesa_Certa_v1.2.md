@@ -1642,6 +1642,8 @@ Aplicação e migrações precisam corresponder. Não afirmar disponibilidade re
 
 ### Limite de criação — MCT-46
 
+> **MCT-78 (07/10/2026):** conta comum mantém **1 evento ativo** (`public.event_limit()` = 1, migração `20261007110000_event_limit_one`), em substituição ao limite 3 de 06/10/2026. Preservados: exceção master (`multi_event`), trava transacional contra pedidos simultâneos e todos os eventos existentes — nada é apagado nem arquivado; contas acima do limite apenas não criam novos. A interface mostra “Seu plano permite 1 evento ativo. Para criar outro, fale com a gente.” Qualquer menção anterior a “até 3 eventos ativos” está superada.
+
 Conta sem liberação pode criar o primeiro evento, mas não outro enquanto já tem vínculo ativo com um evento, inclusive recebido por convite. Arquivar não libera vaga. Eventos existentes acima do limite são conservados. O limite é aplicado no backend, inclusive contra chamada direta e dois pedidos simultâneos em organizações diferentes.
 
 `user_event_permissions.multi_event` é a flag administrativa por conta. **`renannascimento0304@gmail.com` começa com a flag ligada**, sem limite de criação. Ser fundador de um novo evento não ativa essa exceção automaticamente. A flag não vem de campos do documento nem de metadados que o usuário edita.

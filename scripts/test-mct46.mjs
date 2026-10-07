@@ -12,19 +12,21 @@ const user=await account('mct46-limited');
 await rpc(user.client,'criar_organizacao',{p_nome:'Synthetic limited account'});
 const memberships=await user.client.from('memberships').select('organization_id').eq('user_id',user.user.id);assert.ifError(memberships.error);
 const org=memberships.data[0].organization_id;
-const before=await rpc(user.client,'event_creation_permission');assert.deepEqual(before,{canCreate:true,eventCount:0,multiEvent:false});
+const before=await rpc(user.client,'event_creation_permission');assert.deepEqual(before,{canCreate:true,eventCount:0,eventLimit:1,multiEvent:false});
 const directory=await mkdtemp(resolve('node_modules/.limit-ui-'));let tree;
 try {
- await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const useEvent=()=>globalThis.__limitContext; export const EventBackupImport=()=>null; export const LogoutButton=()=>null; export const formatDateFull=()=>''; export const daysUntil=()=>0; export const cn=(...x)=>x.filter(Boolean).join(' '); export const StatusPill=()=>null; export const Button=({children,variant,size,...props})=>React.createElement('button',props,children); export const Input=props=>React.createElement('input',props); export const Label=({children,...props})=>React.createElement('label',props,children);`);
+ await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const useEvent=()=>globalThis.__limitContext; export const EventBackupImport=()=>null; export const LogoutButton=()=>null; export const formatDateFull=()=>''; export const daysUntil=()=>0; export const cn=(...x)=>x.filter(Boolean).join(' '); export const StatusPill=()=>null; export const Button=({children,variant,size,...props})=>React.createElement('button',props,children); export const Input=props=>React.createElement('input',props); export const CityField=()=>null; export const Label=({children,...props})=>React.createElement('label',props,children);`);
  await writeFile(join(directory,'access.mjs'),await readFile('src/lib/eventAccess.js','utf8'));
+ await writeFile(join(directory,'contact.mjs'),await readFile('src/lib/contact.js','utf8'));
+ await writeFile(join(directory,'limit.mjs'),(await readFile('src/lib/eventLimit.js','utf8')).replace("'./contact.js'","'./contact.mjs'"));
  for(const [input,output] of [['src/pages/Events.jsx','events.mjs'],['src/pages/CreateEvent.jsx','create.mjs']]){
-  let source=await readFile(input,'utf8');source=source.replaceAll("'@/lib/eventAccess'","'./access.mjs'");
-  for(const alias of ['@/components/EventBackupImport','@/components/LogoutButton','@/context/EventContext','@/lib/format','@/lib/utils','@/components/common/Primitives','@/components/ui/button','@/components/ui/input','@/components/ui/label'])source=source.replaceAll(`'${alias}'`,"'./mocks.mjs'");
-  for(const name of ['EventBackupImport','LogoutButton'])source=source.replace(`import ${name} from './mocks.mjs'`,`import {${name}} from './mocks.mjs'`);
+  let source=await readFile(input,'utf8');source=source.replaceAll("'@/lib/eventAccess'","'./access.mjs'").replaceAll("'@/lib/eventLimit'","'./limit.mjs'");
+  for(const alias of ['@/components/EventBackupImport','@/components/LogoutButton','@/context/EventContext','@/lib/format','@/lib/utils','@/components/common/Primitives','@/components/ui/button','@/components/ui/input','@/components/ui/label','@/components/common/CityField'])source=source.replaceAll(`'${alias}'`,"'./mocks.mjs'");
+  for(const name of ['EventBackupImport','LogoutButton','CityField'])source=source.replace(`import ${name} from './mocks.mjs'`,`import {${name}} from './mocks.mjs'`);
   await writeFile(join(directory,output),ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext}}).outputText);
  }
  const {default:Events}=await import(pathToFileURL(join(directory,'events.mjs'))),{default:CreateEvent}=await import(pathToFileURL(join(directory,'create.mjs')));
- const mount=(permission,events=[],Component=Events)=>{globalThis.__limitContext={events,eventAccess:Object.fromEntries(events.map(event=>[event.id,{role:'founder'}])),canCreateEvent:permission.canCreate,updateEventById:()=>{},addEvent:()=>{throw Error('UI must not create when limited');}};act(()=>{tree=create(React.createElement(MemoryRouter,{future:{v7_startTransition:true,v7_relativeSplatPath:true}},React.createElement(Component)));});};
+ const mount=(permission,events=[],Component=Events)=>{globalThis.__limitContext={events,eventAccess:Object.fromEntries(events.map(event=>[event.id,{role:'founder'}])),canCreateEvent:permission.canCreate,eventLimit:permission.eventLimit,updateEventById:()=>{},addEvent:()=>{throw Error('UI must not create when limited');}};act(()=>{tree=create(React.createElement(MemoryRouter,{future:{v7_startTransition:true,v7_relativeSplatPath:true}},React.createElement(Component)));});};
  const createButtons=()=>tree.root.findAllByType('button').filter(button=>button.children.some(child=>typeof child==='string' && /Criar evento|Novo evento/.test(child)));
  mount(before);assert.equal(createButtons().length,1);act(()=>tree.unmount());
  console.log('CA1 UI/API PASS: new unflagged account has eventCount=0, canCreate=true; actual Events renders Criar evento.');
@@ -32,10 +34,10 @@ try {
  assert.equal(event.creationPermission.canCreate,false);
  const after=await rpc(user.client,'event_creation_permission');assert.equal(after.canCreate,false);assert.equal(after.eventCount,1);
  mount(after,[event.document]);assert.equal(createButtons().length,0);assert.ok(tree.root.findAllByType('button').some(button=>button.children.join('')==='Entrar em um evento'));act(()=>tree.unmount());
- mount(after,[event.document],CreateEvent);assert.equal(createButtons().length,0);assert.ok(tree.root.findByProps({role:'alert'}).children.join('').includes('limite de um evento'));act(()=>tree.unmount());
+ mount(after,[event.document],CreateEvent);assert.equal(createButtons().length,0);assert.ok(tree.root.findByProps({role:'alert'}).children.join('').includes('Seu plano permite 1 evento ativo. Para criar outro, fale com a gente.'));act(()=>tree.unmount());
  console.log('CA2 UI/API PASS: existing unflagged account has canCreate=false; Events hides all create buttons; direct /novo CreateEvent shows limit alert with no creation control.');
  const metadata=await user.client.auth.updateUser({data:{multi_event:true,role:'founder'}});assert.ifError(metadata.error);
- let denied=await user.request('rpc/event_create','POST',{p_org:org,p_document:{id:randomUUID(),name:'Forbidden second event'}});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');assert.match(denied.body.message,/limite de um evento/);
+ let denied=await user.request('rpc/event_create','POST',{p_org:org,p_document:{id:randomUUID(),name:'Forbidden second event'}});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');assert.match(denied.body.message,/Sua conta pode manter até 1 eventos/);
  console.log(`CA3 restricted-JWT POST event_create: HTTP ${denied.status}, SQLSTATE ${denied.body.code}, message=${denied.body.message}; editable Auth metadata cannot bypass.`);
  denied=await user.request(`user_event_permissions?user_id=eq.${user.user.id}`,'PATCH',{multi_event:true});assert.equal(denied.status,403);
  console.log('RLS flag escalation: direct PATCH with account JWT returns HTTP 403.');

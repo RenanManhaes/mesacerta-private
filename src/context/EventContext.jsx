@@ -13,6 +13,7 @@ import { supabase } from '@/api/supabaseClient';
 import { emptyEventTemplate } from '@/lib/demoData';
 import { mergeEventDocument } from '@/lib/mergeEventDocument';
 import { saveEventWithMerge } from '@/lib/eventSync';
+import { friendlyCreateError } from '@/lib/eventLimit';
 
 const EventContext = createContext(null);
 function seed() { return {events: [], currentEventId: ''}; }
@@ -275,7 +276,7 @@ export function EventProvider({ children }) {
     if (!orgId) throw new Error('Crie uma organização antes de criar seu evento.');
     await flush();
     const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: emptyEventTemplate(data)});
-    if (error) throw error;
+    if (error) throw friendlyCreateError(error);
     const ev = row.document;
     setCreationPermission(row.creationPermission);
     revision.current[ev.id] = row.revision;
@@ -294,7 +295,7 @@ export function EventProvider({ children }) {
     // Every imported record goes through the same authenticated creation transaction.
     for (const document of backup.events) {
       const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: document});
-      if (error) throw error;
+      if (error) throw friendlyCreateError(error);
       revision.current[document.id] = row.revision;
       setCreationPermission(row.creationPermission);
       setEventAccess(access => ({...access, [document.id]: row}));
