@@ -20,6 +20,7 @@ import {
   initials,
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {
   Armchair,
@@ -70,6 +71,7 @@ export default function Networking() {
   const [query, setQuery] = useEventField('networking.query', '');
   const [playing, setPlaying] = useState(false);
   const [configOpen,setConfigOpen] = useState(false);
+  const [replaceOpen, setReplaceOpen] = useState(false);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -151,6 +153,11 @@ export default function Networking() {
         setGenerating(false);
       }
     }, 30);
+  };
+  // Refazer a grade troca a distribuição atual; por isso pergunta antes. A primeira geração não pergunta.
+  const requestGenerate = () => {
+    if (result) setReplaceOpen(true);
+    else generate();
   };
   const people = result ? [...result.input.mobile, ...result.input.fixed] : [];
   const matches = people.filter((p) =>
@@ -240,7 +247,7 @@ export default function Networking() {
             <Button
               variant="outline"
               disabled={generating || input.errors.length > 0}
-              onClick={generate}
+              onClick={requestGenerate}
             >
               <RefreshCw size={16} />
               {generating
@@ -322,7 +329,7 @@ export default function Networking() {
           <Button
             variant="outline"
             disabled={generating || input.errors.length > 0}
-            onClick={generate}
+            onClick={requestGenerate}
           >
             <RefreshCw size={16} />
             Recalcular e substituir grade
@@ -752,6 +759,18 @@ export default function Networking() {
           ))}
         </Details>
       )}
+      <ConfirmDialog
+        open={replaceOpen}
+        onOpenChange={setReplaceOpen}
+        destructive
+        title="Substituir a distribuição atual?"
+        description="As mesas e rodadas serão refeitas e a grade de hoje se perde. O cadastro de pessoas não muda."
+        confirmLabel="Substituir"
+        onConfirm={() => {
+          setReplaceOpen(false);
+          generate();
+        }}
+      />
     </div>
   );
 }

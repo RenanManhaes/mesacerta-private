@@ -4,7 +4,23 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-const AlertDialog = AlertDialogPrimitive.Root
+// O Radix só devolve o foco a um <Trigger>. Aqui o modal abre por estado, então
+// guardamos quem tinha o foco na hora de abrir e devolvemos ao fechar.
+const OpenerContext = React.createContext(/** @type {React.MutableRefObject<HTMLElement | null> | null} */ (null))
+
+const AlertDialog = (/** @type {React.ComponentProps<typeof AlertDialogPrimitive.Root>} */ { open, children, ...props }) => {
+  const opener = React.useRef(/** @type {HTMLElement | null} */ (null))
+  React.useLayoutEffect(() => {
+    if (!open) return
+    const active = document.activeElement
+    opener.current = active instanceof HTMLElement && active !== document.body ? active : null
+  }, [open])
+  return (
+    <OpenerContext.Provider value={opener}>
+      <AlertDialogPrimitive.Root open={open} {...props}>{children}</AlertDialogPrimitive.Root>
+    </OpenerContext.Provider>
+  )
+}
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
 
@@ -27,7 +43,9 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 const AlertDialogContent = React.forwardRef(/**
  * @param {React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>} props
  * @param {React.ForwardedRef<React.ElementRef<typeof AlertDialogPrimitive.Content>>} ref
- */ ({ className, ...props }, ref) => (
+ */ ({ className, onCloseAutoFocus, ...props }, ref) => {
+  const opener = React.useContext(OpenerContext)
+  return (
   <AlertDialogPortal>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
@@ -36,9 +54,18 @@ const AlertDialogContent = React.forwardRef(/**
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
         className
       )}
+      onCloseAutoFocus={(event) => {
+        onCloseAutoFocus?.(event)
+        const target = opener?.current
+        if (!event.defaultPrevented && target?.isConnected) {
+          event.preventDefault()
+          target.focus()
+        }
+      }}
       {...props} />
   </AlertDialogPortal>
-))
+  )
+})
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const AlertDialogHeader = ({
