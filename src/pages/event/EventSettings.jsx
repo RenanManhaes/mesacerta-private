@@ -1,8 +1,7 @@
 import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import EventRoles from '@/components/EventRoles';
 import EventInvites from '@/components/EventInvites';
 import {
   PageHeader,
@@ -195,7 +194,12 @@ export default function EventSettings() {
           ))}
         </Panel>
         <EventInvites />
-        <EventRoles />
+        <Panel title="Acesso da equipe">
+          <p className="text-sm text-muted-foreground">
+            Para mudar o acesso de alguém, abra a pessoa em{' '}
+            <Link className="underline underline-offset-2 text-foreground" to={`/event/${ev.id}/equipe`}>Equipe do evento</Link>.
+          </p>
+        </Panel>
         <Panel title="Zona de risco">
           <p className="text-muted-foreground text-sm mb-4">
             Arquivar remove o evento da lista principal, mas mantém os dados.
