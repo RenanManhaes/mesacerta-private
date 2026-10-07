@@ -232,10 +232,15 @@ await item(3,'MCT-70 tarefas: card acompanha o ponto de captura (topo, rolado, e
     const card=page.locator(`[data-task-id="${id}"]`);
     const box=await card.boundingBox();
     const grab={x:box.x+grabDx,y:box.y+grabDy};
-    await page.mouse.move(grab.x,grab.y);
-    await page.mouse.down();
-    await page.mouse.move(grab.x+8,grab.y+8,{steps:4});
-    await dragged(id).waitFor({timeout:3000});
+    // No servidor de desenvolvimento, a primeira visita depois de mudar o código ainda compila
+    // módulos e o arraste pode não estar pronto no primeiro gesto. Tenta pegar o card até 2 vezes.
+    for(let attempt=1;;attempt++) {
+      await page.mouse.move(grab.x,grab.y);
+      await page.mouse.down();
+      await page.mouse.move(grab.x+8,grab.y+8,{steps:4});
+      try { await dragged(id).waitFor({timeout:4000}); break; }
+      catch(error) { await page.mouse.up(); if(attempt>=2) throw error; await sleep(1500); }
+    }
     const deviations=[];
     let mouse={x:grab.x+8,y:grab.y+8};
     const measure=async()=>{const r=await dragged(id).boundingBox();deviations.push({dx:+(mouse.x-r.x-grabDx).toFixed(1),dy:+(mouse.y-r.y-grabDy).toFixed(1),w:r.width,h:r.height});};
