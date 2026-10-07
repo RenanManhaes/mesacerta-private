@@ -10,7 +10,7 @@ export async function transpile(input,output,replacements={}) {
 }
 
 /** Escreve em `directory` o ConfirmDialog real (sobre primitivos simples de AlertDialog) e teamRoles.
- * Imports: './confirm.mjs' (ConfirmDialog) e './roles.mjs' (teamRoles). */
+ * Imports: './confirm.mjs' (ConfirmDialog), './roles.mjs' (teamRoles) e './owners.mjs' (taskOwners). */
 export async function writeTeamSupport(directory) {
   await writeFile(join(directory,'alert.mjs'),`import React from 'react';
 const Close=React.createContext(()=>{});
@@ -21,5 +21,6 @@ export const AlertDialogCancel=({children,...props})=>{const close=React.useCont
 export const AlertDialogAction=({children,...props})=>React.createElement('button',props,children);`);
   await transpile('src/components/common/ConfirmDialog.jsx',join(directory,'confirm.mjs'),{'@/components/ui/alert-dialog':'./alert.mjs'});
   await writeFile(join(directory,'roles.mjs'),await readFile('src/lib/teamRoles.js','utf8'));
+  await writeFile(join(directory,'owners.mjs'),await readFile('src/lib/taskOwners.js','utf8'));
 }
-export const supportImports={'@/components/common/ConfirmDialog':'./confirm.mjs','@/lib/teamRoles':'./roles.mjs'};
+export const supportImports={'@/components/common/ConfirmDialog':'./confirm.mjs','@/lib/teamRoles':'./roles.mjs','@/lib/taskOwners':'./owners.mjs'};
