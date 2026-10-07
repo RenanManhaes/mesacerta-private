@@ -1,41 +1,54 @@
-import {useId,useState} from 'react';
+import {useState} from 'react';
 import {Button} from '@/components/ui/button';
-import {Dialog,DialogContent,DialogHeader,DialogTitle} from '@/components/ui/dialog';
-const normalize=value=>String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
-const labels={function:'Funções',area:'Áreas',title:'Cargos'};
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import {AlertDialog,AlertDialogContent,AlertDialogHeader,AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction} from '@/components/ui/alert-dialog';
+import SearchSuggestions,{normalizeSearch} from '@/components/common/SearchSuggestions';
+const labels={function:'Funções',area:'Áreas'};
+
 export function CatalogField({label,kind,value,onChange,catalog,disabled=false}) {
-  const id=useId();
-  const [confirm,setConfirm]=useState(false),[error,setError]=useState(''),[pending,setPending]=useState(false),[open,setOpen]=useState(false);
+  const [error,setError]=useState(''),[pending,setPending]=useState(false);
   const options=catalog.items.filter(item=>item.kind===kind);
-  const term=normalize(value);
-  const matches=term.length>=3?options.filter(item=>normalize(item.name).includes(term)):[];
-  const exists=options.some(item=>normalize(item.name)===term);
+  const term=normalizeSearch(value);
+  const matches=options.filter(item=>normalizeSearch(item.name).includes(term)).slice(0,12).map(item=>({id:item.id,value:item.name}));
+  const exists=options.some(item=>normalizeSearch(item.name)===term);
   const create=async()=>{
     setPending(true);setError('');
-    try {await catalog.create(kind,value.trim());setConfirm(false);setOpen(false);}catch(err){setError(err.message);}finally{setPending(false);}
+    try {await catalog.create(kind,value.trim());}catch(err){setError(err.message);}finally{setPending(false);}
   };
   return <div className="space-y-2">
-    <label htmlFor={id}>{label}</label>
-    <input id={id} aria-label={label} role="combobox" aria-autocomplete="list" aria-expanded={open && matches.length>0} aria-controls={`${id}-options`} value={value || ''} disabled={disabled} onFocus={()=>setOpen(true)} onChange={e=>{onChange(e.target.value);setOpen(true);setConfirm(false);}} className="w-full rounded-md border p-2 bg-card" />
-    {open && matches.length>0 && <ul id={`${id}-options`} role="listbox" aria-label={`Sugestões de ${label}`}>{matches.map(item=><li key={item.id} role="option" aria-selected={normalize(item.name)===term}><button type="button" onClick={()=>{onChange(item.name);setOpen(false);}}>{item.name}</button></li>)}</ul>}
-    {!disabled && term && !exists && <Button type="button" variant="outline" onClick={()=>setConfirm(true)}>Criar “{value.trim()}”</Button>}
-    {confirm && <div role="alertdialog" aria-label={`Confirmar novo valor de ${label}`}><p>Criar “{value.trim()}” em {labels[kind]} para os eventos desta organização?</p><Button type="button" disabled={pending} onClick={create}>Confirmar criação</Button><Button type="button" variant="outline" onClick={()=>setConfirm(false)}>Cancelar criação</Button></div>}
-    {(error || catalog.error) && <p role="alert">{error || catalog.error}</p>}
+    <p className="text-sm font-medium">{label}</p>
+    <SearchSuggestions label={label} value={value} onChange={onChange} options={matches} disabled={disabled || pending} />
+    {!disabled && term && !exists && <Button type="button" size="sm" variant="outline" disabled={pending} onClick={create}>{pending?'Salvando…':`Adicionar “${value.trim()}”`}</Button>}
+    {(error || catalog.error) && <p role="alert" className="text-sm text-destructive">{error || catalog.error}</p>}
   </div>;
 }
 
 export function TeamCatalogManager({open,onOpenChange,catalog}) {
-  const [kind,setKind]=useState('function'),[name,setName]=useState(''),[removal,setRemoval]=useState(null),[error,setError]=useState(''),[pending,setPending]=useState(false);
-  const add=async e=>{e.preventDefault();setPending(true);setError('');try{await catalog.create(kind,name);setName('');}catch(err){setError(err.message);}finally{setPending(false);}};
+  const [filter,setFilter]=useState('all'),[kind,setKind]=useState('function'),[name,setName]=useState(''),[removal,setRemoval]=useState(null),[error,setError]=useState(''),[pending,setPending]=useState(false);
+  const add=async event=>{event.preventDefault();setPending(true);setError('');try{await catalog.create(kind,name.trim());setName('');}catch(err){setError(err.message);}finally{setPending(false);}};
   const remove=async()=>{
     setPending(true);setError('');
     try {await catalog.remove(removal.id,removal.people_count);setRemoval(null);}catch(err){setError(err.message);try{const items=await catalog.reload();setRemoval(items.find(item=>item.id===removal.id) || null);}catch(err){setError(err.message);}}finally{setPending(false);}
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Gerenciar funções, áreas e cargos</DialogTitle></DialogHeader>
-    <label>Catálogo <select aria-label="Catálogo" value={kind} onChange={e=>{setKind(e.target.value);setRemoval(null);}}>{Object.entries(labels).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
-    <form onSubmit={add} className="flex gap-2"><input required maxLength={80} aria-label="Novo valor do catálogo" value={name} onChange={e=>setName(e.target.value)} className="border rounded p-2" /><Button disabled={pending} type="submit">Adicionar ao catálogo</Button></form>
-    <ul className="max-h-64 overflow-auto">{catalog.items.filter(item=>item.kind===kind).map(item=><li key={item.id} className="flex justify-between items-center gap-4 py-2"><span>{item.name} — {item.people_count} pessoa{item.people_count!==1?'s':''}</span><Button type="button" variant="outline" onClick={()=>{setError('');setRemoval(item);}}>Excluir {item.name}</Button></li>)}</ul>
-    {removal && <div role="alertdialog" aria-label="Confirmar exclusão do catálogo"><p>{removal.people_count} pessoa{removal.people_count!==1?'s':''} usa{removal.people_count!==1?'m':''} “{removal.name}”. Excluir das sugestões? Os dados das pessoas serão preservados.</p><Button disabled={pending} type="button" onClick={remove}>Confirmar exclusão</Button><Button type="button" variant="outline" onClick={()=>setRemoval(null)}>Cancelar exclusão</Button></div>}
-    {(error || catalog.error) && <p role="alert">{error || catalog.error}</p>}
-  </DialogContent></Dialog>;
+  const visible=catalog.items.filter(item=>item.kind!=='title' && (filter==='all' || item.kind===filter));
+  return <>
+    <Dialog open={open} onOpenChange={value=>{setFilter('all');onOpenChange(value);}}><DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Funções e áreas</DialogTitle><DialogDescription>Função é o que a pessoa faz. Área é o setor em que trabalha.</DialogDescription></DialogHeader>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-xl bg-secondary p-3"><strong>Função</strong><p className="text-muted-foreground">Ex.: recepcionar convidados</p></div>
+        <div className="rounded-xl bg-secondary p-3"><strong>Área</strong><p className="text-muted-foreground">Ex.: credenciamento</p></div>
+      </div>
+      <form onSubmit={add} className="space-y-3 rounded-xl border p-3">
+        <label className="block text-sm">O que deseja adicionar?<select aria-label="Tipo do novo cadastro" value={kind} onChange={event=>setKind(event.target.value)} className="ml-2 rounded-lg border p-2"><option value="function">Função</option><option value="area">Área</option></select></label>
+        <div className="flex gap-2"><input required maxLength={80} aria-label="Nome do novo cadastro" placeholder={kind==='function'?'Ex.: operar som':'Ex.: audiovisual'} value={name} onChange={event=>setName(event.target.value)} className="min-w-0 flex-1 border rounded-lg p-2" /><Button disabled={pending || !name.trim()} type="submit">Adicionar</Button></div>
+      </form>
+      <label className="text-sm">Mostrar <select aria-label="Filtrar catálogo" value={filter} onChange={event=>setFilter(event.target.value)} className="ml-2 rounded-lg border p-2"><option value="all">Tudo</option>{Object.entries(labels).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+      <ul className="max-h-64 overflow-auto divide-y">{visible.map(item=><li key={item.id} className="flex justify-between items-center gap-4 py-3"><span><strong className="block text-sm font-medium">{item.name}</strong><small className="text-muted-foreground">{labels[item.kind]} · {item.people_count} pessoa{item.people_count!==1?'s':''}</small></span><Button type="button" size="sm" variant="outline" aria-label={`Excluir ${item.name}`} onClick={()=>{setError('');setRemoval(item);}}>Excluir</Button></li>)}</ul>
+      {!visible.length && <p className="text-sm text-muted-foreground">Nenhum cadastro nesta categoria.</p>}
+      {(error || catalog.error) && <p role="alert" className="text-sm text-destructive">{error || catalog.error}</p>}
+    </DialogContent></Dialog>
+    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. Os dados das {removal?.people_count || 0} pessoas que o utilizam serão preservados.</AlertDialogDescription></AlertDialogHeader>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      <AlertDialogFooter><AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel><AlertDialogAction disabled={pending} onClick={event=>{event.preventDefault();remove();}}>{pending?'Excluindo…':'Excluir'}</AlertDialogAction></AlertDialogFooter>
+    </AlertDialogContent></AlertDialog>
+  </>;
 }

@@ -164,12 +164,14 @@
 /* Tarefas: arrastar, prioridade e atraso (MCT-61) */
 .platform-kanban-drop{display:flex;flex-direction:column;gap:10px;min-height:120px;border-radius:12px;transition:background-color .15s ease,outline-color .15s ease;outline:2px dashed transparent;outline-offset:2px}
 .platform-kanban-drop.is-over{background:rgba(15,31,61,.05);outline-color:rgba(15,31,61,.25)}
-.platform-main .platform-task-card--dnd{animation:none;cursor:grab;border-width:2px;transition:box-shadow .18s ease,border-color .18s ease,rotate .18s ease,scale .18s ease}
+.platform-main .platform-task-card--dnd{animation:none;cursor:grab;border-width:2px;transition:box-shadow .18s ease,border-color .18s ease}
 .platform-task-card--dnd:hover{transform:none}
 .platform-task-card--dnd:focus-visible{outline:2px solid #0f1f3d;outline-offset:2px}
 .platform-task-card--dnd.task-tone-high{border-color:#f97316}
 .platform-task-card--dnd.task-tone-overdue{border-color:#dc2626}
-.platform-task-card--dnd.is-dragging{cursor:grabbing;rotate:2deg;scale:1.03;box-shadow:0 18px 32px -14px rgba(16,24,40,.45)}
+.platform-task-card--dnd.is-dragging{cursor:grabbing;box-shadow:0 18px 32px -14px rgba(16,24,40,.45)}
+.platform-ui button.mc-switch{min-height:24px;height:24px;width:44px;padding:0;border-radius:999px}
+.platform-task-card--dnd.platform-ui{padding:14px;border-width:2px;animation:none;transition:none}
 /* Programação: cronograma e blocos coloridos (MCT-62) */
 .platform-timeline{position:relative;background:white;border:1px solid hsl(var(--border));border-radius:14px;overflow:hidden;user-select:none}
 .platform-timeline-hour{position:absolute;left:0;right:0;border-top:1px solid #eceeea;font-size:11px;color:#8b93a1;padding:1px 0 0 8px;pointer-events:none}

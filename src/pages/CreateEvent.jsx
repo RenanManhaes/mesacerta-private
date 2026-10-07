@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CityField from '@/components/common/CityField';
 
 const STEPS = ['Básico', 'Público', 'Formato'];
 
@@ -90,7 +91,7 @@ export default function CreateEvent() {
             <div className="mt-7 space-y-4">
               <div><Label className="text-[13px]">Nome do evento</Label><Input className="mt-1.5 h-10" placeholder="Ex.: Summit Conecta 2026" value={data.name} onChange={e => set('name', e.target.value)} /></div>
               <div><Label className="text-[13px]">Data</Label><Input type="date" className="mt-1.5 h-10" value={data.date} onChange={e => set('date', e.target.value)} /></div>
-              <div><Label className="text-[13px]">Cidade / local</Label><Input className="mt-1.5 h-10" placeholder="Ex.: São Paulo, SP — Centro Empresarial" value={data.city} onChange={e => set('city', e.target.value)} /></div>
+              <div><Label className="text-[13px]">Cidade / local</Label><CityField value={data.city} onChange={value => set('city', value)} /></div>
             </div>
           </div>
         )}

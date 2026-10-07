@@ -24,6 +24,8 @@ import {
   initials,
 } from '@/components/common/ReferenceUI';
 import { useToast } from '@/components/ui/use-toast';
+import SponsorTier from '@/components/common/SponsorTier';
+import {sponsorTierName} from '@/lib/sponsorTier';
 
 export default function Sponsors() {
   const { currentEvent: ev, updateCurrent } = useEvent();
@@ -42,7 +44,7 @@ export default function Sponsors() {
         ...e.sponsorPlans,
         {
           id: uid(),
-          name: plan.name,
+          name: sponsorTierName(plan.name),
           price: Math.max(0, Number(plan.price) || 0),
           available: Math.max(0, Math.floor(Number(plan.available) || 0)),
           sold: 0,
@@ -167,7 +169,7 @@ export default function Sponsors() {
             <span>
               <b>{s.company}</b>
               <small>
-                Cota {s.plan || 'Sem plano'} · {formatBRL(s.negotiated)}
+                <SponsorTier name={s.plan} /> · {formatBRL(s.negotiated)}
               </small>
             </span>
             <span
@@ -196,7 +198,7 @@ export default function Sponsors() {
           {ev.sponsorPlans.map((p) => (
             <div key={p.id} className="border border-border rounded-md p-4">
               <div className="flex items-baseline justify-between">
-                <span className="text-[15px] font-medium">{p.name}</span>
+                <span className="text-[15px] font-medium"><SponsorTier name={p.name} /></span>
                 <span className="tnum text-[15px]">{formatBRL(p.price)}</span>
               </div>
               <div className="mt-1 text-[12px] text-muted-foreground">
@@ -244,7 +246,7 @@ export default function Sponsors() {
                 />
                 <Field
                   label="Cota"
-                  value={draft.plan}
+                  value={sponsorTierName(draft.plan)}
                   onChange={(plan) => patch({ plan })}
                 />
                 <Field
@@ -349,7 +351,7 @@ export default function Sponsors() {
                 onChange={(e) =>
                   setPlan((p) => ({ ...p, name: e.target.value }))
                 }
-                placeholder="Ex.: Master"
+                placeholder="Diamante, Ouro ou Prata"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
