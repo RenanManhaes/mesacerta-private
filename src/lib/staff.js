@@ -6,7 +6,7 @@ export function assignTask(event, taskId, ownerId) {
     ...event,
     tasks: event.tasks.map((t) =>
       t.id === taskId
-        ? { ...t, ownerId: person?.id || '', owner: person?.name || '' }
+        ? { ...t, ownerId: person?.id || '', ownerIds: person ? [person.id] : [], owner: person?.name || '' }
         : t,
     ),
   };
