@@ -43,15 +43,22 @@ assert.ifError(inserted.error);
 const dir = await mkdtemp(resolve('node_modules/.mct55-'));
 let tree;
 globalThis.window = {addEventListener() {}, removeEventListener() {}};
+globalThis.document = {addEventListener() {}, removeEventListener() {}, visibilityState: 'visible'};
 // Any browser storage use fails the test, including a hidden fallback.
 globalThis.localStorage = {getItem() {throw Error('Unexpected browser storage read');}, setItem() {throw Error('Unexpected browser storage write');}};
 try {
   await writeFile(join(dir, 'api.mjs'), `export let supabase; export let auth; export const configure = (client, value) => {supabase = client; auth = value;}; export const useAuth = () => auth;`);
+  // Modulos puros usados pelo contexto: copiados como estao, com imports internos reapontados.
+  for (const name of ['contact', 'eventLimit', 'mergeEventDocument', 'eventSync']) {
+    const text = (await readFile(`src/lib/${name}.js`, 'utf8')).replaceAll(/'\.\/(\w+)\.js'/g, "'./$1.mjs'").replaceAll(/'@\/lib\/(\w+)'/g, "'./$1.mjs'");
+    await writeFile(join(dir, `${name}.mjs`), text);
+  }
   for (const [source, output] of [['src/context/EventContext.jsx', 'context.mjs'], ['src/lib/useEventField.js', 'field.mjs']]) {
     const code = (await readFile(source, 'utf8'))
       .replaceAll("'@/api/supabaseClient'", "'./api.mjs'")
       .replaceAll("'@/lib/AuthContext'", "'./api.mjs'")
       .replaceAll("'@/context/EventContext'", "'./context.mjs'")
+      .replaceAll(/'@\/lib\/(mergeEventDocument|eventSync|eventLimit)'/g, "'./$1.mjs'")
       .replace("import { emptyEventTemplate } from '@/lib/demoData';", "const emptyEventTemplate = data => ({id: crypto.randomUUID(), ...data});");
     await writeFile(join(dir, output), ts.transpileModule(code, {compilerOptions: {jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext}}).outputText);
   }

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CityField from '@/components/common/CityField';
+import { eventLimitMessage, EVENT_LIMIT_CONTACT_URL } from '@/lib/eventLimit';
 
 const STEPS = ['Básico', 'Público', 'Formato'];
 
@@ -62,7 +63,15 @@ export default function CreateEvent() {
   };
 
   // O limite vem do banco (event_limit), para a tela nao divergir da regra.
-  if (!canCreateEvent) return <main className="p-8"><p role="alert">Sua conta pode manter até {eventLimit} evento{eventLimit > 1 ? 's' : ''}. Para criar mais, solicite a liberação.</p><Button variant="outline" onClick={()=>navigate('/eventos')}>Voltar para meus eventos</Button></main>;
+  if (!canCreateEvent) return (
+    <main className="mx-auto max-w-[520px] p-8">
+      <p role="alert" className="text-[15px]">{eventLimitMessage(eventLimit)}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button asChild><a href={EVENT_LIMIT_CONTACT_URL} target="_blank" rel="noopener noreferrer">Falar com a gente</a></Button>
+        <Button variant="outline" onClick={()=>navigate('/eventos')}>Voltar para meus eventos</Button>
+      </div>
+    </main>
+  );
   return (
     <div className="platform-ui min-h-screen bg-background">
       <header className="border-b border-border">

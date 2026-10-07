@@ -1,6 +1,7 @@
 import React from 'react';
 import EventBackupImport from '@/components/EventBackupImport';
 import {eventHome} from '@/lib/eventAccess';
+import { eventLimitMessage, EVENT_LIMIT_CONTACT_URL } from '@/lib/eventLimit';
 import LogoutButton from '@/components/LogoutButton';
 import { useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
@@ -57,7 +58,7 @@ function Group({ title, hint, events }) {
 }
 
 export default function Events() {
-  const { events, updateEventById, canCreateEvent } = useEvent();
+  const { events, updateEventById, canCreateEvent, eventLimit } = useEvent();
   const navigate = useNavigate();
   const planning = events.filter(e => !e.archived && ['planejamento', 'confirmado'].includes(e.status));
   const upcoming = events.filter(e => !e.archived && e.status === 'andamento');
@@ -86,6 +87,7 @@ export default function Events() {
           <p className="platform-eyebrow mb-2">Organização</p>
           <h1 className="font-display text-[30px] leading-tight tracking-tight">Meus eventos</h1>
           <p className="mt-1 text-[14px] text-muted-foreground">Planeje, acompanhe e opere cada evento em um só lugar.</p>
+          {!canCreateEvent && eventLimit > 0 && <p role="status" className="mt-3 text-[13px] text-muted-foreground">{eventLimitMessage(eventLimit)} <a className="underline" href={EVENT_LIMIT_CONTACT_URL} target="_blank" rel="noopener noreferrer">Falar com a gente</a></p>}
         </div>
 
         <Group title="Em planejamento" hint={`${planning.length} evento${planning.length !== 1 ? 's' : ''}`} events={planning} />
