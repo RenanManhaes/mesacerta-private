@@ -1759,7 +1759,7 @@ Revisão de Renan em 06/10/2026, registrada pelo Codex no Linear (MCT-68 a MCT-8
 | Abas (MCT-79) | Cada aba do navegador pode estar numa conta diferente; sair numa aba não muda as outras contas. A mesma conta em duas abas compartilha a sessão. |
 | Tempo real (MCT-85) | Quem está com o evento aberto vê, em segundos, o que outra pessoa salvou. Staff recebe só o aviso de mudança e a sua projeção, nunca o documento completo. |
 | Equipe (MCT-73, MCT-74) | Convite: copiar link é a ação principal; código sempre dá staff. Papéis e remoção ficam no card do membro, só para o fundador, com confirmação. Configurações não muda mais papéis. O cargo é definido no card de qualquer pessoa, inclusive o fundador (fundador e diretor editam); é só rótulo e não muda o acesso (§54, MCT-59). |
-| Fornecedor (MCT-84) | O card abre a edição; valores e pagamentos continuam no financeiro central. |
+| Fornecedor (MCT-84) | O card abre a edição. O valor contratado é editável aí (decisão de outubro): não aceita negativo nem valor menor que o já pago, e a despesa ligada ao fornecedor acompanha, sem criar lançamento novo. O pago continua vindo dos pagamentos e o a pagar é calculado por `selectors.js`. |
 | Tarefas (MCT-86) | Título, descrição e um ou mais responsáveis, escolhidos entre os membros reais da equipe. Staff só muda o status das próprias tarefas. |
 | Confirmações (MCT-82) | Toda ação destrutiva pede confirmação em modal, com foco preso no modal e devolvido ao botão de origem. |
 | Banco (MCT-88) | `event_create` usa `private.is_org_member`; corrigido por migration. |

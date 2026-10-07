@@ -6,7 +6,7 @@ import { formatBRL, formatDateShort } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import SupplierEditDialog from '@/components/suppliers/SupplierEditDialog';
-import { applySupplierEdit } from '@/lib/supplierEdit';
+import { applySupplierEdit, contractedError } from '@/lib/supplierEdit';
 import { Check, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -42,10 +42,12 @@ export default function Suppliers() {
     updateCurrent(e => updateSupplierPayment(e, id, e.suppliers.find(s => s.id === id)?.contracted || 0));
     toast({ title: 'Pagamento registrado', duration: 1800 });
   };
-  // Só as informações do fornecedor; valores e pagamentos seguem em selectors.js. Se a gravação falhar, volta ao que era.
+  // Informações e valor contratado do fornecedor; pagamentos seguem em selectors.js. Se a gravação falhar, volta ao que era.
   const saveSupplier = async (id, patch) => {
     const previous = ev.suppliers.find(s => s.id === id);
     if (!previous) return;
+    const invalid = patch.contracted !== undefined && contractedError(ev, previous, patch.contracted);
+    if (invalid) throw Object.assign(new Error(invalid), { userMessage: invalid });
     try { await commitCurrent(e => applySupplierEdit(e, id, patch)); }
     catch (error) {
       updateCurrent(e => ({ ...e, suppliers: e.suppliers.map(s => s.id === id ? previous : s) }));
@@ -125,7 +127,7 @@ export default function Suppliers() {
       </div>
 
       {editing && (
-        <SupplierEditDialog key={editing.id} supplier={editing} categories={ev.expenseCategories || []}
+        <SupplierEditDialog key={editing.id} supplier={editing} event={ev} categories={ev.expenseCategories || []}
           onClose={() => setEditingId(null)} onSave={patch => saveSupplier(editing.id, patch)} />
       )}
     </div>
