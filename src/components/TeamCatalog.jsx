@@ -47,7 +47,7 @@ export function TeamCatalogManager({open,onOpenChange,catalog}) {
       {!visible.length && <p className="text-sm text-muted-foreground">Nenhum cadastro nesta categoria.</p>}
       {(error || catalog.error) && <p role="alert" className="text-sm text-destructive">{error || catalog.error}</p>}
     </DialogContent></Dialog>
-    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. {removal?.people_count ? `Os dados ${removal.people_count===1?'da pessoa que o utiliza serão preservados':`das ${removal.people_count} pessoas que o utilizam serão preservados`}.` : 'Nenhuma pessoa o utiliza hoje.'}</AlertDialogDescription></AlertDialogHeader>
+    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. {removal?.people_count ? `${removal.people_count===1?'1 pessoa usa':`${removal.people_count} pessoas usam`} este item; os dados ${removal.people_count===1?'dela':'delas'} continuam salvos.` : 'Nenhuma pessoa usa este item hoje.'}</AlertDialogDescription></AlertDialogHeader>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <AlertDialogFooter><AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel><AlertDialogAction disabled={pending} onClick={event=>{event.preventDefault();remove();}}>{pending?'Excluindo…':'Excluir'}</AlertDialogAction></AlertDialogFooter>
     </AlertDialogContent></AlertDialog>

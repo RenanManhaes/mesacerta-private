@@ -312,8 +312,8 @@ await item(4,'MCT-71 áreas: autocomplete desde o foco e criação sem confirma�
   const page=await newPage({width:1280,height:900});
   await login(page);
   await openEvent(page,'equipe');
-  await page.locator('button[aria-label^="Editar "]').first().click();
-  const dialog=page.getByRole('dialog',{name:'Editar pessoa'});
+  await page.locator('[role="button"][aria-label^="Gerenciar "]').first().click();
+  const dialog=page.getByRole('dialog').filter({has:page.getByRole('combobox',{name:'Área',exact:true})});
   await dialog.waitFor();
   const area=dialog.getByRole('combobox',{name:'Área',exact:true});
   await area.focus();
@@ -349,7 +349,7 @@ await item(4,'MCT-71 áreas: autocomplete desde o foco e criação sem confirma�
   assert.ok(team.some(m=>m.area===newName),`pessoa não ficou com a área; ${JSON.stringify(team.map(m=>m.area))}`);
   // celular: o autocomplete cabe na tela, dentro do modal
   await page.setViewportSize({width:390,height:844});
-  await page.locator('button[aria-label^="Editar "]').first().click();
+  await page.locator('[role="button"][aria-label^="Gerenciar "]').first().click();
   await dialog.waitFor();await sleep(600);
   const mobileArea=dialog.getByRole('combobox',{name:'Área',exact:true});
   await mobileArea.fill('');await mobileArea.focus();
@@ -415,7 +415,7 @@ await item(5,'MCT-72 catálogo: tudo visível, sem papéis de acesso, exclusão 
   assert.ok((await usedRow.innerText()).includes('1 pessoa'),'contagem de pessoas');
   await usedRow.getByRole('button',{name:`Excluir ${usedName}`}).click();
   await alert.waitFor();
-  assert.ok(/da pessoa que o utiliza/.test(await alert.innerText()),`modal deveria citar a pessoa que usa o item: ${await alert.innerText()}`);
+  assert.ok(/1 pessoa usa este item/.test(await alert.innerText()),`modal deveria citar a pessoa que usa o item: ${await alert.innerText()}`);
   await alert.getByRole('button',{name:'Excluir',exact:true}).click();
   await alert.waitFor({state:'detached',timeout:5000});
   const after=await rpc(founder.client,'team_catalog_list',{p_org:orgId});
@@ -658,7 +658,7 @@ await item(9,'MCT-83 cadastro pede nome; nome aparece na Equipe após entrar por
   const owner=await newPage({width:1280,height:900});
   await login(owner);
   await openEvent(owner,'equipe');
-  const card=owner.locator('button[aria-label^="Editar "]').filter({hasText:guestName});
+  const card=owner.locator('[role="button"][aria-label^="Gerenciar "]').filter({hasText:guestName});
   await card.waitFor({timeout:8000});
   const cardText=(await card.innerText()).replace(/\n+/g,' · ');
   assert.ok(/Diretor|Director|diretor/i.test(cardText),`papel do convite não aparece: ${cardText}`);

@@ -76,6 +76,6 @@ try {
  const denied=await staff.request('rpc/team_catalog_create','POST',{p_org,p_kind:'title',p_name:'Diretor'});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');
  const direct=await staff.request(`team_catalog?organization_id=eq.${p_org}&select=id`);assert.equal(direct.status,200);assert.deepEqual(direct.body,[]);
  console.log(`RLS PASS: staff catalog mutation HTTP ${denied.status}, SQLSTATE ${denied.body.code}; direct catalog read HTTP 200 []; function/title never change access role.`);
- const source=await readFile('src/components/EventTeam.jsx','utf8');assert.ok(source.includes('+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Gerenciar funções, áreas e cargos'));
+ const source=await readFile('src/components/EventTeam.jsx','utf8');assert.ok(source.includes('+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Funções e áreas'));
  console.log('MANAGER PASS: manager action is adjacent to + Nova pessoa in EventTeam actions; functions, areas and titles handled by common catalog. Local fixtures retained.');
 } finally {if(tree)act(()=>tree.unmount());delete globalThis.__catalogClient;await rm(directory,{recursive:true,force:true});}

@@ -53,7 +53,7 @@ export default function EventTeam() {
   const keyOpen=person=>event=>{if(event.key==='Enter' || event.key===' '){event.preventDefault();open(person);}};
   const promoting=perms?.nextRole==='director';
   return <div className="reference-page">
-    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<><Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Gerenciar funções, áreas e cargos</Button></>} />
+    <PageHeader eyebrow="Planejamento" title="Equipe do evento" subtitle="Pessoas com acesso a este evento." actions={<><Button onClick={()=>setInvite(true)}>+ Nova pessoa</Button><Button variant="outline" onClick={()=>setCatalogOpen(true)}>Funções e áreas</Button></>} />
     <Panel title="Equipe do evento" extra={<span>{members.length} pessoas</span>}>
       <Field label="Buscar pessoa" value={search} onChange={setSearch} />
       <div className="grid md:grid-cols-2 gap-4 mt-4">{filtered.map(person=><div key={person.id} role="button" tabIndex={0} onClick={()=>open(person)} onKeyDown={keyOpen(person)} className="cursor-pointer rounded-xl border p-4 text-left transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label={`Gerenciar ${person.name}`}>
