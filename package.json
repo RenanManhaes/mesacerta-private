@@ -9,7 +9,7 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "test": "node --test src/lib/networking/engine.test.mjs src/components/networking/model.test.mjs src/lib/pessoas/dedup.test.mjs src/lib/pessoas/empresa.test.mjs src/lib/pessoas/prefiltro.test.mjs src/lib/qa/aferidor.test.mjs src/lib/selectors.test.mjs src/lib/referenceScreens.test.mjs src/lib/staff.test.mjs src/lib/headerSearch.test.mjs src/lib/notifications.test.mjs src/lib/schedule.test.mjs src/lib/activityTypes.test.mjs src/lib/mergeEventDocument.test.mjs src/lib/eventSync.test.mjs src/lib/emailResend.test.mjs",
+    "test": "node --test src/lib/networking/engine.test.mjs src/components/networking/model.test.mjs src/lib/pessoas/dedup.test.mjs src/lib/pessoas/empresa.test.mjs src/lib/pessoas/prefiltro.test.mjs src/lib/qa/aferidor.test.mjs src/lib/selectors.test.mjs src/lib/referenceScreens.test.mjs src/lib/staff.test.mjs src/lib/headerSearch.test.mjs src/lib/notifications.test.mjs src/lib/schedule.test.mjs src/lib/activityTypes.test.mjs src/lib/mergeEventDocument.test.mjs src/lib/eventSync.test.mjs src/lib/realtimeRefresh.test.mjs src/lib/emailResend.test.mjs src/lib/taskOwners.test.mjs src/lib/supplierEdit.test.mjs src/lib/tabAuthStorage.test.mjs src/lib/sponsorTier.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

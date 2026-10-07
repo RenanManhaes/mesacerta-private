@@ -19,6 +19,7 @@ function traduzErro(err) {
 }
 
 export default function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,6 +35,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!name.trim()) {setError("Informe seu nome.");return;}
     if (password !== confirmPassword) {
       setError("As senhas não coincidem");
       return;
@@ -46,7 +48,7 @@ export default function Register() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo },
+      options: { emailRedirectTo, data: {full_name: name.trim()} },
     });
     setLoading(false);
     if (signUpError) {
@@ -113,6 +115,10 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
+          <Label htmlFor="name">Seu nome</Label>
+          <Input id="name" autoComplete="name" autoFocus maxLength={120} value={name} onChange={event=>setName(event.target.value)} placeholder="Como você quer ser chamado?" className="h-12" required />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
@@ -120,7 +126,6 @@ export default function Register() {
               id="email"
               type="email"
               autoComplete="email"
-              autoFocus
               placeholder="voce@exemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

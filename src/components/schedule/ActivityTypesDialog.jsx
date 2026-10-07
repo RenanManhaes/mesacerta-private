@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
@@ -82,23 +83,20 @@ export default function ActivityTypesDialog({ open, onOpenChange }) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent role="alertdialog" className="sm:max-w-[440px]">
-          <DialogHeader>
-            <DialogTitle className="text-[15px]">Excluir o tipo “{pendingDelete?.name}”?</DialogTitle>
-            <DialogDescription data-testid="delete-usage" className="text-[13px]">
-              {usage?.activities
-                ? `Este tipo está em uso por ${plural(usage.activities, 'atividade', 'atividades')} em ${plural(usage.events, 'evento', 'eventos')}. Elas continuam com o nome “${pendingDelete.name}”, mas o tipo deixa de aparecer nas sugestões.`
-                : 'Este tipo não está em uso por nenhuma atividade.'}
-            </DialogDescription>
-          </DialogHeader>
-          {error && <p role="alert" className="text-[12px] text-danger">{error}</p>}
-          <DialogFooter>
-            <Button type="button" variant="ghost" className="h-8 text-[13px]" onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-            <Button type="button" variant="destructive" disabled={busy} className="h-8 text-[13px]" onClick={confirmDelete}>Excluir tipo</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        destructive
+        pending={busy}
+        pendingLabel="Excluindo…"
+        error={confirmOpen ? error : ''}
+        title={`Excluir o tipo “${pendingDelete?.name || ''}”?`}
+        description={usage?.activities
+          ? `Está em ${plural(usage.activities, 'atividade', 'atividades')} em ${plural(usage.events, 'evento', 'eventos')}. Elas continuam com o nome “${pendingDelete.name}”, mas o tipo deixa de aparecer nas sugestões.`
+          : 'Nenhuma atividade usa este tipo. Ele deixa de aparecer nas sugestões.'}
+        confirmLabel="Excluir tipo"
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

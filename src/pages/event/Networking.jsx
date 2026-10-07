@@ -20,6 +20,8 @@ import {
   initials,
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import {
   Armchair,
   Repeat,
@@ -68,6 +70,8 @@ export default function Networking() {
   const [round, setRound] = useEventField('networking.round', 1);
   const [query, setQuery] = useEventField('networking.query', '');
   const [playing, setPlaying] = useState(false);
+  const [configOpen,setConfigOpen] = useState(false);
+  const [replaceOpen, setReplaceOpen] = useState(false);
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -149,6 +153,11 @@ export default function Networking() {
         setGenerating(false);
       }
     }, 30);
+  };
+  // Refazer a grade troca a distribuição atual; por isso pergunta antes. A primeira geração não pergunta.
+  const requestGenerate = () => {
+    if (result) setReplaceOpen(true);
+    else generate();
   };
   const people = result ? [...result.input.mobile, ...result.input.fixed] : [];
   const matches = people.filter((p) =>
@@ -234,10 +243,11 @@ export default function Networking() {
         subtitle="Distribua os convidados e confira reencontros. Clique em um convidado para ver o roteiro."
         actions={
           <>
+            <Button variant="outline" onClick={()=>setConfigOpen(true)}><Settings size={16} />Configurar rodadas</Button>
             <Button
               variant="outline"
               disabled={generating || input.errors.length > 0}
-              onClick={generate}
+              onClick={requestGenerate}
             >
               <RefreshCw size={16} />
               {generating
@@ -298,6 +308,23 @@ export default function Networking() {
           onClick={result ? goToRepeats : undefined}
         />
       </div>
+      {input.errors.length > 0 && (
+        <div
+          role="alert"
+          data-testid="networking-config-errors"
+          className="platform-panel flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <p>
+            <b className="text-destructive">Ajuste a configuração antes de gerar:</b>{' '}
+            {input.errors[0]}
+            {input.errors.length > 1 &&
+              ` (e mais ${input.errors.length - 1} ${input.errors.length - 1 === 1 ? 'ajuste' : 'ajustes'})`}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => setConfigOpen(true)}>
+            Corrigir configuração
+          </Button>
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-danger">
           {error}
@@ -319,7 +346,7 @@ export default function Networking() {
           <Button
             variant="outline"
             disabled={generating || input.errors.length > 0}
-            onClick={generate}
+            onClick={requestGenerate}
           >
             <RefreshCw size={16} />
             Recalcular e substituir grade
@@ -496,11 +523,10 @@ export default function Networking() {
           </Panel>
         </div>
       )}
-      <details className="reference-network-settings" open={!result}>
-        <summary>
-          <Settings size={16} /> Configurar mesas, participantes e regras
-        </summary>
-        <div className="space-y-4 mt-4">
+      <Dialog open={configOpen} onOpenChange={setConfigOpen}>
+        <DialogContent className="platform-ui max-w-4xl max-h-[85dvh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Configurar rodadas</DialogTitle><DialogDescription>Defina mesas, participantes e regras. As alterações são salvas no evento; depois gere a distribuição.</DialogDescription></DialogHeader>
+        <div className="platform-main space-y-4 mt-4">
           <section
             className="platform-panel space-y-3"
             aria-labelledby="rules-heading"
@@ -724,7 +750,9 @@ export default function Networking() {
             </section>
           )}
         </div>
-      </details>
+        <Button variant="outline" onClick={()=>setConfigOpen(false)}>Concluir configuração</Button>
+        </DialogContent>
+      </Dialog>
       {result && selectedTable !== null && (
         <Details
           title={result.input.tables[selectedTable].name}
@@ -748,6 +776,18 @@ export default function Networking() {
           ))}
         </Details>
       )}
+      <ConfirmDialog
+        open={replaceOpen}
+        onOpenChange={setReplaceOpen}
+        destructive
+        title="Substituir a distribuição atual?"
+        description="As mesas e rodadas serão refeitas e a grade de hoje se perde. O cadastro de pessoas não muda."
+        confirmLabel="Substituir"
+        onConfirm={() => {
+          setReplaceOpen(false);
+          generate();
+        }}
+      />
     </div>
   );
 }

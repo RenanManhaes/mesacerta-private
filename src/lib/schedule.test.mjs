@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import { COOL_PALETTE, insertActivity, moveActivity, findConflicts, conflictsFor, validateActivity, layoutLanes } from './schedule.js';
+import { COOL_PALETTE, insertActivity, moveActivity, reorderActivities, endMinutes, findConflicts, conflictsFor, validateActivity, layoutLanes } from './schedule.js';
 import { scheduleSummary } from './selectors.js';
+import { canEditSchedule } from './eventAccess.js';
 
 let passed = 0;
 function check(name, run) { run(); passed++; console.log(`PASS ${name}`); }
@@ -59,5 +60,67 @@ check('scheduleSummary usa o horario proprio de cada atividade e marca conflitos
 });
 check('scheduleSummary de lista vazia nao quebra', () => {
   assert.deepEqual(scheduleSummary({ schedule: [] }).computed, []);
+});
+const byId = (list) => Object.fromEntries(list.map((a) => [a.id, `${a.start}`]));
+const noOverlap = (list) => assert.equal(findConflicts(list).size, 0);
+
+check('reordenar: abertura desce uma posicao e o resto se ajusta em sequencia', () => {
+  const base = [act('abertura', '09:00', 30), act('palestra', '09:30', 60), act('painel', '10:30', 45)];
+  const out = reorderActivities(base, 'abertura', 1);
+  assert.deepEqual(out.map((a) => a.id), ['palestra', 'abertura', 'painel']);
+  assert.deepEqual(byId(out), { palestra: '09:00', abertura: '10:00', painel: '10:30' });
+  noOverlap(out);
+});
+check('reordenar: abertura vai para o fim, duracoes preservadas e sem colisao', () => {
+  const base = [act('abertura', '09:00', 30), act('palestra', '09:30', 60), act('painel', '10:30', 45)];
+  const out = reorderActivities(base, 'abertura', 2);
+  assert.deepEqual(out.map((a) => a.id), ['palestra', 'painel', 'abertura']);
+  assert.deepEqual(byId(out), { palestra: '09:00', painel: '10:00', abertura: '10:45' });
+  assert.deepEqual(out.map((a) => a.duration), [60, 45, 30]);
+  noOverlap(out);
+});
+check('reordenar: subir uma atividade para o inicio mantem o primeiro horario do dia', () => {
+  const out = reorderActivities([act('a', '08:00', 60), act('b', '09:00', 30), act('c', '09:30', 30)], 'c', 0);
+  assert.deepEqual(out.map((a) => a.id), ['c', 'a', 'b']);
+  assert.deepEqual(byId(out), { c: '08:00', a: '08:30', b: '09:30' });
+});
+check('reordenar: intervalo entre atividades e preservado (almoco fica as 12h)', () => {
+  const base = [act('abertura', '09:00', 30), act('palestra', '09:30', 60), act('almoco', '12:00', 60)];
+  const out = reorderActivities(base, 'abertura', 1);
+  assert.deepEqual(byId(out), { palestra: '09:00', abertura: '10:00', almoco: '12:00' });
+  noOverlap(out);
+});
+check('reordenar: sobreposicao que ja existia some depois de reordenar', () => {
+  const base = [act('a', '09:00', 60), act('b', '09:30', 60), act('c', '11:00', 30)];
+  assert.ok(findConflicts(base).size > 0);
+  const out = reorderActivities(base, 'c', 0);
+  noOverlap(out);
+  assert.equal(out.reduce((n, a) => n + a.duration, 0), 150);
+});
+check('reordenar: mesma posicao devolve a lista sem mudar; id desconhecido devolve null', () => {
+  const base = [act('a', '09:00'), act('b', '10:00')];
+  assert.equal(reorderActivities(base, 'a', 0), base);
+  assert.equal(reorderActivities(base, 'x', 1), null);
+});
+check('reordenar: indice fora da lista e limitado ao fim; nao altera a lista original', () => {
+  const base = [act('a', '09:00'), act('b', '10:00')];
+  const copy = JSON.stringify(base);
+  assert.deepEqual(reorderActivities(base, 'a', 99).map((x) => x.id), ['b', 'a']);
+  assert.equal(JSON.stringify(base), copy);
+});
+check('reordenar: sequencia que passa das 24h nao e aplicada (null)', () => {
+  const base = [act('a', '22:00', 60), act('b', '23:00', 60)];
+  assert.equal(reorderActivities(base, 'a', 1)?.length, 2); // 22h+60+60 = 24h: cabe
+  assert.equal(reorderActivities([act('a', '22:30', 60), act('b', '23:30', 30)], 'a', 1)?.length, 2);
+  assert.equal(reorderActivities([act('a', '23:00', 60), act('b', '23:30', 45)], 'b', 0), null);
+});
+check('reordenar: lista persistida mantem os demais campos e termina sem passar do fim', () => {
+  const full = { id: 'a', start: '09:00', duration: 30, title: 'A', type: 'Palestra', speaker: 'Ana', room: 'S1', color: 'violeta', notes: 'x' };
+  const out = reorderActivities([full, act('b', '09:30', 30)], 'a', 1);
+  assert.deepEqual(out.find((a) => a.id === 'a'), { ...full, start: '09:30' });
+  assert.equal(endMinutes(out[1]), 10 * 60);
+});
+check('canEditSchedule: so fundador e diretor editam', () => {
+  assert.deepEqual(['founder', 'director', 'staff', undefined].map(canEditSchedule), [true, true, false, false]);
 });
 console.log(`\n${passed} verificacoes passaram`);

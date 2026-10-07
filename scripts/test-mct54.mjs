@@ -19,6 +19,9 @@ export let query = () => Promise.resolve({data: [{organization_id: 'org-1'}]});
 export const setQuery = fn => { query = fn; };
 export const emit = (event, session) => listener(event, session);
 export const session = {user: {id: 'user-1'}, access_token: 'synthetic-test-token'};
+export const releaseTabSession = () => {};
+export const announceTabSignOut = () => {};
+export const onTabAccountRemoved = () => () => {};
 export const supabase = {
   auth: {
     getSession: async () => ({data: {session}}),

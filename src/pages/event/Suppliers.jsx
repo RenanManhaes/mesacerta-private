@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEventField } from '@/lib/useEventField';
 import { useEvent } from '@/context/EventContext';
 import { supplierOverview, supplierView, updateSupplierPayment } from '@/lib/selectors';
 import { formatBRL, formatDateShort } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import SupplierEditDialog from '@/components/suppliers/SupplierEditDialog';
+import { applySupplierEdit } from '@/lib/supplierEdit';
 import { Check, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -29,7 +31,8 @@ function SummaryCard({ label, value, hint, dark = false }) {
 }
 
 export default function Suppliers() {
-  const { currentEvent: ev, updateCurrent } = useEvent();
+  const { currentEvent: ev, updateCurrent, commitCurrent } = useEvent();
+  const [editingId, setEditingId] = useState(null);
   const { toast } = useToast();
   const o = supplierOverview(ev);
   const [paymentDrafts, setPaymentDrafts] = useEventField('suppliers.paymentDrafts', {});
@@ -39,6 +42,17 @@ export default function Suppliers() {
     updateCurrent(e => updateSupplierPayment(e, id, e.suppliers.find(s => s.id === id)?.contracted || 0));
     toast({ title: 'Pagamento registrado', duration: 1800 });
   };
+  // Só as informações do fornecedor; valores e pagamentos seguem em selectors.js. Se a gravação falhar, volta ao que era.
+  const saveSupplier = async (id, patch) => {
+    const previous = ev.suppliers.find(s => s.id === id);
+    if (!previous) return;
+    try { await commitCurrent(e => applySupplierEdit(e, id, patch)); }
+    catch (error) {
+      updateCurrent(e => ({ ...e, suppliers: e.suppliers.map(s => s.id === id ? previous : s) }));
+      throw error;
+    }
+  };
+  const editing = editingId ? ev.suppliers.find(s => s.id === editingId) : null;
   const addSupplier = () => window.dispatchEvent(new CustomEvent('mesacerta:add', { detail: 'fornecedor' }));
 
   return (
@@ -64,13 +78,15 @@ export default function Suppliers() {
           const v = supplierView(sup);
           const badge = STATE_BADGE[v.state];
           return (
-            <div key={sup.id} data-testid="supplier-card" className="rounded-2xl border border-border bg-card p-5 min-w-0">
+            <div key={sup.id} data-testid="supplier-card" data-supplier-id={sup.id} onClick={() => setEditingId(sup.id)}
+              className="relative cursor-pointer rounded-2xl border border-border bg-card p-5 min-w-0 transition-colors hover:border-foreground/25 focus-within:ring-2 focus-within:ring-ring">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-[14px] font-semibold text-accent-foreground">{initials(sup.name)}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-medium tracking-tight">{sup.name}</div>
-                  <div className="truncate text-[12px] text-muted-foreground">{sup.service}</div>
-                </div>
+                {/* Botão de verdade (Enter/Espaço funcionam) que cobre o card inteiro; os campos de pagamento ficam acima dele. */}
+                <button type="button" aria-label={`Abrir fornecedor ${sup.name}`} className="min-w-0 flex-1 text-left outline-none after:absolute after:inset-0 after:rounded-2xl after:content-['']">
+                  <span className="block truncate text-[15px] font-medium tracking-tight">{sup.name}</span>
+                  <span className="block truncate text-[12px] text-muted-foreground">{sup.service}</span>
+                </button>
               </div>
 
               <div className="mt-4 flex items-end justify-between gap-2">
@@ -93,7 +109,7 @@ export default function Suppliers() {
               </div>
 
               {v.toPay > 0 && (
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2" onClick={e => e.stopPropagation()}>
                   <Input type="number" aria-label={`Valor pago a ${sup.name}`} placeholder="Valor pago" className="h-8 text-[13px] w-32" value={paymentDrafts[sup.id] || ''} onChange={e => setPaymentDrafts(d => ({ ...d, [sup.id]: e.target.value }))} onBlur={e => {
                     if (e.target.value) {
                       setPaid(sup.id, e.target.value);
@@ -107,6 +123,11 @@ export default function Suppliers() {
           );
         })}
       </div>
+
+      {editing && (
+        <SupplierEditDialog key={editing.id} supplier={editing} categories={ev.expenseCategories || []}
+          onClose={() => setEditingId(null)} onSave={patch => saveSupplier(editing.id, patch)} />
+      )}
     </div>
   );
 }

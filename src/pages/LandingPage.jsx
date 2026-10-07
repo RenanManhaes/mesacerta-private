@@ -7,9 +7,10 @@ import { initLanding } from './landing/landingEffects';
 import LogoutButton from '@/components/LogoutButton';
 import { useAuth } from '@/lib/AuthContext';
 
-// WhatsApp do time de vendas (somente dígitos, com DDI).
-const SALES_WHATSAPP = '5511970858297';
-const SALES_CONTACT_URL = SALES_WHATSAPP ? `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent('Olá! Quero um orçamento do Mesa Certa para um evento com mais de 100 pessoas.')}` : '#planos';
+import { SALES_WHATSAPP, contactUrl } from '@/lib/contact';
+
+// WhatsApp do time de vendas: ver src/lib/contact.js.
+const SALES_CONTACT_URL = SALES_WHATSAPP ? contactUrl('Olá! Quero um orçamento do Mesa Certa para um evento com mais de 100 pessoas.') : '#planos';
 
 export default function LandingPage() {
   const rootRef = useRef(null);
@@ -29,7 +30,7 @@ export default function LandingPage() {
 <h1 data-reveal style={{ '--d': '1' }}>Seu evento inteiro, <em>num lugar só.</em></h1>
 <p className="lead" data-reveal style={{ '--d': '2' }}>Financeiro, participantes, fornecedores, tarefas, programação e as mesas das rodadas de negócio. Sem planilha solta, sem grupo de WhatsApp.</p>
 <div className="cta-row" data-reveal style={{ '--d': '3' }}><a className="btn btn-p" href="#planos" data-scroll="planos">Começar agora<ArrowRight aria-hidden="true" /></a><button className="btn" data-scroll="rodadas">Ver as rodadas em ação</button></div>
-<div className="trust" data-reveal style={{ '--d': '4' }}><span><Check aria-hidden="true" />Funciona no navegador</span><span><Check aria-hidden="true" />Vários eventos ao mesmo tempo</span><span><Check aria-hidden="true" />Feito para quem produz evento</span></div>
+<div className="trust" data-reveal style={{ '--d': '4' }}><span><Check aria-hidden="true" />Funciona no navegador</span><span><Check aria-hidden="true" />Cada evento com seus próprios números</span><span><Check aria-hidden="true" />Feito para quem produz evento</span></div>
 </div>
 <div style={{ display: 'flex', justifyContent: 'center' }}><span className="try" data-reveal style={{ '--d': '5' }}><i></i>Experimente: clique no menu e nos cards do painel</span></div>
 <div className="shot-w"><div className="shot">
@@ -92,7 +93,7 @@ export default function LandingPage() {
 <section className="sec" id="para-quem" data-screen-label="02 Para quem"><div className="wrap">
 <div className="sec-head"><span className="eyebrow" data-reveal>Para quem é</span><h2 data-reveal style={{ '--d': '1' }}>Para quem produz evento e responde pelo resultado.</h2></div>
 <div className="cards3">
-<div className="c3" data-reveal><span className="n"><Briefcase aria-hidden="true" /></span><h3>Produtoras</h3><p>Vários eventos ao mesmo tempo, cada um com seus números, equipe e pendências separados.</p></div>
+<div className="c3" data-reveal><span className="n"><Briefcase aria-hidden="true" /></span><h3>Produtoras</h3><p>Cada evento com seus números, equipe e pendências separados. Precisa de mais de um evento? Fale com a gente.</p></div>
 <div className="c3" data-reveal style={{ '--d': '1' }}><span className="n"><ClipboardCheck aria-hidden="true" /></span><h3>Organizadores</h3><p>Uma tela com o que precisa de decisão hoje, no lugar de cinco planilhas e três grupos.</p></div>
 <div className="c3" data-reveal style={{ '--d': '2' }}><span className="n"><Handshake aria-hidden="true" /></span><h3>Eventos de networking</h3><p>Mesas por empresa, anfitriões e rodadas que entregam ao patrocinador os encontros prometidos.</p></div>
 </div>
@@ -167,7 +168,7 @@ export default function LandingPage() {
 <div className="faq" data-reveal>
 <div className="fq open"><button aria-expanded="true">Minha planilha já funciona. Por que mudar?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Se ela resolve tudo, talvez você não precise. O Mesa Certa faz sentido quando financeiro, participantes, fornecedores e tarefas começam a viver em lugares diferentes.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">Serve para evento sem networking?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. As rodadas de negócio são um módulo opcional. O núcleo é planejamento e operação, com o financeiro separado por evento.</p></div></div></div>
-<div className="fq"><button aria-expanded="false">Posso cuidar de vários eventos ao mesmo tempo?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Sim. Cada evento tem seus próprios dados, números e pendências. Cada evento é contratado separadamente, pelo tamanho do público.</p></div></div></div>
+<div className="fq"><button aria-expanded="false">Posso ter mais de um evento?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Cada conta tem 1 evento (arquivados também contam). Para ter mais, fale com a gente. Cada evento tem seus próprios dados, números e pendências e é contratado pelo tamanho do público.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">Preciso instalar alguma coisa?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não. O Mesa Certa funciona direto no navegador, no computador ou no celular.</p></div></div></div>
 <div className="fq"><button aria-expanded="false">O Mesa Certa vende ingressos?<i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg></i></button><div className="fq-a"><div><p>Não nesta versão. Você registra lotes e receitas para acompanhar o resultado; a venda continua na plataforma que você já usa.</p></div></div></div>
 </div>

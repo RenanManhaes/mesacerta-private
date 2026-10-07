@@ -68,9 +68,13 @@ Saídas de aceite, RLS e checks estão em `docs/evidencias/mct55/`.
 
 ## Riscos e reversão
 
-O documento ainda é gravado inteiro por organização. Edições concorrentes são
-recusadas, não mescladas; o usuário pode exportar o conteúdo não salvo para
-conciliação. Prefs/rascunhos ficam no documento da organização: membros que hoje
+O documento ainda é gravado inteiro por organização. Atualização posterior
+(MCT-66 e MCT-85): quando outra pessoa salvou antes, o app junta as duas edições
+(`src/lib/eventSync.js` e `mergeEventDocument.js`); campos diferentes ficam os dois,
+e no mesmo campo vale a edição de quem salva, com aviso visível. Nada é recusado
+nem apagado em silêncio, e `scripts/test-mct55.mjs` cobre os dois casos. Falhas
+de rede seguem como erro com "Tentar novamente", e o usuário pode exportar o
+conteúdo não salvo para conciliação. Prefs/rascunhos ficam no documento da organização: membros que hoje
 podem consultar esse documento possuem acesso a ele. A separação por papel/evento
 é o contrato de MCT-57/MCT-60, não uma permissão resolvida nesta issue.
 

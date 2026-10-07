@@ -1,8 +1,7 @@
 import { useEventField } from '@/lib/useEventField';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEvent } from '@/context/EventContext';
-import EventRoles from '@/components/EventRoles';
 import EventInvites from '@/components/EventInvites';
 import {
   PageHeader,
@@ -11,13 +10,7 @@ import {
 } from '@/components/common/ReferenceUI';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import {
   CalendarDays,
   Truck,
@@ -201,7 +194,12 @@ export default function EventSettings() {
           ))}
         </Panel>
         <EventInvites />
-        <EventRoles />
+        <Panel title="Acesso da equipe">
+          <p className="text-sm text-muted-foreground">
+            Para mudar o acesso de alguém, abra a pessoa em{' '}
+            <Link className="underline underline-offset-2 text-foreground" to={`/event/${ev.id}/equipe`}>Equipe do evento</Link>.
+          </p>
+        </Panel>
         <Panel title="Zona de risco">
           <p className="text-muted-foreground text-sm mb-4">
             Arquivar remove o evento da lista principal, mas mantém os dados.
@@ -216,30 +214,17 @@ export default function EventSettings() {
           </Button>
         </Panel>
       </div>
-      <Dialog open={archive} onOpenChange={setArchive}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Arquivar {ev.name}?</DialogTitle>
-          </DialogHeader>
-          <p>
-            Os dados serão mantidos. Você pode restaurar o evento na lista de
-            arquivados.
-          </p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setArchive(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                updateCurrent((e) => ({ ...e, archived: true }));
-                navigate('/eventos');
-              }}
-            >
-              Arquivar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={archive}
+        onOpenChange={setArchive}
+        title={`Arquivar ${ev.name}?`}
+        description="Os dados serão mantidos. Você pode restaurar o evento na lista de arquivados."
+        confirmLabel="Arquivar"
+        onConfirm={() => {
+          updateCurrent((e) => ({ ...e, archived: true }));
+          navigate('/eventos');
+        }}
+      />
     </div>
   );
 }

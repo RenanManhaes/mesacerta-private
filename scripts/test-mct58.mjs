@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
+import {readFile,writeFile,appendFile,mkdtemp,rm} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import React from 'react';
 import {act,create} from 'react-test-renderer';
 import ts from 'typescript';
 import {account,rpc} from './local-api.mjs';
+import {writeTeamSupport,transpile,supportImports} from './team-ui-helpers.mjs';
 const founder=await account('mct58-founder'),person=await account('mct58-person');
 await rpc(founder.client,'criar_organizacao',{p_nome:'Synthetic MCT58'});
 const org=await founder.client.from('memberships').select('organization_id').eq('user_id',founder.user.id).single();assert.ifError(org.error);
@@ -21,12 +22,10 @@ const directory=await mkdtemp(resolve('node_modules/.team-ui-'));let tree;
 globalThis.window={location:{origin:'http://localhost:5173'}};
 try {
  await writeFile(join(directory,'mocks.mjs'),`import React from 'react'; export const supabase=globalThis.__teamClient; export const useEvent=()=>globalThis.__teamContext; export const useEventField=(key,initial)=>React.useState(initial); export const Panel=({children})=>React.createElement('section',null,children); export const PageHeader=({title,actions})=>React.createElement('header',null,React.createElement('h1',null,title),actions); export const initials=()=>''; export const Field=({label,value,onChange,...props})=>React.createElement('label',null,label,React.createElement('input',{...props,'aria-label':label,value,onChange:e=>onChange(e.target.value)})); export const Button=({children,variant,...props})=>React.createElement('button',props,children); export const Dialog=({children,open})=>open?React.createElement('div',null,children):null; export const DialogContent=({children})=>React.createElement('div',null,children); export const DialogHeader=DialogContent; export const DialogTitle=DialogContent; export const DialogDescription=DialogContent; export const DialogFooter=DialogContent;`);
- for(const [input,output] of [['src/components/EventTeam.jsx','team.mjs'],['src/components/EventInvites.jsx','invites.mjs'],['src/components/TeamCatalog.jsx','catalog.mjs'],['src/hooks/useTeamCatalog.js','hook.mjs']]){
-  let source=await readFile(input,'utf8');
-  source=source.replaceAll("'@/components/EventInvites'","'./invites.mjs'").replaceAll("'@/components/TeamCatalog'","'./catalog.mjs'").replaceAll("'@/hooks/useTeamCatalog'","'./hook.mjs'");
-  for(const name of ['@/context/EventContext','@/api/supabaseClient','@/lib/useEventField','@/components/common/ReferenceUI','@/components/ui/button','@/components/ui/dialog'])source=source.replaceAll(`'${name}'`,"'./mocks.mjs'");
-  await writeFile(join(directory,output),ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext}}).outputText);
- }
+ await writeTeamSupport(directory);
+ await appendFile(join(directory,'mocks.mjs'),"export const Input=props=>React.createElement('input',props);");
+ const maps={'@/context/EventContext':'./mocks.mjs','@/api/supabaseClient':'./mocks.mjs','@/lib/useEventField':'./mocks.mjs','@/components/common/ReferenceUI':'./mocks.mjs','@/components/ui/button':'./mocks.mjs','@/components/ui/dialog':'./mocks.mjs','@/components/ui/input':'./mocks.mjs','@/components/ui/alert-dialog':'./alert.mjs','@/components/EventInvites':'./invites.mjs','@/components/TeamCatalog':'./catalog.mjs','@/hooks/useTeamCatalog':'./hook.mjs','@/components/common/SearchSuggestions':'./search.mjs',...supportImports};
+ for(const [input,output] of [['src/components/EventTeam.jsx','team.mjs'],['src/components/EventInvites.jsx','invites.mjs'],['src/components/TeamCatalog.jsx','catalog.mjs'],['src/hooks/useTeamCatalog.js','hook.mjs'],['src/components/common/SearchSuggestions.jsx','search.mjs']])await transpile(input,join(directory,output),maps);
  globalThis.__teamClient=founder.client;
  const {default:Team}=await import(pathToFileURL(join(directory,'team.mjs')));
  const reload=async()=>{row=(await rpc(founder.client,'event_list'))[0];globalThis.__teamContext={currentEvent:row.document,access:row,orgId:row.organizationId,flush:async()=>{},reloadEvents:reload};tree.update(React.createElement(Team));};
@@ -35,10 +34,10 @@ try {
  assert.ok(JSON.stringify(tree.toJSON()).includes('Equipe do evento'));assert.ok(JSON.stringify(tree.toJSON()).includes('Fundador'));assert.ok(JSON.stringify(tree.toJSON()).includes('Diretor'));
  const button=label=>tree.root.findAllByType('button').find(b=>b.children.join('')===label);
  await act(async()=>{button('+ Nova pessoa').props.onClick();await new Promise(r=>setTimeout(r,100));});
- assert.equal(tree.root.findAllByType('input').length,1); // Search only; new person has no personal form.
- assert.ok(button('Gerar e copiar link de convite'));assert.ok(tree.root.findByProps({'aria-label':'Papel do convite'}));
+ assert.equal(tree.root.findAllByType('input').filter(input=>input.props.type!=='radio').length,1); // Search only; new person has no personal form (the radios choose the role).
+ assert.ok(button('Copiar link de convite'));assert.equal(tree.root.findAllByProps({type:'radio'}).length,2);
  console.log('CA1 UI PASS: actual team heading is Equipe do evento; founder card is Diretor / Fundador; + Nova pessoa opens code/link/role invitation with no name/email/phone fields.');
- act(()=>tree.root.findByProps({'aria-label':`Editar ${member.name}`}).props.onClick());
+ act(()=>tree.root.findByProps({'aria-label':`Gerenciar ${member.name}`}).props.onClick());
  for(const [label,value] of [['Nome','Synthetic renamed person'],['E-mail','contact-only@example.test'],['Telefone','000000000'],['Função','Produção']])act(()=>tree.root.findByProps({'aria-label':label}).props.onChange({target:{value}}));
  await act(async()=>{await tree.root.findByType('form').props.onSubmit({preventDefault(){}});await new Promise(r=>setTimeout(r,100));});
  const edited=row.document.staffMembers.find(p=>p.id===member.id);
@@ -46,9 +45,11 @@ try {
  assert.equal(row.document.uiState[founder.user.id]['staff.draft'],null);
  const auth=await person.client.auth.getUser();assert.ifError(auth.error);assert.equal(auth.data.user.email,person.user.email);
  console.log('CA2 UI/API PASS: actual editor submits name/email/phone/function to authenticated RPC; event_list restores all four fields and clears saved editor; contact email does not change Auth login.');
- act(()=>tree.root.findByProps({'aria-label':`Editar ${edited.name}`}).props.onClick());
+ act(()=>tree.root.findByProps({'aria-label':`Gerenciar ${edited.name}`}).props.onClick());
+ assert.equal(tree.root.findAll(node=>node.props.role==='alertdialog').length,0);
  act(()=>button('Remover da equipe').props.onClick());
- await act(async()=>{await button('Confirmar remoção').props.onClick();await new Promise(r=>setTimeout(r,100));});
+ assert.equal(tree.root.findAll(node=>node.props.role==='alertdialog').length,1);
+ await act(async()=>{await button('Remover').props.onClick({preventDefault(){}});await new Promise(r=>setTimeout(r,100));});
  assert.ok(!row.document.staffMembers.some(p=>p.id===member.id));
  assert.deepEqual(await rpc(person.client,'event_list'),[]);
  const denied=await person.request('rpc/event_save','POST',{p_event:row.document.id,p_revision:row.revision,p_document:{id:row.document.id}});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');

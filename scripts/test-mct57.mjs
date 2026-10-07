@@ -13,7 +13,7 @@ const other = await rpc(founder.client,'event_create',{p_org,p_document:{id:rand
 assert.equal(created.role,'founder'); assert.match(created.code,/^[A-F0-9]{8}$/); assert.notEqual(created.code,other.code);
 const invite = await rpc(founder.client,'event_invite',{p_event:created.document.id,p_role:'director'});
 const settings = await readFile('src/components/EventInvites.jsx','utf8');
-assert.ok(settings.includes('Copiar código') && settings.includes('Gerar e copiar link de convite'));
+assert.ok(settings.includes('Copiar código') && settings.includes('Copiar link de convite'));
 assert.ok(settings.includes('/entrar?') && settings.includes('codigo: code, convite: invitation'));
 console.log('CA1 PASS: API creates unique eight-character code; Settings offers code copy, role selector, generate/copy invite URL /entrar?codigo=...&convite=... .');
 const joined = await rpc(staff.client,'event_join',{p_code:created.code.toLowerCase(),p_invitation:null});

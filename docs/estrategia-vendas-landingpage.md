@@ -42,7 +42,7 @@ Uma oferta, duas formas de contratação; mesmos recursos e limites em ambas, pa
 
 ### Escopo comercial proposto, sujeito à capacidade comprovada
 
-- Uma organização, um usuário responsável e até três eventos ativos simultaneamente. Não são três eventos por ano: concluir um evento libera espaço para outro.
+- Uma organização, um usuário responsável e um evento ativo por conta comum (MCT-78, 07/10/2026; antes previa três). Mais de um evento ativo exige liberação pela equipe. Contas master não têm limite.
 - Financeiro, participantes, fornecedores, tarefas, programação e capacidade, conforme módulos efetivamente aprovados para lançamento.
 - Networking incluído quando a jornada completa estiver demonstrada; nenhuma promessa de escala de participantes sem teste correspondente.
 - Suporte assíncrono por um canal a definir, sem prometer atendimento 24 horas ou implantação individual incluída.
@@ -137,7 +137,7 @@ Não criar uma soma de “bônus” com preços fictícios. A comparação de va
 - **“Minha planilha já funciona.”** Talvez sua preocupação seja trocar uma rotina conhecida. Veja uma demonstração com informações de exemplo e avalie se reunir os dados resolve uma dificuldade real da sua operação.
 - **“Está caro para mim.”** Talvez você ainda não saiba quanto vai usar. O mensal reduz o compromisso inicial; a compra de 12 meses compensa para uso contínuo a partir do nono mês. Não prometer que a ferramenta se paga sozinha.
 - **“Serve para um evento sem networking?”** Sim. O networking é opcional; a proposta principal é organizar o evento e acompanhar sua operação.
-- **“Posso organizar vários eventos?”** Sim, dentro do limite de eventos ativos da oferta. Os dados e o financeiro pertencem a cada evento.
+- **“Posso organizar vários eventos?”** Cada conta comum mantém 1 evento ativo; mais de um exige liberação da equipe. Os dados e o financeiro pertencem a cada evento.
 - **“Pago uma vez e uso para sempre?”** A compra única libera 12 meses de acesso. Ao final, você escolhe se quer comprar outro período.
 - **“Como cancelo o mensal?”** O cancelamento interrompe próximas renovações e mantém o acesso até o fim do período pago. Publicar o caminho exato apenas quando testado.
 - **“Posso vender ingressos por aqui?”** Esta oferta é de planejamento e operação. Não anunciar bilheteria, processamento de pagamentos ou integração com Sympla sem uma entrega comprovada.

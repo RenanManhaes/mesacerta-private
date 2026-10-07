@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/api/supabaseClient';
+import { supabase, releaseTabSession, announceTabSignOut, onTabAccountRemoved } from '@/api/supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -90,8 +90,22 @@ export const AuthProvider = ({ children }) => {
       if (!observedAuthEvent) applySession(null);
     });
 
+    // Outra aba da MESMA conta saiu: a entrada compartilhada sumiu e esta aba nao seria avisada.
+    // Saida de proposito: encerra esta aba e vai ao login com aviso (recarregar descarta
+    // dado privado em memoria). Qualquer outro motivo (ex.: sessao expirou): so encerra a
+    // sessao local e cai no aviso de sessao expirada, que preserva o trabalho aberto.
+    const offRemote = onTabAccountRemoved(async ({ deliberate }) => {
+      if (!mounted || !identity.current) return;
+      if (deliberate) explicitSignOut.current = true;
+      try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* a sessao ja nao existe mais */ }
+      if (!deliberate) return;
+      releaseTabSession();
+      window.location.replace('/login?saiu=outra-aba');
+    });
+
     return () => {
       mounted = false;
+      offRemote();
       ++membershipRequest.current;
       timers.forEach(clearTimeout);
       listener.subscription.unsubscribe();
@@ -100,6 +114,7 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = useCallback(async () => {
     explicitSignOut.current = true;
+    announceTabSignOut();
     try {
       const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (error) {
@@ -108,6 +123,7 @@ export const AuthProvider = ({ children }) => {
         const { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || data.session) throw error;
       }
+      releaseTabSession();
       ++membershipRequest.current;
       identity.current = null;
       setSession(null);

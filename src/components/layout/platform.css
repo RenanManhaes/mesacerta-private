@@ -125,6 +125,8 @@
 /* Reference screens: structural layouts from the supplied platform, using event data. */
 .reference-page{display:flex;flex-direction:column;gap:16px;min-width:0}
 .reference-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:12px;padding-top:2px}
+/* O título cede espaço aos botões, mas não encolhe abaixo de 320px: com 3 botões (Networking) eles passam para a linha de baixo. */
+.reference-header{flex-wrap:wrap}.reference-header>div:first-child{flex:1 1 320px;min-width:0}
 .reference-header h1{margin:10px 0 8px}.reference-header>div>p:last-child{font-size:14px}
 .reference-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
 .reference-actions button,.reference-toolbar>button{gap:8px;white-space:nowrap}
@@ -164,16 +166,19 @@
 /* Tarefas: arrastar, prioridade e atraso (MCT-61) */
 .platform-kanban-drop{display:flex;flex-direction:column;gap:10px;min-height:120px;border-radius:12px;transition:background-color .15s ease,outline-color .15s ease;outline:2px dashed transparent;outline-offset:2px}
 .platform-kanban-drop.is-over{background:rgba(15,31,61,.05);outline-color:rgba(15,31,61,.25)}
-.platform-main .platform-task-card--dnd{animation:none;cursor:grab;border-width:2px;transition:box-shadow .18s ease,border-color .18s ease,rotate .18s ease,scale .18s ease}
+.platform-main .platform-task-card--dnd{animation:none;cursor:grab;border-width:2px;transition:box-shadow .18s ease,border-color .18s ease}
 .platform-task-card--dnd:hover{transform:none}
 .platform-task-card--dnd:focus-visible{outline:2px solid #0f1f3d;outline-offset:2px}
 .platform-task-card--dnd.task-tone-high{border-color:#f97316}
 .platform-task-card--dnd.task-tone-overdue{border-color:#dc2626}
-.platform-task-card--dnd.is-dragging{cursor:grabbing;rotate:2deg;scale:1.03;box-shadow:0 18px 32px -14px rgba(16,24,40,.45)}
-/* Programação: cronograma e blocos coloridos (MCT-62) */
-.platform-timeline{position:relative;background:white;border:1px solid hsl(var(--border));border-radius:14px;overflow:hidden;user-select:none}
-.platform-timeline-hour{position:absolute;left:0;right:0;border-top:1px solid #eceeea;font-size:11px;color:#8b93a1;padding:1px 0 0 8px;pointer-events:none}
-.platform-timeline-block{position:absolute;box-sizing:border-box;border-left:4px solid;border-radius:8px;padding:3px 8px;overflow:hidden;cursor:grab;touch-action:none;transition:box-shadow .15s ease,top .15s ease}
-.platform-timeline-block:focus-visible{outline:2px solid #0f1f3d;outline-offset:1px}
-.platform-timeline-block.has-conflict{outline:2px dashed #dc2626;outline-offset:-2px}
-.platform-timeline-block.is-dragging{cursor:grabbing;transition:none;z-index:5;box-shadow:0 12px 24px -10px rgba(16,24,40,.4)}
+.platform-task-card--dnd.is-dragging{cursor:grabbing;box-shadow:0 18px 32px -14px rgba(16,24,40,.45)}
+.platform-ui button.mc-switch{min-height:24px;height:24px;width:44px;padding:0;border-radius:999px}
+.platform-task-card--dnd.platform-ui{padding:14px;border-width:2px;animation:none;transition:none}
+/* Programação: arrastar na lista principal (MCT-81) */
+.platform-schedule-item.is-last::after{display:none}
+.platform-main .platform-schedule-item.is-dragging,.platform-schedule-item.is-dragging{animation:none;box-shadow:0 18px 32px -14px rgba(16,24,40,.45);background:white}
+.platform-schedule-item.is-dragging::before,.platform-schedule-item.is-dragging::after{display:none}
+.platform-schedule-item.is-dragging.platform-ui{padding:4px 16px}
+.platform-schedule-handle{cursor:grab;touch-action:none}
+.platform-schedule-handle:focus-visible{outline:2px solid #0f1f3d;outline-offset:2px}
+.platform-schedule-item.is-dragging .platform-schedule-handle{cursor:grabbing}

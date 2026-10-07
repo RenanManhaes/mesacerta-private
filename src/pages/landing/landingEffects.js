@@ -89,9 +89,12 @@ export function initLanding(root) {
     const token = ++scrollToken;
     const el = root.querySelector('#' + id); if (!el) return;
     const to = el.getBoundingClientRect().top + window.scrollY - 80, from = window.scrollY, d = to - from;
-    if (RM) { window.scrollTo(0, to); return; }
-    const dur = Math.min(1200, Math.max(600, Math.abs(d) * .3)); let s;
-    const f = n => { if (token !== scrollToken) return; s ??= n; const k = clamp((n - s) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; window.scrollTo(0, from + d * e); if (k < 1) raf(f); };
+    // behavior:'instant' ignora o `html{scroll-behavior:smooth}` global (index.css): sem isso cada quadro da
+    // animação de 280ms seria suavizado de novo pelo navegador e a rolagem levava ~900ms.
+    const jump = y => window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+    if (RM) { jump(to); return; }
+    const dur = 280; let s;
+    const f = n => { if (token !== scrollToken) return; s ??= n; const k = clamp((n - s) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; jump(from + d * e); if (k < 1) raf(f); };
     raf(f);
   };
   on(window, 'wheel', () => { scrollToken++; }, { passive: true });

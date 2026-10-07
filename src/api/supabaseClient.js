@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabaseUrl, supabaseAnonKey } from '@/lib/app-params';
+import { createTabAuthStorage, tabAuthStorageKey } from '@/lib/tabAuthStorage';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   // eslint-disable-next-line no-console
@@ -8,8 +9,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// MCT-79: cada aba mantém a própria conta (ver src/lib/tabAuthStorage.js).
+// A chave-base é a mesma que a SDK usava por padrão, para migrar quem já está logado.
+function defaultStorageKey() {
+  try { return `sb-${new URL(supabaseUrl).hostname.split('.')[0]}-auth-token`; } catch { return 'sb-mesacerta-auth-token'; }
+}
+const baseKey = defaultStorageKey();
+const instanceKey = tabAuthStorageKey(baseKey);
+
+const tabStorage = createTabAuthStorage(baseKey, instanceKey);
+// Chamado ao sair de propósito: a aba fica sem conta até um novo login.
+export const releaseTabSession = () => tabStorage.release();
+// Marca, antes de sair, que foi de propósito (as outras abas da mesma conta saberão).
+export const announceTabSignOut = () => tabStorage.announceSignOut();
+// Avisa quando outra aba da MESMA conta saiu (a entrada da conta desta aba sumiu).
+export const onTabAccountRemoved = (callback) => tabStorage.onAccountRemoved(callback);
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    storage: tabStorage,
+    storageKey: instanceKey,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,

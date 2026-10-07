@@ -29,6 +29,8 @@ export default function Login() {
   // Post-login destination (e.g. a protected route sends users here with
   // returnTo so they land back where they tried to go). Same-origin only.
   const returnTo = safeReturnTo();
+  // Outra aba da mesma conta saiu (ver AuthContext).
+  const signedOutElsewhere = new URLSearchParams(window.location.search).get("saiu") === "outra-aba";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +69,11 @@ export default function Login() {
         <p id="google-unavailable">Google indisponível. Entre com seu e-mail.</p>
       </div>
       <div className="platform-auth-divider">ou com e-mail</div>
+      {signedOutElsewhere && !error && (
+        <div role="status" className="mb-4 p-3 rounded-lg bg-muted text-sm">
+          Você saiu da conta em outra aba.
+        </div>
+      )}
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}

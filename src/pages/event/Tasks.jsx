@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import {createPortal} from 'react-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useEventField } from '@/lib/useEventField';
 import { useEvent } from '@/context/EventContext';
 import { taskSummary } from '@/lib/selectors';
 import { daysUntil, formatDateShort } from '@/lib/format';
 import { EmptyState } from '@/components/common/Primitives';
-import TaskOwnerSelect from '@/components/common/TaskOwnerSelect';
-import { assignTask } from '@/lib/staff';
+import TaskEditDialog from '@/components/tasks/TaskEditDialog';
+import { applyTaskEdit, findMember, taskOwnerIds } from '@/lib/taskOwners';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,8 @@ export default function Tasks() {
   const { currentEvent: ev, updateCurrent, commitCurrent, access } = useEvent();
   const [filter, setFilter] = useEventField('tasks.filter', 'todas');
   const [revertNote, setRevertNote] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const canEdit = access?.role === 'founder' || access?.role === 'director';
   const s = taskSummary(ev);
 
   const withStatus = (id, status) => e => ({ ...e, tasks: e.tasks.map(t => t.id === id ? { ...t, status } : t) });
@@ -46,7 +49,21 @@ export default function Tasks() {
   const onDragEnd = ({ draggableId, destination }) => {
     if (destination) setStatus(draggableId, destination.droppableId);
   };
-  const setOwner = (id, ownerId) => updateCurrent(e => assignTask(e,id,ownerId));
+  // Salva título, descrição e responsáveis; se a gravação falhar, a tarefa volta ao que era e o erro sobe para o modal.
+  const saveTask = async (id, patch) => {
+    const previous = ev.tasks.find(t => t.id === id);
+    if (!previous || !canEdit) return;
+    try { await commitCurrent(e => applyTaskEdit(e, id, patch)); }
+    catch (error) {
+      updateCurrent(e => ({ ...e, tasks: e.tasks.map(t => t.id === id ? previous : t) }));
+      throw error;
+    }
+  };
+  const ownerNames = t => {
+    const names = taskOwnerIds(t).map(id => findMember(ev.staffMembers, id)?.name).filter(Boolean);
+    return names.length ? names.join(', ') : t.owner || '';
+  };
+  const editing = editingId ? ev.tasks.find(t => t.id === editingId) : null;
 
   let list = ev.tasks;
   if (filter === 'minhas') list = list.filter(t => t.owner);
@@ -87,11 +104,16 @@ export default function Tasks() {
                         const tone = taskTone(t);
                         return (
                           <Draggable key={t.id} draggableId={t.id} index={index}>
-                            {(drag, dragSnap) => (
+                            {(drag, dragSnap) => {
+                              const card = (
                               <div ref={drag.innerRef} {...drag.draggableProps} {...drag.dragHandleProps}
-                                aria-label={`Tarefa ${t.name}, ${t.status}. Espaço para pegar e mover.`}
+                                aria-label={`Tarefa ${t.name}, ${t.status}. Enter para abrir. Espaço para pegar e mover.`}
                                 data-task-id={t.id} data-tone={tone}
-                                className={cn('platform-task-card platform-task-card--dnd grid grid-cols-12 gap-3 items-center', `task-tone-${tone}`, dragSnap.isDragging && 'is-dragging')}>
+                                onClick={() => setEditingId(t.id)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && e.target === e.currentTarget) { e.preventDefault(); setEditingId(t.id); }
+                                }}
+                                className={cn('platform-task-card platform-task-card--dnd grid grid-cols-12 gap-3 items-center', `task-tone-${tone}`, dragSnap.isDragging && 'is-dragging platform-ui')}>
                                 <div className="col-span-12 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className={cn('text-[14px] font-medium', t.status === 'Concluído' && 'line-through text-muted-foreground')}>{t.name}</span>
@@ -101,16 +123,19 @@ export default function Tasks() {
                                   <div className="text-[11px] text-muted-foreground mt-0.5">{t.category} · {t.date ? formatDateShort(t.date) : 'sem data'} {tone === 'overdue' && <span className="text-danger">· atrasada</span>}</div>
                                 </div>
                                 <div className="col-span-12">
-                                  {access?.role === 'staff' ? <span>{t.owner || 'Minha tarefa'}</span> : <TaskOwnerSelect label={`Responsável por ${t.name}`} members={ev.staffMembers || []} ownerId={t.ownerId || ''} owner={t.owner || ''} onChange={id=>setOwner(t.id,id)}/>}
+                                  <span className="text-[12px] text-muted-foreground">{ownerNames(t) || (canEdit ? 'Sem responsável' : 'Minha tarefa')}</span>
+                                  {t.description && <p className="mt-1 line-clamp-2 text-[12px] text-muted-foreground">{t.description}</p>}
                                 </div>
-                                <div className="col-span-12 flex justify-end">
+                                <div className="col-span-12 flex justify-end" onClick={e => e.stopPropagation()}>
                                   <Select value={t.status} onValueChange={v => setStatus(t.id, v)}>
                                     <SelectTrigger aria-label={`Status de ${t.name}`} className="h-8 text-[12px] w-40"><SelectValue /></SelectTrigger>
                                     <SelectContent>{STATUSES.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                                   </Select>
                                 </div>
                               </div>
-                            )}
+                              );
+                              return dragSnap.isDragging ? createPortal(card,document.body) : card;
+                            }}
                           </Draggable>
                         );
                       })}
@@ -122,6 +147,11 @@ export default function Tasks() {
             ))}
           </div>
         </DragDropContext>
+      )}
+
+      {editing && (
+        <TaskEditDialog key={editing.id} task={editing} members={ev.staffMembers || []} statuses={STATUSES} canEdit={canEdit}
+          onClose={() => setEditingId(null)} onSave={patch => saveTask(editing.id, patch)} onStatus={status => setStatus(editing.id, status)} />
       )}
     </div>
   );
