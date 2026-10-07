@@ -632,7 +632,7 @@ Mudanças recalculam atividades seguintes.
 
 ### Cadastro e cronograma — MCT-62
 
-**Nova atividade** abre modal com título, início, duração, responsável, tipo, observação e cor. Nada é criado antes da confirmação. Ao salvar, posicionar a atividade pela hora: 14h entre 13h e 15h. Arrastar um bloco no cronograma ajusta seu horário e persiste a mudança. Sinalizar conflito de horário sem impedir o salvamento.
+**Nova atividade** abre modal com título, início, duração, responsável, tipo, observação e cor. Nada é criado antes da confirmação. Ao salvar, posicionar a atividade pela hora: 14h entre 13h e 15h. Arrastar um bloco no cronograma ajusta seu horário e persiste a mudança. **Atualizado pela MCT-81:** o painel separado de cronograma foi removido; a reordenação acontece na própria lista, pela alça (mouse ou teclado), e os horários são recalculados mantendo o início do dia, a duração de cada atividade e os intervalos, sem sobreposição. Staff só lê (MCT-80). Sinalizar conflito de horário sem impedir o salvamento.
 
 A cor é escolhida **por atividade**, numa paleta de tons frios, e aparece na lista e no cronograma. Não é uma cor fixa do tipo. Programação com várias trilhas/salas simultâneas permanece fora deste lote.
 
@@ -1259,7 +1259,7 @@ A referência é o pacote e os prints de **Mesa Certa Plataforma** aprovados pel
 | Controles de módulo | **Retângulos de cantos arredondados**, com ligado/desligado, foco e desabilitado consistentes. MCT-56 não muda seu comportamento. |
 | Animações | Entrada discreta, contadores, barras e transição de rodada; respeitar movimento reduzido. Login pode ter a animação decorativa de mesas; não usar seus dados como estado de um evento real. |
 
-Fornecedores usam cartões; financeiro, participantes, receitas e despesas usam tabelas/painéis conforme suas referências; tarefas usam quadro; programação combina lista e cronograma; capacidade usa medidor; networking mantém a representação espacial. Não uniformizar telas diferentes em uma coleção genérica de cartões.
+Fornecedores usam cartões; financeiro, participantes, receitas e despesas usam tabelas/painéis conforme suas referências; tarefas usam quadro; programação usa uma lista ordenável (MCT-81); capacidade usa medidor; networking mantém a representação espacial. Não uniformizar telas diferentes em uma coleção genérica de cartões.
 
 ### Gráficos — MCT-47 / MCT-50
 
@@ -1622,7 +1622,7 @@ Todos os dados importantes do evento devem estar no Supabase: participantes, equ
 
 Abrir em outra máquina ou após limpar cache restaura o que foi gravado. O navegador pode guardar conveniência local, mas não a única cópia do trabalho. Esse requisito não promete modo offline nem histórico completo de versões.
 
-Gravar com retorno de erro visível e proteção contra revisão desatualizada. Se outra pessoa alterou o documento, recusar sobrescrita silenciosa, conservar a edição e oferecer exportação/recuperação. Não mesclar automaticamente decisões conflitantes. Importação de backup deve ser explícita, recusar IDs duplicados e nunca sobrescrever um evento existente sem fluxo próprio autorizado.
+Gravar com retorno de erro visível e proteção contra revisão desatualizada. Se outra pessoa alterou o documento, recusar sobrescrita silenciosa, conservar a edição e oferecer exportação/recuperação. **Atualizado pelas MCT-66 e MCT-85:** alterações em campos diferentes são juntadas automaticamente; quando duas pessoas mudam o mesmo campo, vale a de quem salvou por último e aparece o aviso "1 alteração feita por outra pessoa foi substituída pela sua." — nada é descartado sem aviso. Importação de backup deve ser explícita, recusar IDs duplicados e nunca sobrescrever um evento existente sem fluxo próprio autorizado.
 
 Cabeçalho deve distinguir **Salvo**, **Salvando…** e estado de **falha**, com aviso claro e **Tentar novamente**. A main usa o texto **Não salvo** para falha; a issue descreve **Falha ao salvar**. Nenhum desses estados pode dizer Salvo depois de uma gravação recusada. Falha deve conservar a edição em memória e permitir exportá-la.
 
@@ -1745,3 +1745,24 @@ Antes de cada PR de implementação: `npm run lint`, `npm run typecheck`, `npm r
 Esta atualização é documental: não altera estilos, telas, algoritmo, cadastro, permissões ou dados. A correção do mapeamento histórico foi versionada e testada nas PRs de implementação; a conferência dos IDs e da conta real continua necessária antes da aplicação em produção. Estudos de IA, edição offline, cobrança/planos, envio de convites por e-mail, permissões individuais por módulo, importação de equipe, várias trilhas e edição manual de assentos continuam fora deste lote.
 
 **Versão oficial:** PRD Mesa Certa v1.2 — 06/10/2026.
+
+---
+
+## 60. Revisão de usabilidade de outubro — MCT-68 a MCT-88
+
+Revisão de Renan em 06/10/2026, registrada pelo Codex no Linear (MCT-68 a MCT-87) e concluída pelo Claude em 07/10/2026 no [PR #44](https://github.com/RenanManhaes/mesacerta-private/pull/44). Detalhe e evidências por item em `docs/usabilidade-2026-10-06.md`.
+
+| Tema | Regra vigente |
+|---|---|
+| Programação (MCT-80, MCT-81) | Staff só lê, inclusive pela API (`event_save` e `schedule_items`). Direção reordena na lista principal; não há painel de cronograma separado. |
+| Limite de eventos (MCT-78) | Conta comum: 1 evento, e arquivados também contam (§56). A exceção master continua. |
+| Abas (MCT-79) | Cada aba do navegador pode estar numa conta diferente; sair numa aba não muda as outras contas. A mesma conta em duas abas compartilha a sessão. |
+| Tempo real (MCT-85) | Quem está com o evento aberto vê, em segundos, o que outra pessoa salvou. Staff recebe só o aviso de mudança e a sua projeção, nunca o documento completo. |
+| Equipe (MCT-73, MCT-74) | Convite: copiar link é a ação principal; código sempre dá staff. Papéis e remoção ficam no card do membro, só para o fundador, com confirmação. Configurações não muda mais papéis. |
+| Fornecedor (MCT-84) | O card abre a edição; valores e pagamentos continuam no financeiro central. |
+| Tarefas (MCT-86) | Título, descrição e um ou mais responsáveis, escolhidos entre os membros reais da equipe. Staff só muda o status das próprias tarefas. |
+| Confirmações (MCT-82) | Toda ação destrutiva pede confirmação em modal, com foco preso no modal e devolvido ao botão de origem. |
+| Banco (MCT-88) | `event_create` usa `private.is_org_member`; corrigido por migration. |
+
+Migrations novas desta revisão, ainda **não aplicadas em produção**: `20261007090000` a `20261007160000`. Aplicar em ordem, junto com a publicação do front, depois de conferir a MCT-88.
+

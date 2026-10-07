@@ -2,41 +2,36 @@
 
 ## Estado da entrega
 
-Base: `af4d735` (PR #42), branch `fix/october-usability`.
-20 solicitações registradas no Linear (MCT-68 a MCT-87), distribuídas nos projetos existentes por assunto.
+**Atualização de 07/10/2026 (Claude):** os 20 itens estão implementados e validados no [PR #44](https://github.com/RenanManhaes/mesacerta-private/pull/44), que incorpora este PR #43. O lote do Codex foi conferido em Chromium real: os 10 itens passam (`scripts/test-pr43-browser.mjs`, 10/10), com 7 correções encontradas na validação. Os outros 10 itens foram implementados por agentes Claude e testados contra Supabase local em Docker. Detalhe e evidências estão em cada issue do Linear.
 
-Este lote implementa os itens **1, 2, 3, 4, 5, 8, 9, 10, 16 e 20**. Os outros dez ficam preparados para execução pelo Claude, conforme autorização de Renan. Não foram executados por um agente Claude nesta conversa.
+As migrations novas (`20261007090000` a `20261007160000`) ainda **não foram aplicadas em produção**. A MCT-88 descreve uma falha de criação de eventos que precisa ser conferida em produção antes.
 
-Os itens implementados permanecem **In Review** até validação visual. O navegador do Codex falhou em duas tentativas com:
-`failed to write kernel assets: O sistema não pode encontrar o caminho especificado. (os error 3)`.
-Uma tentativa incluiu reinicialização do kernel. Não é uma solicitação pendente de permissão do usuário.
-
-**Merge e publicação ficam pendentes da validação visual pelo Claude.** PR/merge já autorizados por Renan; não pedir confirmação novamente.
+Histórico: base `af4d735` (PR #42), branch `fix/october-usability`. O navegador do Codex falhou com `failed to write kernel assets ... (os error 3)`, por isso a validação visual ficou para o Claude.
 
 ## Issues e escopo
 
 | Item | Linear | Solicitação | Continuidade |
 | --- | --- | --- | --- |
-| 1 | [MCT-68](https://linear.app/renanmanhaes/issue/MCT-68/revisao-de-usabilidade-01-ajustar-tipografia-e-proporcoes-dos-cards-de) | Revisão de usabilidade 01 — Ajustar tipografia e proporções dos cards de planos | Implementado no PR; validação visual pendente |
-| 2 | [MCT-69](https://linear.app/renanmanhaes/issue/MCT-69/revisao-de-usabilidade-02-sugerir-cidades-brasileiras-durante-a) | Revisão de usabilidade 02 — Sugerir cidades brasileiras durante a criação do evento | Implementado no PR; validação visual pendente |
-| 3 | [MCT-70](https://linear.app/renanmanhaes/issue/MCT-70/revisao-de-usabilidade-03-corrigir-distancia-do-cursor-e-fluidez-ao) | Revisão de usabilidade 03 — Corrigir distância do cursor e fluidez ao arrastar tarefas | Implementado no PR; validação visual pendente |
-| 4 | [MCT-71](https://linear.app/renanmanhaes/issue/MCT-71/revisao-de-usabilidade-04-autocomplete-de-areas-e-criacao-sem) | Revisão de usabilidade 04 — Autocomplete de áreas e criação sem confirmação | Implementado no PR; validação visual pendente |
-| 5 | [MCT-72](https://linear.app/renanmanhaes/issue/MCT-72/revisao-de-usabilidade-05-simplificar-catalogo-e-separar-funcoes-de) | Revisão de usabilidade 05 — Simplificar catálogo e separar funções de áreas | Implementado no PR; validação visual pendente |
-| 6 | [MCT-73](https://linear.app/renanmanhaes/issue/MCT-73/revisao-de-usabilidade-06-simplificar-o-modal-de-convite-da-equipe) | Revisão de usabilidade 06 — Simplificar o modal de convite da equipe | Claude: implementação pendente |
-| 7 | [MCT-74](https://linear.app/renanmanhaes/issue/MCT-74/revisao-de-usabilidade-07-gerenciar-papeis-e-remocao-no-card-da-equipe) | Revisão de usabilidade 07 — Gerenciar papéis e remoção no card da equipe | Claude: implementação pendente |
-| 8 | [MCT-75](https://linear.app/renanmanhaes/issue/MCT-75/revisao-de-usabilidade-08-expor-configuracao-das-rodadas-no-topo-de) | Revisão de usabilidade 08 — Expor configuração das rodadas no topo de Networking | Implementado no PR; validação visual pendente |
-| 9 | [MCT-76](https://linear.app/renanmanhaes/issue/MCT-76/revisao-de-usabilidade-09-usar-cotas-diamante-ouro-e-prata-com-icones) | Revisão de usabilidade 09 — Usar cotas Diamante, Ouro e Prata com ícones | Implementado no PR; validação visual pendente |
-| 10 | [MCT-77](https://linear.app/renanmanhaes/issue/MCT-77/revisao-de-usabilidade-10-padronizar-interruptores-com-formato) | Revisão de usabilidade 10 — Padronizar interruptores com formato semelhante ao iPhone | Implementado no PR; validação visual pendente |
-| 11 | [MCT-78](https://linear.app/renanmanhaes/issue/MCT-78/revisao-de-usabilidade-11-restabelecer-limite-de-um-evento-por-conta) | Revisão de usabilidade 11 — Restabelecer limite de um evento por conta comum | Claude: implementação pendente |
-| 12 | [MCT-79](https://linear.app/renanmanhaes/issue/MCT-79/revisao-de-usabilidade-12-isolar-autenticacao-entre-abas-para-contas) | Revisão de usabilidade 12 — Isolar autenticação entre abas para contas diferentes | Claude: implementação pendente |
-| 13 | [MCT-80](https://linear.app/renanmanhaes/issue/MCT-80/revisao-de-usabilidade-13-impedir-que-staff-altere-programacao-no) | Revisão de usabilidade 13 — Impedir que staff altere programação no servidor e na tela | Claude: implementação pendente |
-| 14 | [MCT-81](https://linear.app/renanmanhaes/issue/MCT-81/revisao-de-usabilidade-14-arrastar-a-programacao-principal-e-remover) | Revisão de usabilidade 14 — Arrastar a programação principal e remover coluna duplicada | Claude: implementação pendente |
-| 15 | [MCT-82](https://linear.app/renanmanhaes/issue/MCT-82/revisao-de-usabilidade-15-usar-modal-em-todas-as-confirmacoes) | Revisão de usabilidade 15 — Usar modal em todas as confirmações | Claude: implementação pendente |
-| 16 | [MCT-83](https://linear.app/renanmanhaes/issue/MCT-83/revisao-de-usabilidade-16-pedir-nome-no-cadastro-e-reutilizar-perfil) | Revisão de usabilidade 16 — Pedir nome no cadastro e reutilizar perfil da equipe | Implementado no PR; validação visual pendente |
-| 17 | [MCT-84](https://linear.app/renanmanhaes/issue/MCT-84/revisao-de-usabilidade-17-abrir-gestao-do-fornecedor-ao-clicar-no-card) | Revisão de usabilidade 17 — Abrir gestão do fornecedor ao clicar no card | Claude: implementação pendente |
-| 18 | [MCT-85](https://linear.app/renanmanhaes/issue/MCT-85/revisao-de-usabilidade-18-sincronizar-dados-e-rodadas-entre-membros-em) | Revisão de usabilidade 18 — Sincronizar dados e rodadas entre membros em tempo real | Claude: implementação pendente |
-| 19 | [MCT-86](https://linear.app/renanmanhaes/issue/MCT-86/revisao-de-usabilidade-19-editar-tarefas-com-descricao-e-busca-de) | Revisão de usabilidade 19 — Editar tarefas com descrição e busca de responsáveis | Claude: implementação pendente |
-| 20 | [MCT-87](https://linear.app/renanmanhaes/issue/MCT-87/revisao-de-usabilidade-20-acelerar-navegacao-da-landing-por-ancoras) | Revisão de usabilidade 20 — Acelerar navegação da landing por âncoras | Implementado no PR; validação visual pendente |
+| 1 | [MCT-68](https://linear.app/renanmanhaes/issue/MCT-68/revisao-de-usabilidade-01-ajustar-tipografia-e-proporcoes-dos-cards-de) | Revisão de usabilidade 01 — Ajustar tipografia e proporções dos cards de planos | Validado em navegador (PR #44) |
+| 2 | [MCT-69](https://linear.app/renanmanhaes/issue/MCT-69/revisao-de-usabilidade-02-sugerir-cidades-brasileiras-durante-a) | Revisão de usabilidade 02 — Sugerir cidades brasileiras durante a criação do evento | Validado em navegador (PR #44) |
+| 3 | [MCT-70](https://linear.app/renanmanhaes/issue/MCT-70/revisao-de-usabilidade-03-corrigir-distancia-do-cursor-e-fluidez-ao) | Revisão de usabilidade 03 — Corrigir distância do cursor e fluidez ao arrastar tarefas | Validado em navegador (PR #44) |
+| 4 | [MCT-71](https://linear.app/renanmanhaes/issue/MCT-71/revisao-de-usabilidade-04-autocomplete-de-areas-e-criacao-sem) | Revisão de usabilidade 04 — Autocomplete de áreas e criação sem confirmação | Validado em navegador (PR #44) |
+| 5 | [MCT-72](https://linear.app/renanmanhaes/issue/MCT-72/revisao-de-usabilidade-05-simplificar-catalogo-e-separar-funcoes-de) | Revisão de usabilidade 05 — Simplificar catálogo e separar funções de áreas | Validado em navegador (PR #44) |
+| 6 | [MCT-73](https://linear.app/renanmanhaes/issue/MCT-73/revisao-de-usabilidade-06-simplificar-o-modal-de-convite-da-equipe) | Revisão de usabilidade 06 — Simplificar o modal de convite da equipe | Implementado e testado (PR #44) |
+| 7 | [MCT-74](https://linear.app/renanmanhaes/issue/MCT-74/revisao-de-usabilidade-07-gerenciar-papeis-e-remocao-no-card-da-equipe) | Revisão de usabilidade 07 — Gerenciar papéis e remoção no card da equipe | Implementado e testado (PR #44) |
+| 8 | [MCT-75](https://linear.app/renanmanhaes/issue/MCT-75/revisao-de-usabilidade-08-expor-configuracao-das-rodadas-no-topo-de) | Revisão de usabilidade 08 — Expor configuração das rodadas no topo de Networking | Validado em navegador (PR #44) |
+| 9 | [MCT-76](https://linear.app/renanmanhaes/issue/MCT-76/revisao-de-usabilidade-09-usar-cotas-diamante-ouro-e-prata-com-icones) | Revisão de usabilidade 09 — Usar cotas Diamante, Ouro e Prata com ícones | Validado em navegador (PR #44) |
+| 10 | [MCT-77](https://linear.app/renanmanhaes/issue/MCT-77/revisao-de-usabilidade-10-padronizar-interruptores-com-formato) | Revisão de usabilidade 10 — Padronizar interruptores com formato semelhante ao iPhone | Validado em navegador (PR #44) |
+| 11 | [MCT-78](https://linear.app/renanmanhaes/issue/MCT-78/revisao-de-usabilidade-11-restabelecer-limite-de-um-evento-por-conta) | Revisão de usabilidade 11 — Restabelecer limite de um evento por conta comum | Implementado e testado (PR #44) |
+| 12 | [MCT-79](https://linear.app/renanmanhaes/issue/MCT-79/revisao-de-usabilidade-12-isolar-autenticacao-entre-abas-para-contas) | Revisão de usabilidade 12 — Isolar autenticação entre abas para contas diferentes | Implementado e testado (PR #44) |
+| 13 | [MCT-80](https://linear.app/renanmanhaes/issue/MCT-80/revisao-de-usabilidade-13-impedir-que-staff-altere-programacao-no) | Revisão de usabilidade 13 — Impedir que staff altere programação no servidor e na tela | Implementado e testado (PR #44) |
+| 14 | [MCT-81](https://linear.app/renanmanhaes/issue/MCT-81/revisao-de-usabilidade-14-arrastar-a-programacao-principal-e-remover) | Revisão de usabilidade 14 — Arrastar a programação principal e remover coluna duplicada | Implementado e testado (PR #44) |
+| 15 | [MCT-82](https://linear.app/renanmanhaes/issue/MCT-82/revisao-de-usabilidade-15-usar-modal-em-todas-as-confirmacoes) | Revisão de usabilidade 15 — Usar modal em todas as confirmações | Implementado e testado (PR #44) |
+| 16 | [MCT-83](https://linear.app/renanmanhaes/issue/MCT-83/revisao-de-usabilidade-16-pedir-nome-no-cadastro-e-reutilizar-perfil) | Revisão de usabilidade 16 — Pedir nome no cadastro e reutilizar perfil da equipe | Validado em navegador (PR #44) |
+| 17 | [MCT-84](https://linear.app/renanmanhaes/issue/MCT-84/revisao-de-usabilidade-17-abrir-gestao-do-fornecedor-ao-clicar-no-card) | Revisão de usabilidade 17 — Abrir gestão do fornecedor ao clicar no card | Implementado e testado (PR #44) |
+| 18 | [MCT-85](https://linear.app/renanmanhaes/issue/MCT-85/revisao-de-usabilidade-18-sincronizar-dados-e-rodadas-entre-membros-em) | Revisão de usabilidade 18 — Sincronizar dados e rodadas entre membros em tempo real | Implementado e testado (PR #44) |
+| 19 | [MCT-86](https://linear.app/renanmanhaes/issue/MCT-86/revisao-de-usabilidade-19-editar-tarefas-com-descricao-e-busca-de) | Revisão de usabilidade 19 — Editar tarefas com descrição e busca de responsáveis | Implementado e testado (PR #44) |
+| 20 | [MCT-87](https://linear.app/renanmanhaes/issue/MCT-87/revisao-de-usabilidade-20-acelerar-navegacao-da-landing-por-ancoras) | Revisão de usabilidade 20 — Acelerar navegação da landing por âncoras | Validado em navegador (PR #44) |
 
 ## Código do lote implementado
 
