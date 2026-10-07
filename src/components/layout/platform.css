@@ -125,6 +125,8 @@
 /* Reference screens: structural layouts from the supplied platform, using event data. */
 .reference-page{display:flex;flex-direction:column;gap:16px;min-width:0}
 .reference-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:12px;padding-top:2px}
+/* O título cede espaço aos botões, mas não encolhe abaixo de 320px: com 3 botões (Networking) eles passam para a linha de baixo. */
+.reference-header{flex-wrap:wrap}.reference-header>div:first-child{flex:1 1 320px;min-width:0}
 .reference-header h1{margin:10px 0 8px}.reference-header>div>p:last-child{font-size:14px}
 .reference-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
 .reference-actions button,.reference-toolbar>button{gap:8px;white-space:nowrap}
