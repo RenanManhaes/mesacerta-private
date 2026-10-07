@@ -45,7 +45,7 @@ try {
   const elapsed=Date.now()-started;
   assert.equal(await directorPage.evaluate(()=>window.__semRecarregar===true),true,'a página do diretor não pode ter recarregado');
   await directorPage.getByText('Atualizado por outra pessoa da equipe').first().waitFor({timeout:3000});
-  await directorPage.screenshot({path:process.env.SHOT||'mct85-diretor.png'});
+  await directorPage.screenshot({path:process.env.SHOT||(await import('node:path')).join((await import('node:os')).tmpdir(),'mct85-diretor.png')});
   console.log(`UI PASS 1: diretor viu a tarefa nova (revisão ${saved.revision}) em ${elapsed} ms, sem recarregar a página, com o aviso "Atualizado por outra pessoa da equipe".`);
 
   // Agora o contrário, tudo pela interface: o diretor muda o status da tarefa e a página do fundador acompanha.
