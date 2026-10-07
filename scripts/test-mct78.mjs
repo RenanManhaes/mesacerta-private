@@ -1,4 +1,4 @@
-// MCT-78: conta comum mantem 1 evento ativo (substitui o limite 3 da MCT-46).
+// MCT-78: conta comum mantem 1 evento (arquivado tambem conta) (substitui o limite 3 da MCT-46).
 // Roda contra o Supabase local (contas sinteticas). Nao toca producao.
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -12,7 +12,7 @@ import ts from 'typescript';
 import {account,rpc,admin} from './local-api.mjs';
 import {eventLimitMessage,friendlyCreateError} from '../src/lib/eventLimit.js';
 
-const MESSAGE = 'Seu plano permite 1 evento ativo. Para criar outro, fale com a gente.';
+const MESSAGE = 'Sua conta permite 1 evento. Eventos arquivados também contam. Para criar outro, fale com a gente.';
 const orgOf = async (person) => {
   const {data,error} = await person.client.from('memberships').select('organization_id').eq('user_id',person.user.id);
   assert.ifError(error);
@@ -92,6 +92,9 @@ console.log('CA4 PASS: account with 3 pre-existing events keeps all 3 (listed, n
 
 // CA5: textos da interface (telas reais renderizadas com a permissao vinda da API).
 assert.equal(eventLimitMessage(1),MESSAGE);
+assert.equal(eventLimitMessage(3),'Sua conta permite 3 eventos. Eventos arquivados também contam. Para criar outro, fale com a gente.'); // plural
+assert.ok(!/ativo/.test(MESSAGE),'arquivado também conta: a mensagem não pode dizer "ativo"');
+assert.equal(friendlyCreateError({code:'42501',message:'Sua conta pode manter até 3 eventos. Solicite a liberação para criar mais.'}).message,eventLimitMessage(3));
 assert.equal(friendlyCreateError({code:'42501',message:denied.body.message}).message,MESSAGE);
 assert.equal(denied.body.message,MESSAGE); // o banco já devolve a mensagem final (singular correto)
 assert.equal(friendlyCreateError({code:'42501',message:'Sua conta pode manter até 1 eventos. Solicite a liberação para criar mais.'}).message,MESSAGE); // texto antigo (banco ainda sem a migração) segue tratado

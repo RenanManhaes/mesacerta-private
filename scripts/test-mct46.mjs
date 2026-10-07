@@ -34,10 +34,10 @@ try {
  assert.equal(event.creationPermission.canCreate,false);
  const after=await rpc(user.client,'event_creation_permission');assert.equal(after.canCreate,false);assert.equal(after.eventCount,1);
  mount(after,[event.document]);assert.equal(createButtons().length,0);assert.ok(tree.root.findAllByType('button').some(button=>button.children.join('')==='Entrar em um evento'));act(()=>tree.unmount());
- mount(after,[event.document],CreateEvent);assert.equal(createButtons().length,0);assert.ok(tree.root.findByProps({role:'alert'}).children.join('').includes('Seu plano permite 1 evento ativo. Para criar outro, fale com a gente.'));act(()=>tree.unmount());
+ mount(after,[event.document],CreateEvent);assert.equal(createButtons().length,0);assert.ok(tree.root.findByProps({role:'alert'}).children.join('').includes('Sua conta permite 1 evento. Eventos arquivados também contam. Para criar outro, fale com a gente.'));act(()=>tree.unmount());
  console.log('CA2 UI/API PASS: existing unflagged account has canCreate=false; Events hides all create buttons; direct /novo CreateEvent shows limit alert with no creation control.');
  const metadata=await user.client.auth.updateUser({data:{multi_event:true,role:'founder'}});assert.ifError(metadata.error);
- let denied=await user.request('rpc/event_create','POST',{p_org:org,p_document:{id:randomUUID(),name:'Forbidden second event'}});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');assert.equal(denied.body.message,'Seu plano permite 1 evento ativo. Para criar outro, fale com a gente.');
+ let denied=await user.request('rpc/event_create','POST',{p_org:org,p_document:{id:randomUUID(),name:'Forbidden second event'}});assert.equal(denied.status,403);assert.equal(denied.body.code,'42501');assert.equal(denied.body.message,'Sua conta permite 1 evento. Eventos arquivados também contam. Para criar outro, fale com a gente.');
  console.log(`CA3 restricted-JWT POST event_create: HTTP ${denied.status}, SQLSTATE ${denied.body.code}, message=${denied.body.message}; editable Auth metadata cannot bypass.`);
  denied=await user.request(`user_event_permissions?user_id=eq.${user.user.id}`,'PATCH',{multi_event:true});assert.equal(denied.status,403);
  console.log('RLS flag escalation: direct PATCH with account JWT returns HTTP 403.');
