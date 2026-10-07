@@ -167,6 +167,25 @@ try {
   }));
   assert.ok([...stored.local, ...stored.session].every(key => key.startsWith('sb-127-auth-token')), JSON.stringify(stored));
   console.log(`CA8 PASS: chaves de navegador de A: localStorage=${JSON.stringify(stored.local)} sessionStorage=${JSON.stringify(stored.session)} (so chaves de autenticacao; nenhum dado de evento).`);
+
+  // CA9: sair numa aba nao deixa OUTRA aba da MESMA conta quebrada. A (conta 1) e C (conta 1,
+  // herdada) sao a mesma conta; D e conta 3. Sair em A leva C ao login com aviso; D nao muda.
+  await tabA.reload();
+  await tabA.getByRole('heading', {name: 'Meus eventos'}).waitFor({timeout: 20000});
+  await expectAccount(tabA, one, 'A antes de sair (CA9)');
+  await expectAccount(tabC, one, 'C antes de A sair (CA9)');
+  await expectAccount(tabD, three, 'D antes de A sair (CA9)');
+  await tabA.getByRole('button', {name: 'Sair da conta'}).click();
+  await tabA.waitForURL(/\/login/, {timeout: 20000});
+  await tabC.waitForURL(/\/login\?saiu=outra-aba/, {timeout: 20000});
+  await tabC.getByText('Você saiu da conta em outra aba.').waitFor({timeout: 20000});
+  assert.equal((await who(tabC)).email, null, 'C deve estar sem sessao depois que A saiu');
+  await expectAccount(tabD, three, 'D (outra conta) depois de A sair');
+  await tabD.getByRole('heading', {name: 'Meus eventos'}).waitFor({timeout: 20000});
+  await tabD.reload();
+  await tabD.getByRole('heading', {name: 'Meus eventos'}).waitFor({timeout: 20000});
+  await expectAccount(tabD, three, 'D depois de A sair e F5');
+  console.log('CA9 PASS: Sair em A (conta 1) levou a aba C (mesma conta) ao login com "Você saiu da conta em outra aba."; a aba D (conta 3) seguiu logada, inclusive depois do F5.');
 } catch (error) {
   failures.push(error);
   console.error(error);

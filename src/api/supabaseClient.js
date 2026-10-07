@@ -20,6 +20,10 @@ const instanceKey = tabAuthStorageKey(baseKey);
 const tabStorage = createTabAuthStorage(baseKey, instanceKey);
 // Chamado ao sair de propósito: a aba fica sem conta até um novo login.
 export const releaseTabSession = () => tabStorage.release();
+// Marca, antes de sair, que foi de propósito (as outras abas da mesma conta saberão).
+export const announceTabSignOut = () => tabStorage.announceSignOut();
+// Avisa quando outra aba da MESMA conta saiu (a entrada da conta desta aba sumiu).
+export const onTabAccountRemoved = (callback) => tabStorage.onAccountRemoved(callback);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

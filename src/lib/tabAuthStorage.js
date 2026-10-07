@@ -27,10 +27,18 @@
 //     mensagens de login/logout. O adaptador reconverte esse nome para a chave
 //     estável, e o dado gravado não depende dele.
 //
+//  7. Sair em uma aba remove a entrada da conta, que outras abas da MESMA conta
+//     também usam. Essas abas não recebem aviso da SDK (cada uma tem um storageKey
+//     próprio), então `onAccountRemoved` ouve o evento `storage` do window: quando
+//     some a entrada da conta fixada nesta aba, avisa o app. Abas de outras contas
+//     não são afetadas, pois a entrada delas é outra. `announceSignOut` marca que a
+//     saída foi de propósito (e não expiração), para o app dizer a mensagem certa.
+//
 // Chaves que não são a sessão (ex.: verificador PKCE) ficam em localStorage,
 // compartilhadas, para que o link do e-mail possa terminar em outra aba.
 
 const NONE = '-'; // aba desconectada de propósito: não herda outra conta
+const SIGN_OUT_WINDOW_MS = 15000; // quanto tempo vale a marca de "saí de propósito"
 
 function memoryStorage() {
   const data = new Map();
@@ -73,6 +81,7 @@ export function createTabAuthStorage(base, instanceKey, stores = {}) {
   const entry = id => `${base}:u:${id}`;
   const LAST = `${base}:last`;
   const PIN = `${base}:tab`;
+  const OUT = `${base}:out`;
 
   const normalize = key => (key === instanceKey ? base : key.startsWith(`${instanceKey}-`) ? base + key.slice(instanceKey.length) : key);
   const userId = raw => {
@@ -108,7 +117,33 @@ export function createTabAuthStorage(base, instanceKey, stores = {}) {
     return id;
   };
 
+  // A marca de saída diz "a conta X saiu de propósito em tal horário".
+  const signedOutOnPurpose = id => {
+    const [who, at] = String(shared.getItem(OUT) ?? '').split('|');
+    return who === id && Date.now() - Number(at) < SIGN_OUT_WINDOW_MS;
+  };
+
   return {
+    // Chamar ANTES de sair de propósito: as outras abas da mesma conta saberão que foi um logout.
+    announceSignOut() {
+      const id = tab.getItem(PIN);
+      if (id && id !== NONE) shared.setItem(OUT, `${id}|${Date.now()}`);
+    },
+    // Avisa quando a entrada da conta desta aba some por ação de OUTRA aba (o evento
+    // `storage` só dispara em outras abas). Devolve a função que cancela o aviso.
+    onAccountRemoved(callback, target = globalThis.window) {
+      if (!target?.addEventListener) return () => {};
+      const listener = event => {
+        if (event.storageArea && event.storageArea !== shared) return;
+        const id = tab.getItem(PIN);
+        if (!id || id === NONE) return;
+        const removed = event.key === entry(id) ? event.newValue === null : event.key === null; // null = localStorage.clear()
+        if (!removed || shared.getItem(entry(id)) !== null) return; // voltou a existir (novo login da mesma conta)
+        callback({ deliberate: signedOutOnPurpose(id) });
+      };
+      target.addEventListener('storage', listener);
+      return () => target.removeEventListener('storage', listener);
+    },
     // Sair de propósito: esta aba fica sem conta e não herda a de outra aba.
     release() {
       tab.setItem(PIN, NONE);
