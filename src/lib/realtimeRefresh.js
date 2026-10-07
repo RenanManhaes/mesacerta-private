@@ -58,3 +58,28 @@ export function reconcileRemote({ acknowledged, local, remote }) {
     conflicts,
   };
 }
+
+// Mudanças locais na lista de eventos feitas FORA do fluxo de rebusca: criar, importar e gravar.
+// Uma rebusca (event_list) que estava em voo quando uma delas começou pode voltar com a lista antiga
+// (sem o evento novo, ou com a revisão velha). Sem esta guarda, reconcileRemote trataria o evento
+// novo como "perdi o acesso" e o removeria da tela, ou desfaria a mudança recém-gravada.
+//
+// begin()/end() marcam o início e o fim de cada operação. A rebusca guarda `snapshot()` ao começar e,
+// ao terminar, descarta o resultado se `changedSince(snapshot)` (algo começou ou terminou no meio, ou ainda está em andamento)
+// e agenda uma nova rebusca. `busy()` diz se há operação em andamento, para não começar uma rebusca nessa hora.
+export function createMutationTracker() {
+  let epoch = 0;
+  let active = 0;
+  return {
+    begin() { epoch += 1; active += 1; },
+    end() { epoch += 1; active = Math.max(0, active - 1); },
+    busy: () => active > 0,
+    snapshot: () => epoch,
+    changedSince: (snapshot) => active > 0 || epoch !== snapshot,
+    // Executa `operation` marcando início e fim, mesmo se falhar.
+    async track(operation) {
+      this.begin();
+      try { return await operation(); } finally { this.end(); }
+    },
+  };
+}

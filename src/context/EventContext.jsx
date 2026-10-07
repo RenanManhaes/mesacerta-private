@@ -13,7 +13,7 @@ import { supabase } from '@/api/supabaseClient';
 import { emptyEventTemplate } from '@/lib/demoData';
 import { mergeEventDocument } from '@/lib/mergeEventDocument';
 import { saveEventWithMerge } from '@/lib/eventSync';
-import { recordSignal, hasNewerSignal, decideRefresh, reconcileRemote } from '@/lib/realtimeRefresh';
+import { recordSignal, hasNewerSignal, decideRefresh, reconcileRemote, createMutationTracker } from '@/lib/realtimeRefresh';
 import { watchEventSignals } from '@/lib/eventSignals';
 import { toast } from '@/components/ui/use-toast';
 import { friendlyCreateError } from '@/lib/eventLimit';
@@ -45,6 +45,9 @@ export function EventProvider({ children }) {
   const rerun = useRef(false);
   const forceRerun = useRef(false);
   const refreshRef = useRef(null);
+  // Criar, importar e gravar mudam a lista fora da rebusca; a rebusca em voo descarta o que voltar nessa hora.
+  const mutations = useRef(null);
+  mutations.current ||= createMutationTracker();
   const [mergeNotice, setMergeNotice] = useState('');
 
   latest.current = state.events;
@@ -115,7 +118,7 @@ export function EventProvider({ children }) {
     const startedScope = identity.current;
     setSaveStatus('saving');
     setSaveError('');
-    const operation = (async () => {
+    const operation = mutations.current.track(async () => {
       const previous = JSON.parse(acknowledged.current || '[]');
       let merged = false, conflictCount = 0;
       for (const document of JSON.parse(snapshot)) {
@@ -145,7 +148,7 @@ export function EventProvider({ children }) {
         ? '1 alteração feita por outra pessoa foi substituída pela sua.'
         : `${conflictCount} alterações feitas por outra pessoa foram substituídas pelas suas.`);
       setSaveStatus(snapshot === JSON.stringify(latest.current) ? 'saved' : 'saving');
-    })();
+    });
     writing.current = operation;
     try {
       await operation;
@@ -192,16 +195,22 @@ export function EventProvider({ children }) {
       if (!active) return;
       if (force && document.visibilityState === 'hidden') return;
       if (refreshing.current) { rerun.current = true; forceRerun.current ||= force; return; }
+      // Criação/importação em andamento: o servidor e a tela estão em momentos diferentes. Espera terminar (quem terminar chama a rebusca).
+      if (mutations.current.busy()) { rerun.current = true; forceRerun.current ||= force; return; }
       const action = decideRefresh({newer: force || forceRerun.current || hasNewerSignal(signals.current, revision.current), writing: !!writing.current, dirty: dirty()});
       if (action === 'ignore') { rerun.current = false; forceRerun.current = false; return; }
       if (action === 'defer') { rerun.current = true; forceRerun.current ||= force; return; }
       rerun.current = false; forceRerun.current = false;
       const startedScope = identity.current;
+      const startedEpoch = mutations.current.snapshot();
       refreshing.current = true;
       try {
         const {data, error} = await supabase.rpc('event_list').abortSignal(AbortSignal.timeout(15000));
         if (error) throw new Error(error.message);
         if (!active || identity.current !== startedScope) return;
+        // Um evento foi criado/importado (ou algo foi gravado) enquanto buscava: a resposta pode estar velha e
+        // faria o evento novo parecer "sem acesso". Descarta e busca de novo.
+        if (mutations.current.changedSince(startedEpoch)) { rerun.current = true; forceRerun.current = true; return; }
         // Começou uma gravação enquanto buscava: o que veio pode não incluir a minha mudança. Confere de novo depois.
         if (writing.current) { rerun.current = true; forceRerun.current = true; return; }
         const result = reconcileRemote({acknowledged: JSON.parse(acknowledged.current || '[]'), local: latest.current, remote: data});
@@ -223,7 +232,7 @@ export function EventProvider({ children }) {
         }
       } finally {
         refreshing.current = false;
-        if (active && rerun.current && !writing.current) refresh();
+        if (active && rerun.current && !writing.current && !mutations.current.busy()) refresh();
       }
     };
     refreshRef.current = refresh;
@@ -329,14 +338,18 @@ export function EventProvider({ children }) {
   const addEvent = useCallback(async (data) => {
     if (!orgId) throw new Error('Crie uma organização antes de criar seu evento.');
     await flush();
-    const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: emptyEventTemplate(data)});
-    if (error) throw friendlyCreateError(error);
-    const ev = row.document;
-    setCreationPermission(row.creationPermission);
-    revision.current[ev.id] = row.revision;
-    setEventAccess(access => ({...access, [ev.id]: row}));
-    acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current || '[]'), ev]);
-    setState(s => {const events = [...s.events, ev]; latest.current = events; return {events, currentEventId: ev.id};});
+    const ev = await mutations.current.track(async () => {
+      const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: emptyEventTemplate(data)});
+      if (error) throw friendlyCreateError(error);
+      const created = row.document;
+      setCreationPermission(row.creationPermission);
+      revision.current[created.id] = row.revision;
+      setEventAccess(access => ({...access, [created.id]: row}));
+      acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current || '[]'), created]);
+      setState(s => {const events = [...s.events, created]; latest.current = events; return {events, currentEventId: created.id};});
+      return created;
+    });
+    if (rerun.current) refreshRef.current?.();
     return ev;
   }, [orgId, flush]);
 
@@ -347,14 +360,20 @@ export function EventProvider({ children }) {
     if (!ready || !orgId) throw new Error('Aguarde o carregamento e crie uma organização antes de importar.');
     await flush();
     // Every imported record goes through the same authenticated creation transaction.
-    for (const document of backup.events) {
-      const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: document});
-      if (error) throw friendlyCreateError(error);
-      revision.current[document.id] = row.revision;
-      setCreationPermission(row.creationPermission);
-      setEventAccess(access => ({...access, [document.id]: row}));
-      acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current), row.document]);
-      setState(s => {const events = [...s.events, row.document]; latest.current = events; return {...s, events};});
+    try {
+      await mutations.current.track(async () => {
+        for (const document of backup.events) {
+          const {data: row, error} = await supabase.rpc('event_create', {p_org: orgId, p_document: document});
+          if (error) throw friendlyCreateError(error);
+          revision.current[document.id] = row.revision;
+          setCreationPermission(row.creationPermission);
+          setEventAccess(access => ({...access, [document.id]: row}));
+          acknowledged.current = JSON.stringify([...JSON.parse(acknowledged.current), row.document]);
+          setState(s => {const events = [...s.events, row.document]; latest.current = events; return {...s, events};});
+        }
+      });
+    } finally {
+      if (rerun.current) refreshRef.current?.();
     }
   }, [ready, orgId, flush]);
 
