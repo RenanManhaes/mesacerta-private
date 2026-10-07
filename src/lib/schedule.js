@@ -59,6 +59,38 @@ export const moveActivity = (list, id, newStartMinutes) =>
     }),
   );
 
+// Reordena pela lista: tira a atividade da posição atual e a coloca em `toIndex` (posição na lista
+// ordenada por horário). Em seguida recalcula os inícios em sequência: cada atividade mantém a
+// própria duração, nada se sobrepõe e os intervalos entre uma posição e outra são preservados
+// (um almoço marcado às 12h continua às 12h se o intervalo antes dele não mudou).
+// O primeiro horário do dia é mantido. Devolve a lista nova, a mesma lista se nada mudou,
+// ou null se a sequência não couber nas 24h (nada é alterado nesse caso).
+export const reorderActivities = (list, id, toIndex) => {
+  const sorted = sortSchedule(list);
+  const from = sorted.findIndex((it) => it.id === id);
+  if (from < 0) return null;
+  const to = Math.max(0, Math.min(sorted.length - 1, Math.trunc(Number(toIndex)) || 0));
+  if (from === to) return list;
+  const origin = timeToMinutes(sorted[0].start);
+  const gaps = sorted.slice(0, -1).map((it, i) => Math.max(0, timeToMinutes(sorted[i + 1].start) - endMinutes(it)));
+  const order = [...sorted];
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
+  const place = (withGaps) => {
+    let cursor = origin;
+    const starts = order.map((it, i) => {
+      const start = cursor;
+      cursor += (Number(it.duration) || 0) + (withGaps ? gaps[i] || 0 : 0);
+      return start;
+    });
+    const last = order[order.length - 1];
+    return starts[starts.length - 1] + (Number(last.duration) || 0) <= DAY ? starts : null;
+  };
+  const starts = place(true) || place(false);
+  if (!starts) return null;
+  return order.map((it, i) => ({ ...it, start: minutesToTime(starts[i]) }));
+};
+
 // Raias para exibir atividades sobrepostas lado a lado (sem trilhas: só visual do conflito).
 export const layoutLanes = (items) => {
   const sorted = sortSchedule(items);
