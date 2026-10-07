@@ -47,9 +47,9 @@ globalThis.document = {addEventListener() {}, removeEventListener() {}, visibili
 // Any browser storage use fails the test, including a hidden fallback.
 globalThis.localStorage = {getItem() {throw Error('Unexpected browser storage read');}, setItem() {throw Error('Unexpected browser storage write');}};
 try {
-  await writeFile(join(dir, 'api.mjs'), `export let supabase; export let auth; export const configure = (client, value) => {supabase = client; auth = value;}; export const useAuth = () => auth;`);
+  await writeFile(join(dir, 'api.mjs'), `export let supabase; export let auth; export const configure = (client, value) => {supabase = client; auth = value;}; export const useAuth = () => auth; export const toast = () => {};`);
   // Modulos puros usados pelo contexto: copiados como estao, com imports internos reapontados.
-  for (const name of ['contact', 'eventLimit', 'mergeEventDocument', 'eventSync']) {
+  for (const name of ['contact', 'eventLimit', 'mergeEventDocument', 'eventSync', 'realtimeRefresh', 'eventSignals']) {
     const text = (await readFile(`src/lib/${name}.js`, 'utf8')).replaceAll(/'\.\/(\w+)\.js'/g, "'./$1.mjs'").replaceAll(/'@\/lib\/(\w+)'/g, "'./$1.mjs'");
     await writeFile(join(dir, `${name}.mjs`), text);
   }
@@ -57,8 +57,9 @@ try {
     const code = (await readFile(source, 'utf8'))
       .replaceAll("'@/api/supabaseClient'", "'./api.mjs'")
       .replaceAll("'@/lib/AuthContext'", "'./api.mjs'")
+      .replaceAll("'@/components/ui/use-toast'", "'./api.mjs'")
       .replaceAll("'@/context/EventContext'", "'./context.mjs'")
-      .replaceAll(/'@\/lib\/(mergeEventDocument|eventSync|eventLimit)'/g, "'./$1.mjs'")
+      .replaceAll(/'@\/lib\/(mergeEventDocument|eventSync|eventLimit|realtimeRefresh|eventSignals)'/g, "'./$1.mjs'")
       .replace("import { emptyEventTemplate } from '@/lib/demoData';", "const emptyEventTemplate = data => ({id: crypto.randomUUID(), ...data});");
     await writeFile(join(dir, output), ts.transpileModule(code, {compilerOptions: {jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext}}).outputText);
   }
@@ -158,14 +159,37 @@ try {
   await assert.rejects(() => event.importBackup({events: [legacy]}), /IDs de eventos repetidos/);
   console.log('MIGRATION PASS: explicit JSON backup import persists all legacy fields; duplicate IDs rejected without overwriting existing events.');
 
-  // Concurrency protection: another client updates while this form is open.
-  const row = imported.data.find(e => e.document.id === id);
-  const changed = await thirdClient.rpc('event_save', {p_event: id, p_revision: row.revision, p_document: row.document});
-  assert.ifError(changed.error);
-  act(() => setDraft({description: 'Conflict must not overwrite'}));
-  await act(async () => {await assert.rejects(event.flush(), /Outra pessoa atualizou/);});
-  assert.equal(event.saveStatus, 'error');
-  console.log('REGRESSION PASS: stale revision is rejected; concurrent document is never silently overwritten.');
+  // Concorrência (MCT-66/85): se outra pessoa salvou antes, o app junta as duas edições em vez de recusar ou apagar.
+  // Edições em campos diferentes ficam as duas; no mesmo campo vale a de quem salva, com aviso visível.
+  const latestRow = async () => (await thirdClient.rpc('event_list')).data.find(e => e.document.id === id);
+  const theirs = async (change) => {
+    const row = await latestRow();
+    const saved = await thirdClient.rpc('event_save', {p_event: id, p_revision: row.revision, p_document: change(row.document)});
+    assert.ifError(saved.error);
+  };
+  const notice = () => JSON.stringify(tree.toJSON());
+  await theirs(document => ({...document, name: 'Renamed by the other person'}));
+  act(() => event.updateCurrent(e => ({...e, tasks: e.tasks.map(t => t.id === 'task-1' ? {...t, name: 'Task edited here'} : t)})));
+  await act(async () => {await event.flush();});
+  await act(async () => {await event.flush();}); // o salvamento automático confirma o documento já unido
+  assert.equal(event.saveStatus, 'saved');
+  let server = (await latestRow()).document;
+  assert.equal(server.name, 'Renamed by the other person');
+  assert.equal(server.tasks.find(t => t.id === 'task-1').name, 'Task edited here');
+  assert.equal(event.currentEvent.name, 'Renamed by the other person', 'a tela passa a mostrar a edição da outra pessoa');
+  assert.ok(!notice().includes('substitu'), 'sem aviso quando não há conflito');
+  console.log('REGRESSION PASS: stale revision with edits in different fields is merged (both kept, saveStatus=saved, no notice); nothing is silently overwritten.');
+  await theirs(document => ({...document, tasks: document.tasks.map(t => t.id === 'task-1' ? {...t, name: 'Task edited by the other person'} : t)}));
+  act(() => event.updateCurrent(e => ({...e, tasks: e.tasks.map(t => t.id === 'task-1' ? {...t, name: 'Task edited here, again'} : t)})));
+  await act(async () => {await event.flush();});
+  await act(async () => {await event.flush();}); // o salvamento automático confirma o documento já unido
+  assert.equal(event.saveStatus, 'saved');
+  server = (await latestRow()).document;
+  assert.equal(server.tasks.find(t => t.id === 'task-1').name, 'Task edited here, again');
+  assert.equal(server.name, 'Renamed by the other person', 'o resto da edição da outra pessoa continua');
+  assert.match(notice(), /1 alteração feita por outra pessoa foi substituída pela sua\./);
+  console.log('REGRESSION PASS: both people edited the same field: the saving person wins, the rest of the other edit is kept, and the visible notice says "1 alteração feita por outra pessoa foi substituída pela sua."');
+  // Falha que não é de revisão continua erro visível (rede) — coberto por CA3.
   console.log('TEST_DATA: synthetic users and organization retained locally; no customer data deleted or remote project accessed.');
 } finally {
   if (tree) act(() => tree.unmount());

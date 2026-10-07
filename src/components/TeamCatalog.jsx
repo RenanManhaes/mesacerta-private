@@ -46,7 +46,7 @@ export function TeamCatalogManager({open,onOpenChange,catalog}) {
       {!visible.length && <p className="text-sm text-muted-foreground">Nenhum cadastro nesta categoria.</p>}
       {(error || catalog.error) && <p role="alert" className="text-sm text-destructive">{error || catalog.error}</p>}
     </DialogContent></Dialog>
-    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>O item sai das sugestões. Os dados das {removal?.people_count || 0} pessoas que o utilizam serão preservados.</AlertDialogDescription></AlertDialogHeader>
+    <AlertDialog open={!!removal} onOpenChange={value=>{if(!value && !pending)setRemoval(null);}}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir “{removal?.name}”?</AlertDialogTitle><AlertDialogDescription>{(()=>{const count=removal?.people_count || 0;return `O item deixa de ser sugerido. Os dados de ${count} pessoa${count!==1?'s':''} que ${count!==1?'usam':'usa'} este item continuam salvos.`;})()}</AlertDialogDescription></AlertDialogHeader>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <AlertDialogFooter><AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel><AlertDialogAction disabled={pending} onClick={event=>{event.preventDefault();remove();}}>{pending?'Excluindo…':'Excluir'}</AlertDialogAction></AlertDialogFooter>
     </AlertDialogContent></AlertDialog>
