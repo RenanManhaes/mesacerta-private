@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/api/supabaseClient';
+import { supabase, releaseTabSession } from '@/api/supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }) => {
         const { data, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || data.session) throw error;
       }
+      releaseTabSession();
       ++membershipRequest.current;
       identity.current = null;
       setSession(null);
