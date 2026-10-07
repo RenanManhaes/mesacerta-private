@@ -1610,7 +1610,7 @@ Catálogo por organização, reutilizável em seus eventos, independente dos pap
 
 O campo apresenta correspondências a partir de **três letras**. Valor inexistente exige confirmação de criação e então passa às sugestões. Ao lado de **+ Nova pessoa**, oferecer **Gerenciar funções, áreas e cargos**. Excluir um valor em uso mostra quantas contas ativas distintas o usam nos eventos da organização e pede confirmação; a mesma pessoa em dois eventos conta uma vez. Arquivar a sugestão conserva textos de perfis e histórico. Um valor arquivado já atribuído não impede editar outros dados de contato.
 
-Fundador/diretor gerem esse catálogo; staff não lê nem altera o catálogo pela API. Cargo Fundador deriva do papel real do criador. Função **Financeiro**, cargo **Diretor** ou área **Produção** não concedem permissão por seu nome. Reutilizar catálogo não importa pessoas ou equipe.
+Fundador/diretor gerem esse catálogo; staff não lê nem altera o catálogo pela API. **Decisão de outubro (cargo no card):** o cargo é definido no card de qualquer pessoa da equipe, inclusive o fundador, por quem edita contato (fundador e diretor). Antes, o cargo Fundador derivava do papel real do criador e o campo ficava travado no card dele; agora ele só é o valor padrão quando o cargo está vazio. Cargo é só um rótulo: mudar o cargo nunca muda o papel de acesso, e staff continua só lendo. A gestão "Funções e áreas" segue sem cargos. Função **Financeiro**, cargo **Diretor** ou área **Produção** não concedem permissão por seu nome. Reutilizar catálogo não importa pessoas ou equipe.
 
 ---
 
@@ -1758,7 +1758,7 @@ Revisão de Renan em 06/10/2026, registrada pelo Codex no Linear (MCT-68 a MCT-8
 | Limite de eventos (MCT-78) | Conta comum: 1 evento, e arquivados também contam (§56). A exceção master continua. |
 | Abas (MCT-79) | Cada aba do navegador pode estar numa conta diferente; sair numa aba não muda as outras contas. A mesma conta em duas abas compartilha a sessão. |
 | Tempo real (MCT-85) | Quem está com o evento aberto vê, em segundos, o que outra pessoa salvou. Staff recebe só o aviso de mudança e a sua projeção, nunca o documento completo. |
-| Equipe (MCT-73, MCT-74) | Convite: copiar link é a ação principal; código sempre dá staff. Papéis e remoção ficam no card do membro, só para o fundador, com confirmação. Configurações não muda mais papéis. |
+| Equipe (MCT-73, MCT-74) | Convite: copiar link é a ação principal; código sempre dá staff. Papéis e remoção ficam no card do membro, só para o fundador, com confirmação. Configurações não muda mais papéis. O cargo é definido no card de qualquer pessoa, inclusive o fundador (fundador e diretor editam); é só rótulo e não muda o acesso (§54, MCT-59). |
 | Fornecedor (MCT-84) | O card abre a edição; valores e pagamentos continuam no financeiro central. |
 | Tarefas (MCT-86) | Título, descrição e um ou mais responsáveis, escolhidos entre os membros reais da equipe. Staff só muda o status das próprias tarefas. |
 | Confirmações (MCT-82) | Toda ação destrutiva pede confirmação em modal, com foco preso no modal e devolvido ao botão de origem. |
