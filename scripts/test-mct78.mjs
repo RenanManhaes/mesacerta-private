@@ -93,6 +93,8 @@ console.log('CA4 PASS: account with 3 pre-existing events keeps all 3 (listed, n
 // CA5: textos da interface (telas reais renderizadas com a permissao vinda da API).
 assert.equal(eventLimitMessage(1),MESSAGE);
 assert.equal(friendlyCreateError({code:'42501',message:denied.body.message}).message,MESSAGE);
+assert.equal(denied.body.message,MESSAGE); // o banco já devolve a mensagem final (singular correto)
+assert.equal(friendlyCreateError({code:'42501',message:'Sua conta pode manter até 1 eventos. Solicite a liberação para criar mais.'}).message,MESSAGE); // texto antigo (banco ainda sem a migração) segue tratado
 const passthrough = {code:'XX000',message:'outro erro'};
 assert.equal(friendlyCreateError(passthrough),passthrough);
 const directory = await mkdtemp(resolve('node_modules/.limit78-ui-'));
