@@ -9,8 +9,9 @@ export function eventLimitMessage(limit) {
 
 export const EVENT_LIMIT_CONTACT_URL = contactUrl('Olá! Quero criar mais um evento no Mesa Certa.');
 
-// O banco recusa com SQLSTATE 42501 e "Sua conta pode manter até N eventos...".
-// Troca esse texto técnico pela mensagem padrão; outros erros passam como estão.
+// O banco recusa com SQLSTATE 42501 e já devolve "Seu plano permite N evento(s) ativo(s)...".
+// Bancos ainda sem a migração 20261007150000 devolvem o texto antigo "Sua conta pode manter até N eventos...":
+// aqui ele é trocado pela mensagem padrão; os demais erros passam como estão.
 export function friendlyCreateError(error) {
   const text = String(error?.message || '');
   if (error?.code === '42501' && /Sua conta pode manter/.test(text)) {
