@@ -98,6 +98,44 @@ const settle=async page=>{await page.getByText('Salvo',{exact:true}).waitFor();}
   await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
   console.log('CA2 PASS: edição gravada no banco (event_list) e, após recarregar a página, o modal reabre com os novos dados; contratado/pago intactos (1000/0).');
 
+  // Valor contratado editável: 1000 -> 1500 persiste, e o "A pagar" do modal, da página e do Financeiro mudam.
+  const bf=sup=>page.getByRole('button',{name:`Abrir fornecedor ${sup}`});
+  await bf('Buffet Sabor & Cia').click();await dialog.waitFor();
+  assert.equal(await dialog.getByLabel('Valor contratado (R$)').inputValue(),'1.000,00');
+  await dialog.getByLabel('Valor contratado (R$)').fill('1.500,00');
+  await dialog.getByRole('button',{name:'Salvar'}).click();await dialog.waitFor({state:'detached'});await settle(page);
+  let before2=(await current()).document;
+  sup=before2.suppliers.find(s=>s.id==='s-buffet');
+  assert.deepEqual([sup.contracted,sup.paid],[1500,0]);
+  assert.equal(before2.expenses.length,2,'nenhum lançamento novo');
+  assert.equal(before2.expenses.find(e=>e.id==='e-buffet').unitValue,1500,'a despesa do financeiro seguiu o contratado');
+  await page.reload();await cards.first().waitFor();
+  assert.match(await page.getByTestId('supplier-card').first().innerText(),/R\$\s?1\.500/);
+  assert.match(await page.locator('main').innerText(),/A PAGAR\s+R\$\s?2\.000/i,'resumo da página: a pagar 1500 + 500');
+  await bf('Buffet Sabor & Cia').click();await dialog.waitFor();
+  assert.match(await dialog.getByTestId('supplier-summary').innerText(),/CONTRATADO\s+R\$\s?1\.500\s+PAGO\s+R\$\s?0\s+A PAGAR\s+R\$\s?1\.500/);
+  assert.equal(await dialog.getByLabel('Valor contratado (R$)').inputValue(),'1.500,00');
+  await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});
+  await page.goto(`${APP}/event/${eventId}/financeiro`);
+  await page.getByText(/a pagar/).first().waitFor();
+  assert.match(await page.locator('main').innerText(),/R\$\s?2\.000\s+a pagar/,'Financeiro: despesas a pagar subiram para 2.000');
+  console.log('CA8 PASS: contratado do Buffet editado de 1.000 para 1.500 no modal; após recarregar o card mostra R$ 1.500, o modal mostra A PAGAR R$ 1.500, a página de Fornecedores soma A PAGAR R$ 2.000 e o Financeiro mostra "R$ 2.000 a pagar"; a despesa ligada passou de 1000 para 1500 e continuam 2 despesas (nenhum lançamento novo).');
+  // Volta a 1000 (redução válida) para o restante do roteiro.
+  await page.goto(`${APP}/event/${eventId}/fornecedores`);await cards.first().waitFor();
+  await bf('Buffet Sabor & Cia').click();await dialog.waitFor();
+  await dialog.getByLabel('Valor contratado (R$)').fill('1000');
+  await dialog.getByRole('button',{name:'Salvar'}).click();await dialog.waitFor({state:'detached'});await settle(page);
+  before2=(await current()).document;
+  assert.equal(before2.suppliers.find(s=>s.id==='s-buffet').contracted,1000);assert.equal(before2.expenses.find(e=>e.id==='e-buffet').unitValue,1000);
+  // Negativo não salva.
+  await bf('Buffet Sabor & Cia').click();await dialog.waitFor();
+  await dialog.getByLabel('Valor contratado (R$)').fill('-50');
+  assert.match(await dialog.getByRole('alert').innerText(),/não pode ser negativo/);
+  await dialog.getByRole('button',{name:'Salvar'}).click();
+  assert.equal(await dialog.count(),1,'modal continua aberto');assert.equal((await current()).document.suppliers.find(s=>s.id==='s-buffet').contracted,1000);
+  await dialog.getByRole('button',{name:'Cancelar'}).click();await page.getByRole('alertdialog').getByRole('button',{name:'Descartar'}).click();await dialog.waitFor({state:'detached'});
+  console.log('CA8b PASS: voltar de 1500 para 1000 persiste (contratado e despesa); valor negativo mostra "não pode ser negativo" e não salva.');
+
   // Pagamento: Quitar não abre o modal e não duplica lançamentos.
   const before=(await current()).document;
   await cards.nth(0).getByRole('button',{name:'Quitar'}).click();
@@ -113,6 +151,26 @@ const settle=async page=>{await page.getByText('Salvo',{exact:true}).waitFor();}
   assert.equal(after.suppliers.find(s=>s.id==='s-som').paid,200);assert.equal(after.expenses.length,2);
   assert.equal(after.expenses.find(e=>e.id==='e-som').paidAmount,200);
   console.log('CA3 PASS: "Quitar" e valor parcial não abriram o modal; contratado/pago/despesas mudaram uma vez só (2 despesas antes e depois; Buffet pago 1000, Audio Pro 200).');
+  // Contratado abaixo do já pago (Audio Pro: contratado 500, pago 200) não salva e explica.
+  await page.reload();await cards.first().waitFor();
+  await bf('Audio Pro').click();await dialog.waitFor();
+  await dialog.getByLabel('Valor contratado (R$)').fill('100');
+  const warn=dialog.getByRole('alert');
+  assert.equal((await warn.innerText()).trim(),'O valor contratado não pode ser menor que o já pago (R$ 200,00).');
+  await dialog.getByRole('button',{name:'Salvar'}).click();
+  assert.equal(await dialog.count(),1,'modal continua aberto');
+  await page.waitForTimeout(600);
+  let som=(await current()).document.suppliers.find(s=>s.id==='s-som');assert.deepEqual([som.contracted,som.paid],[500,200]);
+  console.log('CA9 PASS: contratado 100 com R$ 200 já pagos mostra "O valor contratado não pode ser menor que o já pago (R$ 200,00)."; modal fica aberto e o banco segue 500/200.');
+  // Redução válida (300): a pagar passa de 300 para 100 no card e no financeiro.
+  await dialog.getByLabel('Valor contratado (R$)').fill('300');
+  await dialog.getByRole('button',{name:'Salvar'}).click();await dialog.waitFor({state:'detached'});await settle(page);
+  const final=(await current()).document;som=final.suppliers.find(s=>s.id==='s-som');
+  assert.deepEqual([som.contracted,som.paid],[300,200]);assert.equal(final.expenses.length,2);
+  assert.equal(final.expenses.find(e=>e.id==='e-som').unitValue,300);assert.equal(final.expenses.find(e=>e.id==='e-som').paidAmount,200);
+  await page.goto(`${APP}/event/${eventId}/financeiro`);await page.getByText(/a pagar/).first().waitFor();
+  assert.match(await page.locator('main').innerText(),/R\$\s?100\s+a pagar/,'Financeiro: a pagar = 100 (Buffet quitado, Audio Pro 300-200)');
+  console.log('CA9b PASS: redução válida de 500 para 300 com 200 pagos: a pagar cai para R$ 100 no Financeiro; 2 despesas, nenhuma duplicada.');
   await context.close();
 }
 

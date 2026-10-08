@@ -74,7 +74,8 @@ export default function EventTeam() {
           <Field label="Telefone" type="tel" value={draft.phone || ''} onChange={value=>set('phone',value)} />
           <CatalogField label="Função" kind="function" value={draft.function || ''} onChange={value=>set('function',value)} catalog={catalog} />
           <CatalogField label="Área" kind="area" value={draft.area || ''} onChange={value=>set('area',value)} catalog={catalog} />
-          <CatalogField label="Cargo" kind="title" value={draft.jobTitle || ''} onChange={value=>set('jobTitle',value)} catalog={catalog} disabled={liveRole==='founder'} />
+          <CatalogField label="Cargo" kind="title" value={draft.jobTitle || ''} onChange={value=>set('jobTitle',value)} catalog={catalog} />
+          <p className="-mt-2 text-xs text-muted-foreground" data-testid="cargo-hint">Cargo é só o nome que aparece na equipe. O acesso não muda.</p>
         </> : <p className="text-sm">{[draft.email,draft.phone,draft.function,draft.area,draft.jobTitle].filter(Boolean).join(' · ') || 'Sem dados de contato.'}</p>}
         <section className="space-y-2 rounded-xl border p-3" aria-label="Acesso ao evento">
           <p className="text-sm font-medium">Acesso: {ROLE_LABEL[liveRole] || draft.role}</p>

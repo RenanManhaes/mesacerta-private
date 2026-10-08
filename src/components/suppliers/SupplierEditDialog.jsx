@@ -8,34 +8,38 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supplierView } from '@/lib/selectors';
 import { formatBRL } from '@/lib/format';
+import { contractedError, formatBRLField, parseBRL } from '@/lib/supplierEdit';
 
 const draftOf = (s) => ({
   name: s.name || '', service: s.service || '', expenseCategory: s.expenseCategory || 'Outros',
-  contact: s.contact || '', paymentData: s.paymentData || '', notes: s.notes || '', dueDate: s.dueDate || '',
+  contracted: formatBRLField(s.contracted || 0), contact: s.contact || '', paymentData: s.paymentData || '', notes: s.notes || '', dueDate: s.dueDate || '',
 });
 
 /**
- * Informações de um fornecedor. O resumo de valores é só leitura (vem de selectors.js);
- * pagamentos continuam no botão Quitar / campo de valor do card e em Despesas.
- * @param {{supplier: any, categories: string[], onClose: () => void, onSave: (patch: any) => Promise<void>}} props
+ * Informações de um fornecedor. O valor contratado é editável; o pago e o "a pagar" são só leitura
+ * (vêm dos pagamentos e de selectors.js). Pagamentos continuam no botão Quitar / campo de valor do card e em Despesas.
+ * @param {{supplier: any, event: any, categories: string[], onClose: () => void, onSave: (patch: any) => Promise<void>}} props
  */
-export default function SupplierEditDialog({ supplier, categories, onClose, onSave }) {
+export default function SupplierEditDialog({ supplier, event, categories, onClose, onSave }) {
   const initial = draftOf(supplier);
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [askDiscard, setAskDiscard] = useState(false);
   const set = (key) => (e) => setDraft((d) => ({ ...d, [key]: e.target.value }));
-  const dirty = Object.keys(initial).some((k) => initial[k] !== draft[k]);
+  const contracted = parseBRL(draft.contracted);
+  const contractedMsg = contractedError(event, supplier, contracted);
+  const dirty = Object.keys(initial).some((k) => (k === 'contracted' ? parseBRL(initial[k]) !== contracted : initial[k] !== draft[k]));
   const requestClose = () => (dirty && !saving ? setAskDiscard(true) : onClose());
   const view = supplierView(supplier);
   const cats = categories.includes(draft.expenseCategory) ? categories : [draft.expenseCategory, ...categories];
 
   const save = async () => {
     if (!draft.name.trim()) { setError('Dê um nome para o fornecedor.'); return; }
+    if (contractedMsg) { setError(contractedMsg); return; }
     setSaving(true); setError('');
-    try { await onSave(draft); }
-    catch { setError('Não foi possível salvar. Suas alterações continuam aqui; tente de novo.'); setSaving(false); return; }
+    try { await onSave({ ...draft, contracted }); }
+    catch (err) { setError(err?.userMessage || 'Não foi possível salvar. Suas alterações continuam aqui; tente de novo.'); setSaving(false); return; }
     setSaving(false);
     onClose();
   };
@@ -48,7 +52,7 @@ export default function SupplierEditDialog({ supplier, categories, onClose, onSa
         <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto" data-testid="supplier-dialog">
           <DialogHeader>
             <DialogTitle className="text-[16px]">Fornecedor</DialogTitle>
-            <DialogDescription>Dados de contato e do contrato. Valores e pagamentos ficam nos cards e em Despesas.</DialogDescription>
+            <DialogDescription>Dados de contato e do contrato. Os pagamentos ficam nos cards e em Despesas.</DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-3 gap-2 rounded-xl bg-muted p-3 text-center" data-testid="supplier-summary">
@@ -65,6 +69,13 @@ export default function SupplierEditDialog({ supplier, categories, onClose, onSa
                 <SelectTrigger aria-label="Categoria" className="h-9 text-[13px]"><SelectValue /></SelectTrigger>
                 <SelectContent>{cats.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
+            </div>
+            <div className={`col-span-2 ${field}`}>
+              <Label htmlFor="sup-contracted" className={label}>Valor contratado (R$)</Label>
+              <Input id="sup-contracted" inputMode="decimal" value={draft.contracted} placeholder="0,00" aria-invalid={!!contractedMsg} aria-describedby="sup-contracted-hint" onChange={set('contracted')} />
+              <p id="sup-contracted-hint" role={contractedMsg ? 'alert' : undefined} className={`text-[12px] ${contractedMsg ? 'text-danger' : 'text-muted-foreground'}`}>
+                {contractedMsg || `Já pago: ${formatBRL(supplier.paid || 0)}. O pago vem dos pagamentos; o a pagar é calculado.`}
+              </p>
             </div>
             <div className={`col-span-2 ${field}`}><Label htmlFor="sup-contact" className={label}>Contato</Label><Input id="sup-contact" value={draft.contact} placeholder="E-mail ou telefone" onChange={set('contact')} /></div>
             <div className={field}><Label htmlFor="sup-due" className={label}>Vencimento</Label><Input id="sup-due" type="date" value={draft.dueDate} onChange={set('dueDate')} /></div>

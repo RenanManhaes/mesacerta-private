@@ -69,14 +69,17 @@ export default function SupplierEditDialog(props){globalThis.__dialogProps=props
   assert.equal(state.suppliers[0].paid,1000);assert.equal(state.expenses.length,2);
   console.log('CA3 PASS (componente): "Quitar" chama updateCurrent 1 vez (pago=1000, 2 lançamentos antes e depois), o contêiner chama stopPropagation e o diálogo não abre.');
 
-  // O onSave do diálogo só grava informações; contratado/pago/lançamentos não mudam.
+  // Contratado abaixo do já pago é recusado antes de gravar, com a mensagem simples para o diálogo.
   act(()=>{cards()[0].props.onClick({stopPropagation(){}});});
   const paidBefore=globalThis.__ctx.currentEvent.suppliers[0].paid;
-  await act(async()=>{await globalThis.__dialogProps.onSave({name:'Buffet Novo',contracted:1,paid:1});});
+  await act(async()=>{await assert.rejects(globalThis.__dialogProps.onSave({name:'Buffet Novo',contracted:1}),e=>e.userMessage==='O valor contratado não pode ser menor que o já pago (R$ 1.000,00).');});
+  assert.equal(globalThis.__ctx.commits,0);assert.equal(globalThis.__ctx.currentEvent.suppliers[0].contracted,1000);
+  // O onSave grava as informações; pago (vem dos pagamentos) e lançamentos não mudam por aqui.
+  await act(async()=>{await globalThis.__dialogProps.onSave({name:'Buffet Novo',paid:1});});
   const saved=globalThis.__ctx.currentEvent;
   assert.equal(globalThis.__ctx.commits,1);assert.equal(saved.suppliers[0].name,'Buffet Novo');
   assert.equal(saved.suppliers[0].contracted,1000);assert.equal(saved.suppliers[0].paid,paidBefore);assert.equal(saved.expenses.length,2);
-  console.log('CA2 PASS (componente): onSave usa commitCurrent (gravação existente) e muda só as informações; contratado 1000 e pago seguem iguais.');
+  console.log('CA2 PASS (componente): contratado abaixo do pago é recusado sem gravar; onSave usa commitCurrent e muda as informações; pago e lançamentos seguem iguais.');
   // Se a gravação falhar, o fornecedor volta ao que era e o erro sobe para o diálogo (que mantém o rascunho).
   globalThis.__ctx.currentEvent={...globalThis.__ctx.currentEvent,suppliers:suppliers()};
   act(()=>{cards()[0].props.onClick({stopPropagation(){}});});

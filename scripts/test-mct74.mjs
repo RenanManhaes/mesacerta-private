@@ -73,6 +73,31 @@ try {
  const editedByDirector=await director.client.rpc('event_edit_person',{p_member:ids.staff,p_name:'Staff editado pelo diretor',p_email:'',p_phone:'111',p_function:'',p_area:'',p_job_title:''});assert.ifError(editedByDirector.error);
  const editedByStaff=await status(staff,'rpc/event_edit_person',{p_member:ids.other,p_name:'Nope',p_email:'',p_phone:'',p_function:''});assert.equal(editedByStaff.status,403);
  console.log('API: diretor edita contato (permitido); staff editar contato retorna HTTP 403.');
+ // ---- Cargo no card de qualquer pessoa, inclusive o fundador (decisão de outubro) -----------
+ const person=async who=>(await members()).find(m=>m.id===ids[who]);
+ const setCargo=async(client,who,cargo)=>{
+  const current=await person(who);
+  return client.rpc('event_edit_person',{p_member:ids[who],p_name:current.name,p_email:current.email||'',p_phone:current.phone||'',p_function:current.function||'',p_area:current.area||'',p_job_title:cargo});
+ };
+ assert.equal((await person('founder')).job_title,'Fundador','cargo padrão do fundador, quando vazio');
+ let result=await setCargo(founder.client,'founder','Coordenador');assert.ifError(result.error);
+ assert.equal((await person('founder')).job_title,'Coordenador');assert.equal(await roleOf('founder'),'founder');
+ result=await setCargo(founder.client,'staff','Assistente');assert.ifError(result.error);
+ assert.equal((await person('staff')).job_title,'Assistente');assert.equal(await roleOf('staff'),'staff');
+ result=await setCargo(director.client,'founder','Assistente');assert.ifError(result.error);
+ assert.equal((await person('founder')).job_title,'Assistente');assert.equal(await roleOf('founder'),'founder');assert.equal(await roleOf('director'),'director');
+ const shown=(await rpc(founder.client,'event_list'))[0].document.staffMembers.find(p=>p.id===ids.founder);
+ assert.equal(shown.jobTitle,'Assistente');assert.equal(shown.accessRole,'founder');
+ console.log(`API PASS (cargo): fundador define o cargo do próprio card ('Coordenador') e do staff ('Assistente'); diretor define o cargo do fundador ('Assistente'); papel de acesso segue founder/staff/director; documento mostra jobTitle=${shown.jobTitle}, accessRole=${shown.accessRole}.`);
+ const staffCargo=await staff.client.rpc('event_edit_person',{p_member:ids.founder,p_name:'Nope',p_email:'',p_phone:'',p_function:'',p_area:'',p_job_title:'Coordenador'});
+ assert.equal(staffCargo.error.code,'42501');assert.equal((await person('founder')).job_title,'Assistente');
+ const staffCargoOwn=await staff.client.rpc('event_edit_person',{p_member:ids.staff,p_name:'Nope',p_email:'',p_phone:'',p_function:'',p_area:'',p_job_title:'Coordenador'});
+ assert.equal(staffCargoOwn.error.code,'42501');assert.equal((await person('staff')).job_title,'Assistente');
+ const unknown=await setCargo(founder.client,'founder','Cargo fora do catálogo');assert.ok(unknown.error,'cargo novo exige confirmação no catálogo, também para o fundador');
+ result=await setCargo(founder.client,'founder','');assert.ifError(result.error);
+ assert.equal((await person('founder')).job_title,'Fundador');assert.equal(await roleOf('founder'),'founder');
+ console.log(`API negada (cargo): staff tentando mudar cargo do fundador e o próprio -> SQLSTATE ${staffCargo.error.code}/${staffCargoOwn.error.code}, cargos inalterados; cargo fora do catálogo exige confirmação ('${unknown.error.message}'); cargo vazio do fundador volta ao padrão 'Fundador'.`);
+ await setCargo(founder.client,'staff','');
 
  // ---- Interface do card ----------------------------------------------------------------
  const mocks=`import React from 'react'; export const supabase=new Proxy({},{get:(_,key)=>globalThis.__team74.client[key]}); export const useEvent=()=>globalThis.__team74.context; export const useEventField=(key,initial)=>React.useState(initial); export const Panel=({children})=>React.createElement('section',null,children); export const PageHeader=({title,actions})=>React.createElement('header',null,React.createElement('h1',null,title),actions); export const initials=()=>''; export const Field=({label,value,onChange,...props})=>React.createElement('label',null,label,React.createElement('input',{...props,'aria-label':label,value,onChange:e=>onChange(e.target.value)})); export const Button=({children,variant,size,...props})=>React.createElement('button',props,children); export const Dialog=({children,open})=>open?React.createElement('div',{role:'dialog'},children):null; export const DialogContent=({children})=>React.createElement('div',null,children); export const DialogHeader=DialogContent; export const DialogTitle=DialogContent; export const DialogDescription=DialogContent; export const DialogFooter=DialogContent; export const Input=props=>React.createElement('input',props);`;
@@ -136,7 +161,15 @@ try {
  for(const label of ['Promover a Diretor','Tornar Staff','Remover da equipe'])assert.ok(!buttons().includes(label),`card do fundador não oferece "${label}"`);
  assert.ok(buttons().includes('Salvar pessoa'));
  console.log('UI PASS: card do fundador só oferece editar contato; sem promover, rebaixar ou remover.');
- closeModal();
+ const cargoInput=()=>tree.root.findAllByType('input').find(i=>i.props['aria-label']==='Cargo');
+ assert.ok(cargoInput(),'card do fundador mostra o campo Cargo');
+ assert.ok(!cargoInput().props.disabled,'campo Cargo habilitado no card do fundador');
+ assert.ok(JSON.stringify(tree.toJSON()).includes('Cargo é só o nome que aparece na equipe. O acesso não muda.'),'aviso de que cargo não muda o acesso');
+ act(()=>cargoInput().props.onChange({target:{value:'Coordenador'}}));
+ await act(async()=>{await tree.root.findByType('form').props.onSubmit({preventDefault(){}});await pause();});
+ assert.equal((await person('founder')).job_title,'Coordenador');assert.equal(await roleOf('founder'),'founder');
+ console.log("UI/API PASS (cargo): campo Cargo habilitado no card do fundador (disabled=false), com a linha 'O acesso não muda'; salvar 'Coordenador' persiste e o papel segue founder.");
+ await rpc(founder.client,'event_edit_person',{p_member:ids.founder,p_name:(await person('founder')).name,p_email:'',p_phone:'',p_function:'',p_area:'',p_job_title:''});
 
  // Diretor: edita contato, nada de papel/remoção.
  await mount(director);
@@ -144,6 +177,7 @@ try {
  for(const who of ['staff','director','founder']) {
   act(()=>card(names[who]).props.onClick());
   assert.ok(buttons().includes('Salvar pessoa'),`diretor edita contato (${who})`);
+  assert.ok(tree.root.findAllByType('input').some(i=>i.props['aria-label']==='Cargo'&&!i.props.disabled),`diretor edita o Cargo no card de ${who}`);
   for(const label of ['Promover a Diretor','Tornar Staff','Remover da equipe'])assert.ok(!buttons().includes(label),`diretor não vê "${label}" no card de ${who}`);
   closeModal();
  }
@@ -165,6 +199,7 @@ try {
  act(()=>card(staffViewName).props.onClick());
  for(const label of ['Salvar pessoa','Promover a Diretor','Tornar Staff','Remover da equipe'])assert.ok(!buttons().includes(label),`staff não vê "${label}"`);
  assert.ok(buttons().includes('Fechar'));
+ assert.ok(!tree.root.findAllByType('input').some(i=>i.props['aria-label']==='Cargo'),'staff não vê campo editável de Cargo');
  console.log('UI PASS: staff vê o card só para leitura, sem salvar, promover, rebaixar ou remover.');
 
  // Remoção: confirmação modal; histórico e tarefas preservados.
